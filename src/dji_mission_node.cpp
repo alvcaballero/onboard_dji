@@ -51,7 +51,7 @@ int uav_id =1;
 float velocity_range;
 float idle_velocity;
 float start_altitude;
-int yaw_mode;
+int yaw_mode = 3;  //3 para usar yaw dado por los wp
 int trace_mode;
 int finish_action;
 int landing_type = 0;
@@ -130,7 +130,7 @@ bool runWaypointMission(std::vector<sensor_msgs::NavSatFix> gpsList, int respons
 void setWaypointDefaults(WayPointSettings* wp)
 {
   wp->damping         = damping;
-  wp->yaw             = 0;
+  wp->yaw             = 90;
   wp->gimbalPitch     = 0;
   wp->turnMode        = 0;
   wp->hasAction       = 0;
@@ -216,7 +216,7 @@ void uploadWaypoints(std::vector<DJI::OSDK::WayPointSettings>& wp_list,
     waypoint.longitude           = wp->longitude;
     waypoint.altitude            = wp->altitude;
     waypoint.damping_distance    = 0;
-    waypoint.target_yaw          = 0;
+    waypoint.target_yaw          = 90;
     waypoint.target_gimbal_pitch = 0;
     waypoint.turn_mode           = 0;
     waypoint.has_action          = 0;
