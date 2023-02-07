@@ -1,0 +1,7 @@
+<launch>
+    <arg name="uav_id" default="2"/>
+
+    <group ns="uav_$(arg uav_id)">
+        <include file="$(find dji_osdk_ros)/launch/dji_vehicle_node.launch"/>
+    </group>
+</launch>

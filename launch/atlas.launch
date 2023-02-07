@@ -1,0 +1,14 @@
+<launch>
+    <arg name="uav_id" default="2"/>
+
+    <group ns="uav_$(arg uav_id)">
+        <include file="$(find dji_osdk_ros)/launch/dji_vehicle_node.launch"/>
+
+        <node pkg="aerialcore_onboard_dji" type="dji_mission_node" name="mission_node" output="screen">
+        <!-- node parameters -->
+            <param name="damping" type="double" value="0.0"/>
+            <param name="start_altitude" type="double" value="2.0"/>
+            <param name="uav_id" type="double" value="$(arg uav_id)"/>
+        </node>
+    </group>
+</launch>

@@ -1,0 +1,11 @@
+<launch>
+  <node name="master_discovery" pkg="master_discovery_fkie" type="master_discovery">
+    <rosparam param="robot_hosts">[ubuntu18-Lenovo,ubuntu-black,arpapc]</rosparam>
+    <rosparam param="static_hosts">[ubuntu18-Lenovo,ubuntu-black,arpapc]</rosparam>
+    <rosparam param="send_mcast">False</rosparam>
+    <rosparam param="listen_mcast">False</rosparam>
+  </node>
+  <node name="master_sync" pkg="master_sync_fkie" type="master_sync">
+    <!--rosparam param="sync_hosts">[ubuntu18-Lenovo,ubuntu-black,arpapc]</rosparam-->
+  </node>
+</launch>
