@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>aerialcore_onboard_dji</name>
+  <name>onboard_dji</name>
   <version>1.0.0</version>
   <description>A ROS package using DJI Onboard SDK in INSPECTOR Project</description>
 

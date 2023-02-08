@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(aerialcore_onboard_dji) ## Compile as C++11, supported in ROS Kinetic and newer
+project(onboard_dji) ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
 
 ## Find catkin macros and libraries
