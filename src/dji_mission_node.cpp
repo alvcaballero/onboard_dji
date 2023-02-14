@@ -86,12 +86,10 @@ void StopRosbag()
 }
 bool sendFiles(std_srvs::SetBool::Request  &req, std_srvs::SetBool::Response &res){
   ROS_WARN("Init to pass bag files ");
-  std::string bashscript  = "rsync -aP ~/bags arpa@10.42.0.27:~/bags";
+  std::string bashscript  = "sshpass -p 112358 rsync -ae ~/bags/ arpa@10.42.0.2:~/bags";
   system( bashscript.c_str() );
-  system( "mv  -v ~/bags/* ~/backupbags/");
-
   res.success = true;
-  res.message = "message";
+  res.message = "Success";
   return true;
 }
 
