@@ -27,10 +27,11 @@
  */
 
 #include <dji_osdk_ros/common_type.h>
-#include <aerialcore_onboard_dji/dji_mission_node.h>
 #include <dji_osdk_ros/FlightTaskControl.h>
-#include <aerialcore_common/ConfigMission.h>
 #include <dji_osdk_ros/MissionWpGetInfo.h>
+//#include <dji_osdk_ros/dji_waypoint.hpp>
+#include <aerialcore_onboard_dji/dji_mission_node.h>
+#include <aerialcore_common/ConfigMission.h>
 #include <std_srvs/SetBool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -64,7 +65,6 @@ bool dont_more_missionwaypoints = true;
 
 void StartRosbag()
 {
-  
   std::string id = std::to_string(uav_id);
   std::string bashscript ("rosbag record -O ~/bags/uav_"+ id +"_");
 
@@ -73,20 +73,26 @@ void StartRosbag()
   struct tm tm = *localtime(&t);
 
   ROS_WARN("Start of ROS BAG");
-
   strftime(timeString, sizeof(timeString), "%Y_%m_%d_%H_%M", &tm);
-  
   bashscript = bashscript +  timeString+ ".bag  -e \"/uav_"+ id +"/dji_osdk_ros/(.*)\" __name:=node_bag_uav"+id+" &";
-  
   system( bashscript.c_str() );
 }
 void StopRosbag()
 {
   std::string id = std::to_string(uav_id);
   std::string bashscript  = "rosnode kill node_bag_uav"+id;
-  
   system( bashscript.c_str() );
   ROS_WARN("END of ROS BAG");
+}
+bool sendFiles(std_srvs::SetBool::Request  &req, std_srvs::SetBool::Response &res){
+  ROS_WARN("Init to pass bag files ");
+  std::string bashscript  = "rsync -aP ~/bags arpa@10.42.0.27:~/bags";
+  system( bashscript.c_str() );
+  system( "mv  -v ~/bags/* ~/backupbags/");
+
+  res.success = true;
+  res.message = "message";
+  return true;
 }
 
 void gpsPosCallback(const sensor_msgs::NavSatFix::ConstPtr& msg)
@@ -292,8 +298,7 @@ bool config_mission(aerialcore_common::ConfigMission::Request  &req,
   return true;
 }
 
-bool run_mission(std_srvs::SetBool::Request  &req,
-         std_srvs::SetBool::Response &res){
+bool run_mission(std_srvs::SetBool::Request  &req,std_srvs::SetBool::Response &res){
   ROS_WARN("Starting mission");
 
   bool input = req.data;
@@ -370,18 +375,17 @@ int main(int argc, char** argv)
   nh.getParam("mission_node/uav_id", uav_id);
   
   // ROS stuff
-  waypoint_upload_client = nh.serviceClient<dji_osdk_ros::MissionWpUpload>(
-    "dji_osdk_ros/mission_waypoint_upload");
-  waypoint_action_client = nh.serviceClient<dji_osdk_ros::MissionWpAction>(
-    "dji_osdk_ros/mission_waypoint_action");
-  flight_control_client =
-    nh.serviceClient<dji_osdk_ros::FlightTaskControl>("flight_task_control");
+  waypoint_upload_client = nh.serviceClient<dji_osdk_ros::MissionWpUpload>("dji_osdk_ros/mission_waypoint_upload");
+  waypoint_action_client = nh.serviceClient<dji_osdk_ros::MissionWpAction>("dji_osdk_ros/mission_waypoint_action");
+  flight_control_client =nh.serviceClient<dji_osdk_ros::FlightTaskControl>("flight_task_control");
+
   gps_pos_subscriber = nh.subscribe<sensor_msgs::NavSatFix>("dji_osdk_ros/gps_position", 10, &gpsPosCallback);
   ros::Subscriber flight_mode_subscriber = nh.subscribe<std_msgs::UInt8>("dji_osdk_ros/display_mode", 1, &ModeCallback);
   ros::Subscriber fly_status_subscriber = nh.subscribe<std_msgs::UInt8>("dji_osdk_ros/flight_status", 1, &flyStatusCallback);
 
   ros::ServiceServer service_config_mission = nh.advertiseService("dji_control/configure_mission", config_mission);
   ros::ServiceServer service_run_mission = nh.advertiseService("dji_control/start_mission", run_mission);
+  ros::ServiceServer service_send_bags = nh.advertiseService("dji_control/send_bags", sendFiles);
 
   ros::spin();
 
