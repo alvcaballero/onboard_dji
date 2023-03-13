@@ -134,7 +134,7 @@ bool runWaypointMission(std::vector<sensor_msgs::NavSatFix> gpsList, int respons
 void setWaypointDefaults(WayPointSettings* wp)
 {
   wp->damping         = damping;
-  wp->yaw             = 90;
+  wp->yaw             = 0;
   wp->gimbalPitch     = 0;
   wp->turnMode        = 0;
   wp->hasAction       = 0;
@@ -170,7 +170,7 @@ void setWaypointInitDefaults(dji_osdk_ros::MissionWaypointTask& waypointTask)
 }
 
 std::vector<WayPointSettings>
-createWaypoints(std::vector<sensor_msgs::NavSatFix> gpsList,
+createWaypoints(std::vector<sensor_msgs::NavSatFix> gpsList, std::vector<std_msgs::Float64> yawList,
                 float32_t start_alt)
 {
   // Create Start Waypoint
@@ -198,9 +198,10 @@ createWaypoints(std::vector<sensor_msgs::NavSatFix> gpsList,
     wp.latitude  = gpsList[i].latitude;
     wp.longitude = gpsList[i].longitude;
     wp.altitude  = gpsList[i].altitude;
+    wp.yaw = yawList[i].yaw;
     wp_list.push_back(wp);
       ROS_INFO("Waypoint created at (LLA): %f \t%f \t%f\n", wp.latitude,
-           wp.longitude, wp.altitude);
+           wp.longitude, wp.altitude, wp.yaw);
   }
   
   return wp_list;
@@ -220,7 +221,7 @@ void uploadWaypoints(std::vector<DJI::OSDK::WayPointSettings>& wp_list,
     waypoint.longitude           = wp->longitude;
     waypoint.altitude            = wp->altitude;
     waypoint.damping_distance    = 0;
-    waypoint.target_yaw          = 90;
+    waypoint.target_yaw          = wp->yaw;
     waypoint.target_gimbal_pitch = 0;
     waypoint.turn_mode           = 0;
     waypoint.has_action          = 0;
@@ -286,6 +287,7 @@ bool config_mission(aerialcore_common::ConfigMission::Request  &req,
          aerialcore_common::ConfigMission::Response &res){
   ROS_WARN("Received mission");
   std::vector<sensor_msgs::NavSatFix> gps_list = req.waypoint;
+  std::vector<std_msgs::Float64> yaw_list = req.yaw;  
   velocity_range = req.maxVel;
   idle_velocity = req.idleVel;
   yaw_mode = req.yawMode;
