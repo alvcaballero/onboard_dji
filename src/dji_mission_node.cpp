@@ -98,7 +98,7 @@ void gpsPosCallback(const sensor_msgs::NavSatFix::ConstPtr& msg)
   gps_pos = *msg;
 }
 
-bool runWaypointMission(std::vector<sensor_msgs::NavSatFix> gpsList, int responseTimeout)
+bool runWaypointMission(std::vector<sensor_msgs::NavSatFix> gpsList, std_msgs::Float64MultiArray yawList, int responseTimeout)
 {
   ros::spinOnce();
 
@@ -111,7 +111,7 @@ bool runWaypointMission(std::vector<sensor_msgs::NavSatFix> gpsList, int respons
   ROS_INFO("Creating Waypoints..\n");
 
   std::vector<WayPointSettings> generatedWaypts =
-  createWaypoints(gpsList, start_alt);
+  createWaypoints(gpsList,yawList, start_alt);
 
   // Waypoint Mission: Upload the waypoints
   ROS_INFO("Uploading Waypoints..\n");
@@ -170,7 +170,7 @@ void setWaypointInitDefaults(dji_osdk_ros::MissionWaypointTask& waypointTask)
 }
 
 std::vector<WayPointSettings>
-createWaypoints(std::vector<sensor_msgs::NavSatFix> gpsList, std::vector<std_msgs::Float64> yawList,
+createWaypoints(std::vector<sensor_msgs::NavSatFix> gpsList, std_msgs::Float64MultiArray yawList,
                 float32_t start_alt)
 {
   // Create Start Waypoint
@@ -198,7 +198,7 @@ createWaypoints(std::vector<sensor_msgs::NavSatFix> gpsList, std::vector<std_msg
     wp.latitude  = gpsList[i].latitude;
     wp.longitude = gpsList[i].longitude;
     wp.altitude  = gpsList[i].altitude;
-    wp.yaw = yawList[i].yaw;
+    wp.yaw = yawList.data[i];
     wp_list.push_back(wp);
       ROS_INFO("Waypoint created at (LLA): %f \t%f \t%f\n", wp.latitude,
            wp.longitude, wp.altitude, wp.yaw);
@@ -287,14 +287,14 @@ bool config_mission(aerialcore_common::ConfigMission::Request  &req,
          aerialcore_common::ConfigMission::Response &res){
   ROS_WARN("Received mission");
   std::vector<sensor_msgs::NavSatFix> gps_list = req.waypoint;
-  std::vector<std_msgs::Float64> yaw_list = req.yaw;  
+  std_msgs::Float64MultiArray yaw_list = req.yaw;  
   velocity_range = req.maxVel;
   idle_velocity = req.idleVel;
   yaw_mode = req.yawMode;
   trace_mode = req.traceMode;
   finish_action = req.finishAction;
   ROS_WARN("Finish action: %d",finish_action);
-  res.success = runWaypointMission(gps_list, 1);
+  res.success = runWaypointMission(gps_list, yaw_list, 1);
   return true;
 }
 

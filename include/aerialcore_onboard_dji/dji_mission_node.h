@@ -46,6 +46,7 @@
 // ROS includes
 #include <ros/ros.h>
 #include <sensor_msgs/NavSatFix.h>
+#include <std_msgs/Float64MultiArray.h>
 #include <geographic_msgs/GeoPoint.h>
 
 #define C_EARTH (double)6378137.0
@@ -70,13 +71,13 @@ typedef struct ServiceAck
   }
 } ServiceAck;
 
-bool runWaypointMission(std::vector<geographic_msgs::GeoPoint> gpsList, int responseTimeout);
+bool runWaypointMission(std::vector<sensor_msgs::NavSatFix> gpsList, std_msgs::Float64MultiArray yawList, int responseTimeout);
 
 void setWaypointDefaults(DJI::OSDK::WayPointSettings* wp);
 
 void setWaypointInitDefaults(dji_osdk_ros::MissionWaypointTask& waypointTask);
 
-std::vector<WayPointSettings>createWaypoints(std::vector<sensor_msgs::NavSatFix> gpsList,
+std::vector<WayPointSettings>createWaypoints(std::vector<sensor_msgs::NavSatFix> gpsList, std_msgs::Float64MultiArray yawList,
                 float32_t start_alt);
 
 void uploadWaypoints(std::vector<DJI::OSDK::WayPointSettings>& wp_list,
