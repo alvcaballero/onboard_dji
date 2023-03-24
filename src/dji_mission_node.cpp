@@ -69,8 +69,8 @@ bool mission_status = false;   // becomes true when the mission started
 bool was_on_air = false;
 bool dont_more_missionwaypoints = true;
 
-std_msgs::Bool command_mission_msg = false;
-std_msgs::Bool upload_mission_msg = false;
+std_msgs::Bool command_mission_msg ;
+std_msgs::Bool upload_mission_msg;
 
 void StartRosbag()
 {
@@ -386,6 +386,10 @@ int main(int argc, char** argv)
   nh.getParam("mission_node/damping", damping);
   nh.getParam("mission_node/start_altitude", start_altitude);
   nh.getParam("mission_node/uav_id", uav_id);
+
+  command_mission_msg.data = false;
+  upload_mission_msg.data = false;
+
   
   // ROS stuff
   waypoint_upload_client = nh.serviceClient<dji_osdk_ros::MissionWpUpload>("dji_osdk_ros/mission_waypoint_upload");
@@ -401,7 +405,7 @@ int main(int argc, char** argv)
   ros::ServiceServer service_send_bags = nh.advertiseService("dji_control/send_bags", sendFiles);
 
   //info publishers 
-  mission_uploaded_pub = nh.advertise<std_msgs::Bool>("dji_sm/upload_mission", 1);
+  upload_mission_pub = nh.advertise<std_msgs::Bool>("dji_sm/upload_mission", 1);
   command_mission_pub = nh.advertise<std_msgs::Bool>("dji_sm/command_mission", 1);
   
   ros::spin();

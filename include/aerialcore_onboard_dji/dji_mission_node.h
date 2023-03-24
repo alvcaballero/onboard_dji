@@ -47,6 +47,7 @@
 #include <ros/ros.h>
 #include <sensor_msgs/NavSatFix.h>
 #include <std_msgs/Float64MultiArray.h>
+#include <std_msgs/Bool.h>
 #include <geographic_msgs/GeoPoint.h>
 
 #define C_EARTH (double)6378137.0
