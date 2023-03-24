@@ -69,6 +69,8 @@ bool mission_status = false;   // becomes true when the mission started
 bool was_on_air = false;
 bool dont_more_missionwaypoints = true;
 
+std_msgs::Bool command_mission_msg = false;
+std_msgs::Bool upload_mission_msg = false;
 
 void StartRosbag()
 {
@@ -129,6 +131,8 @@ bool runWaypointMission(std::vector<sensor_msgs::NavSatFix> gpsList, std_msgs::F
   if (initWaypointMission(waypointTask).result)
   {
     ROS_INFO("Waypoint upload command sent successfully");
+    upload_mission_msg.data = true;
+    upload_mission_pub.publish(upload_mission_msg);
   }
   else
   {
@@ -316,6 +320,8 @@ bool run_mission(std_srvs::SetBool::Request  &req,std_srvs::SetBool::Response &r
         .result)
   {
     ROS_INFO("Mission start command sent successfully");
+    command_mission_msg.data = true;
+    command_mission_pub.publish(command_mission_msg);
     message += "start";
     response =true;
     StartRosbag();
@@ -395,8 +401,8 @@ int main(int argc, char** argv)
   ros::ServiceServer service_send_bags = nh.advertiseService("dji_control/send_bags", sendFiles);
 
   //info publishers 
-  mission_uploaded_pub = nh.advertise<aerialcore_common::MissionInfo>("dji_sm/mission_uploaded", 1);
-  mission_commanded_pub = nh.advertise<aerialcore_common::MissionInfo>("dji_sm/command_mission", 1);
+  mission_uploaded_pub = nh.advertise<std_msgs::Bool>("dji_sm/upload_mission", 1);
+  command_mission_pub = nh.advertise<std_msgs::Bool>("dji_sm/command_mission", 1);
   
   ros::spin();
 
