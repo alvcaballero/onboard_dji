@@ -56,9 +56,16 @@ int yaw_mode = 3;  //3 para usar yaw dado por los wp
 int trace_mode;
 int finish_action;
 int landing_type = 0;
+
+
+// Variables to publish mission info
+// Publisher for state_machine info
+ros::Publisher command_mission_pub;
+ros::Publisher upload_mission_pub;
+
 bool lading_activated = false;
 bool mission_started = false;
-bool mission_status = false;   // cambia a 1 cuando la mision a iniciado
+bool mission_status = false;   // becomes true when the mission started
 bool was_on_air = false;
 bool dont_more_missionwaypoints = true;
 
@@ -387,6 +394,10 @@ int main(int argc, char** argv)
   ros::ServiceServer service_run_mission = nh.advertiseService("dji_control/start_mission", run_mission);
   ros::ServiceServer service_send_bags = nh.advertiseService("dji_control/send_bags", sendFiles);
 
+  //info publishers 
+  mission_uploaded_pub = nh.advertise<aerialcore_common::MissionInfo>("dji_sm/mission_uploaded", 1);
+  mission_commanded_pub = nh.advertise<aerialcore_common::MissionInfo>("dji_sm/command_mission", 1);
+  
   ros::spin();
 
   return 0;
