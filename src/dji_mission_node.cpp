@@ -187,7 +187,16 @@ void setWaypointInitDefaults(dji_osdk_ros::MissionWaypointTask& waypointTask)
   waypointTask.yaw_mode           = yaw_mode; //dji_osdk_ros::MissionWaypointTask::YAW_MODE_AUTO;
   waypointTask.trace_mode         = trace_mode; //dji_osdk_ros::MissionWaypointTask::TRACE_POINT;
   waypointTask.action_on_rc_lost  = dji_osdk_ros::MissionWaypointTask::ACTION_AUTO;
-  waypointTask.gimbal_pitch_mode  = 1;//GIMBAL_PITCH_FREEdji_osdk_ros::MissionWaypointTask::GIMBAL_PITCH_AUTO
+  if(gimbal_pitch_mode == 0){
+    waypointTask.gimbal_pitch_mode   = dji_osdk_ros::MissionWaypointTask::GIMBAL_PITCH_FREE;
+    ROS_WARN("Gimbal pitch mode : gimbal_pitch_Free");
+  }
+  if(gimbal_pitch_mode == 1){
+    waypointTask.gimbal_pitch_mode   = dji_osdk_ros::MissionWaypointTask::GIMBAL_PITCH_AUTO;
+    ROS_WARN("Gimbal pitch mode : gimbal_pitch_auto");
+  }
+  waypointTask.gimbal_pitch_mode  = gimbal_pitch_mode;//GIMBAL_PITCH_FREEdji_osdk_ros::MissionWaypointTask::GIMBAL_PITCH_AUTO
+
 }
 
 std::vector<WayPointSettings>
@@ -221,6 +230,12 @@ createWaypoints(std::vector<sensor_msgs::NavSatFix> gpsList, std_msgs::Float64Mu
     wp.altitude  = gpsList[i].altitude;
     wp.yaw = yawList.data[i];
     wp.gimbalPitch = gimbalPitchList.data[i];
+    wp.hasAction =1;
+    wp.actionTimeLimit = 100;
+    wp.actionNumber= 1;
+    wp.commandList[0] = 5;
+    wp.commandParameter[0] = gimbalPitchList.data[i];
+    
     // Turn mode values:  0: clockwise, 1: counter-clockwise 
     if (wp.yaw < yawList.data[i+1] && wp.index <= gpsList.size())
       wp.turnMode           = 0; // depends on the yaw
@@ -253,7 +268,11 @@ void uploadWaypoints(std::vector<DJI::OSDK::WayPointSettings>& wp_list,
     waypoint.target_yaw          = wp->yaw;
     waypoint.target_gimbal_pitch = wp->gimbalPitch; // in orther to inspect in a good way, the gimbal pitch depends on the wp
     waypoint.turn_mode           = wp->turnMode; //0: clockwise, 1: counter-clockwise
-    waypoint.has_action          = 0;
+    waypoint.has_action          = wp->hasAction;
+    waypoint.action_time_limit     = wp->actionTimeLimit;
+    waypoint.waypoint_action.action_repeat =1 ;
+    waypoint.waypoint_action.command_list[0] = wp->commandList[0];
+    waypoint.waypoint_action.command_parameter[0] = wp->commandParameter[0];
     waypointTask.mission_waypoint.push_back(waypoint);
   }
 }
