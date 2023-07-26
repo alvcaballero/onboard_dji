@@ -72,13 +72,13 @@ typedef struct ServiceAck
   }
 } ServiceAck;
 
-bool runWaypointMission(std::vector<sensor_msgs::NavSatFix> gpsList, std_msgs::Float64MultiArray yawList, int responseTimeout);
+bool runWaypointMission(std::vector<sensor_msgs::NavSatFix> gpsList, std_msgs::Float64MultiArray yawList,std_msgs::Float64MultiArray gimbalPitchList, int responseTimeout);
 
 void setWaypointDefaults(DJI::OSDK::WayPointSettings* wp);
 
 void setWaypointInitDefaults(dji_osdk_ros::MissionWaypointTask& waypointTask);
 
-std::vector<WayPointSettings>createWaypoints(std::vector<sensor_msgs::NavSatFix> gpsList, std_msgs::Float64MultiArray yawList,
+std::vector<WayPointSettings>createWaypoints(std::vector<sensor_msgs::NavSatFix> gpsList, std_msgs::Float64MultiArray yawList, std_msgs::Float64MultiArray gimbalPitchList,
                 float32_t start_alt);
 
 void uploadWaypoints(std::vector<DJI::OSDK::WayPointSettings>& wp_list,
