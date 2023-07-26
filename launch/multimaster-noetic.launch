@@ -1,0 +1,14 @@
+<launch>
+  <node name="master_discovery" pkg="fkie_master_discovery" type="master_discovery">
+    <rosparam param="robot_hosts">[ubuntu18-Lenovo,grvc-Lenovo-15IKB,ubuntugrvc-Lenovo-ideapad-330-15ICH
+]</rosparam>
+    <rosparam param="static_hosts">[ubuntu18-Lenovo,grvc-Lenovo-15IKB,ubuntugrvc-Lenovo-ideapad-330-15ICH
+]</rosparam>
+    <rosparam param="send_mcast">False</rosparam>
+    <rosparam param="listen_mcast">False</rosparam>
+  </node>
+  <node name="master_sync" pkg="fkie_master_sync" type="master_sync">
+    <rosparam param="sync_hosts">[ubuntu18-Lenovo,grvc-Lenovo-15IKB,ubuntugrvc-Lenovo-ideapad-330-15ICH
+]</rosparam>
+  </node>
+</launch>
