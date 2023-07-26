@@ -52,11 +52,14 @@ int uav_id =1;
 float velocity_range;
 float idle_velocity;
 float start_altitude;
-int yaw_mode = 3;  //3 para usar yaw dado por los wp
-int trace_mode;
-int finish_action;
-int landing_type = 0;
+int yaw_mode = 3;  //0 automode, 1 lock as inicital value , 2 control Rc, 3 use waypoint's yaw
+int trace_mode; // 0 point to point, after reaching the target waypoint hover, complete waypt action (if any), then fly to the next waypt 
+                // 1: Coordinated turn mode, smooth transition between waypts, no waypts task 
+int finish_action;// 0: no action, 1: return to home, 2: auto-landing, 3: return to point 0, 4: infinite mode, no exit
+int landing_type = 0; 
 
+// new variables to make robust the mission node adding yaw and gimbal pitch capabilities
+int gimbal_pitch_mode = 0; // 0 free (no control on gimbal) , 1 auto (smooth transition between waypoints on gimbal)
 
 // Variables to publish mission info
 // Publisher for state_machine info
@@ -173,15 +176,23 @@ void setWaypointInitDefaults(dji_osdk_ros::MissionWaypointTask& waypointTask)
     waypointTask.action_on_finish   = dji_osdk_ros::MissionWaypointTask::FINISH_AUTO_LANDING;
     ROS_WARN("Mission final action: Auto-landing");
   }
+  if(finish_action == 3){
+    waypointTask.action_on_finish   = dji_osdk_ros::MissionWaypointTask::FINISH_RETURN_TO_POINT;
+    ROS_WARN("Mission final action: Return to first waypoint");
+  }
+  if(finish_action == 4){
+    waypointTask.action_on_finish   = dji_osdk_ros::MissionWaypointTask::FINISH_NO_EXIT;
+    ROS_WARN("Mission final action: Continue motion");
+  }
   waypointTask.mission_exec_times = 1;
   waypointTask.yaw_mode           = yaw_mode; //dji_osdk_ros::MissionWaypointTask::YAW_MODE_AUTO;
   waypointTask.trace_mode         = trace_mode; //dji_osdk_ros::MissionWaypointTask::TRACE_POINT;
   waypointTask.action_on_rc_lost  = dji_osdk_ros::MissionWaypointTask::ACTION_AUTO;
-  waypointTask.gimbal_pitch_mode  = dji_osdk_ros::MissionWaypointTask::GIMBAL_PITCH_FREE;//GIMBAL_PICH_AUTO
+  waypointTask.gimbal_pitch_mode  = dji_osdk_ros::MissionWaypointTask::GIMBAL_PICH_AUTO;//GIMBAL_PITCH_FREE
 }
 
 std::vector<WayPointSettings>
-createWaypoints(std::vector<sensor_msgs::NavSatFix> gpsList, std_msgs::Float64MultiArray yawList,
+createWaypoints(std::vector<sensor_msgs::NavSatFix> gpsList, std_msgs::Float64MultiArray yawList, std_msgs::Float64MultiArray gimbalPitchList,
                 float32_t start_alt)
 {
   // Create Start Waypoint
@@ -210,6 +221,8 @@ createWaypoints(std::vector<sensor_msgs::NavSatFix> gpsList, std_msgs::Float64Mu
     wp.longitude = gpsList[i].longitude;
     wp.altitude  = gpsList[i].altitude;
     wp.yaw = yawList.data[i];
+    wp.gimbalPitch = gimbalPitchList.data[i];
+
     wp_list.push_back(wp);
       ROS_INFO("Waypoint created at (LLA): %f \t%f \t%f\n", wp.latitude,
            wp.longitude, wp.altitude, wp.yaw);
@@ -223,8 +236,9 @@ void uploadWaypoints(std::vector<DJI::OSDK::WayPointSettings>& wp_list,
                      dji_osdk_ros::MissionWaypointTask& waypointTask)
 {
   dji_osdk_ros::MissionWaypoint waypoint;
+  int i=0; //counter to choose the turn mode
   for (std::vector<WayPointSettings>::iterator wp = wp_list.begin();
-       wp != wp_list.end(); ++wp)
+       wp != wp_list.end(); ++wp, i++)
   {
     ROS_INFO("Waypoint created at (LLA): %f \t%f \t%f\n ", wp->latitude,
              wp->longitude, wp->altitude);
@@ -233,8 +247,13 @@ void uploadWaypoints(std::vector<DJI::OSDK::WayPointSettings>& wp_list,
     waypoint.altitude            = wp->altitude;
     waypoint.damping_distance    = 0;
     waypoint.target_yaw          = wp->yaw;
-    waypoint.target_gimbal_pitch = 0;
-    waypoint.turn_mode           = 0;
+    waypoint.target_gimbal_pitch = wp->gimbalPitch; // in orther to inspect in a good way, the gimbal pitch depends on the wp
+    // Turn mode values:  0: clockwise, 1: counter-clockwise 
+    if (wp->yaw > wp_list[i-1].yaw)
+      waypoint.turn_mode           = 1; // depends on the yaw
+    else{
+      waypoint.turn_mode           = 0;
+    }
     waypoint.has_action          = 0;
     waypointTask.mission_waypoint.push_back(waypoint);
   }
@@ -299,10 +318,12 @@ bool config_mission(aerialcore_common::ConfigMission::Request  &req,
   ROS_WARN("Received mission");
   std::vector<sensor_msgs::NavSatFix> gps_list = req.waypoint;
   std_msgs::Float64MultiArray yaw_list = req.yaw;  
+  std_msgs::Float64MultiArray gimbal_pitch_list = req.gimbalPitch; //new to include gimbal pitch
   velocity_range = req.maxVel;
   idle_velocity = req.idleVel;
   yaw_mode = req.yawMode;
   trace_mode = req.traceMode;
+  gimbal_pitch_mode = req.gimbalPitchMode; //new to include gimbal pitch
   finish_action = req.finishAction;
   ROS_WARN("Finish action: %d",finish_action);
   res.success = runWaypointMission(gps_list, yaw_list, 1);
