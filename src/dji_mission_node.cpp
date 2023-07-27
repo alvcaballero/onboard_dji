@@ -325,6 +325,8 @@ bool config_mission(aerialcore_common::ConfigMission::Request  &req,
   gimbal_pitch_mode = req.gimbalPitchMode; //new to include gimbal pitch
   finish_action = req.finishAction;
   ROS_WARN("Finish action: %d",finish_action);
+  ROS_WARN("Gimbal Pitch Mode: %d",gimbal_pitch_mode);
+  
   res.success = runWaypointMission(gps_list, yaw_list,gimbal_pitch_list, 1);
   return true;
 }
