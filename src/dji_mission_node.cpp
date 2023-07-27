@@ -239,8 +239,8 @@ void uploadWaypoints(std::vector<DJI::OSDK::WayPointSettings>& wp_list,
   for (std::vector<WayPointSettings>::iterator wp = wp_list.begin();
        wp != wp_list.end(); ++wp, i++)
   {
-    ROS_INFO("Waypoint created at (LLA): %f \t%f \t%f \t gimbal pitch: %d \t yaw: %d \n", wp.latitude,
-           wp.longitude, wp.altitude, wp.gimbalPitch, wp.yaw);
+    ROS_INFO("Waypoint created at (LLA): %f \t%f \t%f \t gimbal pitch: %d \t yaw: %d \n", wp->latitude,
+           wp->longitude, wp->altitude, wp->gimbalPitch, wp->yaw);
     waypoint.latitude            = wp->latitude;
     waypoint.longitude           = wp->longitude;
     waypoint.altitude            = wp->altitude;
