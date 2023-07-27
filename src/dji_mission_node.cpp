@@ -110,7 +110,7 @@ void gpsPosCallback(const sensor_msgs::NavSatFix::ConstPtr& msg)
   gps_pos = *msg;
 }
 
-bool runWaypointMission(std::vector<sensor_msgs::NavSatFix> gpsList, std_msgs::Float64MultiArray yawList,std_msgs::Float64MultiArray gimbalPitchList, int responseTimeout)
+bool runWaypointMission(std::vector<sensor_msgs::NavSatFix> gpsList, std_msgs::Float64MultiArray yawList,std_msgs::Float64MultiArray gimbalPitchList, int responseTimeout){
   ros::spinOnce();
 
   // Waypoint Mission : Initialization
