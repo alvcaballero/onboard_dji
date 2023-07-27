@@ -110,7 +110,7 @@ void gpsPosCallback(const sensor_msgs::NavSatFix::ConstPtr& msg)
   gps_pos = *msg;
 }
 
-bool runWaypointMission(std::vector<sensor_msgs::NavSatFix> gpsList, std_msgs::Float64MultiArray yawList,std_msgs::Float64MultiArray gimbalPitchList, int responseTimeout)
+bool runWaypointMission(std::vector<sensor_msgs::NavSatFix> gpsList, std_msgs::Float64MultiArray yawList, int responseTimeout)
 {
   ros::spinOnce();
 
@@ -123,7 +123,7 @@ bool runWaypointMission(std::vector<sensor_msgs::NavSatFix> gpsList, std_msgs::F
   ROS_INFO("Creating Waypoints..\n");
 
   std::vector<WayPointSettings> generatedWaypts =
-  createWaypoints(gpsList,yawList,gimbalPitchList, start_alt);
+  createWaypoints(gpsList,yawList, start_alt);
 
   // Waypoint Mission: Upload the waypoints
   ROS_INFO("Uploading Waypoints..\n");
@@ -188,7 +188,7 @@ void setWaypointInitDefaults(dji_osdk_ros::MissionWaypointTask& waypointTask)
   waypointTask.yaw_mode           = yaw_mode; //dji_osdk_ros::MissionWaypointTask::YAW_MODE_AUTO;
   waypointTask.trace_mode         = trace_mode; //dji_osdk_ros::MissionWaypointTask::TRACE_POINT;
   waypointTask.action_on_rc_lost  = dji_osdk_ros::MissionWaypointTask::ACTION_AUTO;
-  waypointTask.gimbal_pitch_mode  = dji_osdk_ros::MissionWaypointTask::GIMBAL_PITCH_AUTO;//GIMBAL_PITCH_FREE
+  waypointTask.gimbal_pitch_mode  = dji_osdk_ros::MissionWaypointTask::GIMBAL_PICH_AUTO;//GIMBAL_PITCH_FREE
 }
 
 std::vector<WayPointSettings>
@@ -224,8 +224,8 @@ createWaypoints(std::vector<sensor_msgs::NavSatFix> gpsList, std_msgs::Float64Mu
     wp.gimbalPitch = gimbalPitchList.data[i];
 
     wp_list.push_back(wp);
-      ROS_INFO("Waypoint created at (LLA): %f \t%f \t%f\n", wp.latitude,
-           wp.longitude, wp.altitude, wp.yaw);
+      ROS_INFO("Waypoint created at (LLA): %f \t%f \t%f \t gimbal pitch: \t yaw: \n", wp.latitude,
+           wp.longitude, wp.altitude, wp.gimbalPitch, wp.yaw);
   }
   
   return wp_list;
@@ -326,7 +326,7 @@ bool config_mission(aerialcore_common::ConfigMission::Request  &req,
   gimbal_pitch_mode = req.gimbalPitchMode; //new to include gimbal pitch
   finish_action = req.finishAction;
   ROS_WARN("Finish action: %d",finish_action);
-  res.success = runWaypointMission(gps_list, yaw_list, gimbal_pitch_list, 1);
+  res.success = runWaypointMission(gps_list, yaw_list, 1);
   return true;
 }
 
