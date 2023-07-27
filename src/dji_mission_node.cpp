@@ -59,7 +59,7 @@ int finish_action;// 0: no action, 1: return to home, 2: auto-landing, 3: return
 int landing_type = 0; 
 
 // new variables to make robust the mission node adding yaw and gimbal pitch capabilities
-int gimbal_pitch_mode = 0; // 0 free (no control on gimbal) , 1 auto (smooth transition between waypoints on gimbal)
+int gimbal_pitch_mode = 1; // 0 free (no control on gimbal) , 1 auto (smooth transition between waypoints on gimbal)
 
 // Variables to publish mission info
 // Publisher for state_machine info
@@ -187,7 +187,7 @@ void setWaypointInitDefaults(dji_osdk_ros::MissionWaypointTask& waypointTask)
   waypointTask.yaw_mode           = yaw_mode; //dji_osdk_ros::MissionWaypointTask::YAW_MODE_AUTO;
   waypointTask.trace_mode         = trace_mode; //dji_osdk_ros::MissionWaypointTask::TRACE_POINT;
   waypointTask.action_on_rc_lost  = dji_osdk_ros::MissionWaypointTask::ACTION_AUTO;
-  waypointTask.gimbal_pitch_mode  = dji_osdk_ros::MissionWaypointTask::GIMBAL_PITCH_AUTO;//GIMBAL_PITCH_FREE
+  waypointTask.gimbal_pitch_mode  = 1;//GIMBAL_PITCH_FREEdji_osdk_ros::MissionWaypointTask::GIMBAL_PITCH_AUTO
 }
 
 std::vector<WayPointSettings>
@@ -239,8 +239,8 @@ void uploadWaypoints(std::vector<DJI::OSDK::WayPointSettings>& wp_list,
   for (std::vector<WayPointSettings>::iterator wp = wp_list.begin();
        wp != wp_list.end(); ++wp, i++)
   {
-    ROS_INFO("Waypoint created at (LLA): %f \t%f \t%f\n ", wp->latitude,
-             wp->longitude, wp->altitude);
+    ROS_INFO("Waypoint created at (LLA): %f \t%f \t%f \t gimbal pitch: %d \t yaw: %d \n", wp.latitude,
+           wp.longitude, wp.altitude, wp.gimbalPitch, wp.yaw);
     waypoint.latitude            = wp->latitude;
     waypoint.longitude           = wp->longitude;
     waypoint.altitude            = wp->altitude;
@@ -249,9 +249,9 @@ void uploadWaypoints(std::vector<DJI::OSDK::WayPointSettings>& wp_list,
     waypoint.target_gimbal_pitch = wp->gimbalPitch; // in orther to inspect in a good way, the gimbal pitch depends on the wp
     // Turn mode values:  0: clockwise, 1: counter-clockwise 
     if (wp->yaw > wp_list[i-1].yaw)
-      waypoint.turn_mode           = 1; // depends on the yaw
+      waypoint.turn_mode           = 0; // depends on the yaw
     else{
-      waypoint.turn_mode           = 0;
+      waypoint.turn_mode           = 1;
     }
     waypoint.has_action          = 0;
     waypointTask.mission_waypoint.push_back(waypoint);
