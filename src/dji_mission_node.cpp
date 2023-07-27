@@ -223,7 +223,7 @@ createWaypoints(std::vector<sensor_msgs::NavSatFix> gpsList, std_msgs::Float64Mu
     wp.gimbalPitch = gimbalPitchList.data[i];
 
     wp_list.push_back(wp);
-      ROS_INFO("Waypoint created at (LLA): %f \t%f \t%f \t gimbal pitch: %f \t yaw: %f \n", wp.latitude,
+      ROS_INFO("Waypoint created at (LLA): %f \t%f \t%f \t gimbal pitch: %f \t yaw: %d \n", wp.latitude,
            wp.longitude, wp.altitude, wp.gimbalPitch, wp.yaw);
   }
   
