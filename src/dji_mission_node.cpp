@@ -222,7 +222,7 @@ createWaypoints(std::vector<sensor_msgs::NavSatFix> gpsList, std_msgs::Float64Mu
     wp.yaw = yawList.data[i];
     wp.gimbalPitch = gimbalPitchList.data[i];
     // Turn mode values:  0: clockwise, 1: counter-clockwise 
-    if (wp.yaw > yawList.data[i-1])
+    if (wp.yaw > yawList.data[i+1])
       wp.turnMode           = 0; // depends on the yaw
     else{
       wp.turnMode           = 1;
