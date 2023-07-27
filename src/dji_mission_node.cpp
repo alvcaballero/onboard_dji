@@ -221,7 +221,12 @@ createWaypoints(std::vector<sensor_msgs::NavSatFix> gpsList, std_msgs::Float64Mu
     wp.altitude  = gpsList[i].altitude;
     wp.yaw = yawList.data[i];
     wp.gimbalPitch = gimbalPitchList.data[i];
-
+    // Turn mode values:  0: clockwise, 1: counter-clockwise 
+    if (wp.yaw > yawList.data[i-1])
+      wp.turnMode           = 0; // depends on the yaw
+    else{
+      wp.turnMode           = 1;
+    }
     wp_list.push_back(wp);
       ROS_INFO("Waypoint created at (LLA): %f \t%f \t%f \t gimbal pitch: %d \t yaw: %d \n", wp.latitude,
            wp.longitude, wp.altitude, wp.gimbalPitch, wp.yaw);
@@ -247,12 +252,7 @@ void uploadWaypoints(std::vector<DJI::OSDK::WayPointSettings>& wp_list,
     waypoint.damping_distance    = 0;
     waypoint.target_yaw          = wp->yaw;
     waypoint.target_gimbal_pitch = wp->gimbalPitch; // in orther to inspect in a good way, the gimbal pitch depends on the wp
-    // Turn mode values:  0: clockwise, 1: counter-clockwise 
-    if (wp->yaw > wp_list[i-1].yaw)
-      waypoint.turn_mode           = 0; // depends on the yaw
-    else{
-      waypoint.turn_mode           = 1;
-    }
+    waypoint.turn_mode           = wp->turnMode; //0: clockwise, 1: counter-clockwise
     waypoint.has_action          = 0;
     waypointTask.mission_waypoint.push_back(waypoint);
   }
