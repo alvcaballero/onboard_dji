@@ -233,7 +233,8 @@ createWaypoints(std::vector<sensor_msgs::NavSatFix> gpsList, std_msgs::Float64Mu
     wp.hasAction =1;
     wp.actionTimeLimit = 100;
     wp.actionNumber= 1;
-    wp.commandList[0] = 5;
+    wp.commandList[0] = DJI::OSDK::WayPointSettings::WP_ACTION_GIMBAL_PITCH; // WP_ACTION_STAY= 0,  WP_ACTION_SIMPLE_SHOT= 1,  WP_ACTION_VIDEO_START= 2,  WP_ACTION_VIDEO_STOP= 3,
+                           // WP_ACTION_CRAFT_YAW = 4,  WP_ACTION_GIMBAL_PITCH         = 5
     wp.commandParameter[0] = gimbalPitchList.data[i];
     
     // Turn mode values:  0: clockwise, 1: counter-clockwise 
