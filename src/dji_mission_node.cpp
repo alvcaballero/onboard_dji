@@ -209,6 +209,10 @@ createWaypoints(std::vector<sensor_msgs::NavSatFix> gpsList, std_msgs::Float64Mu
   start_wp.latitude  = gps_pos.latitude;
   start_wp.longitude = gps_pos.longitude;
   start_wp.altitude  = start_alt;
+  start_wp.actionNumber= 1;
+  start_wp.actionTimeLimit = 100;
+  start_wp.commandList[0] = 2; //start recording
+
   ROS_INFO("Waypoint created at (LLA): %f \t%f \t%f\n", gps_pos.latitude,
            gps_pos.longitude, start_alt);
 
@@ -232,11 +236,11 @@ createWaypoints(std::vector<sensor_msgs::NavSatFix> gpsList, std_msgs::Float64Mu
     wp.gimbalPitch = gimbalPitchList.data[i];
     wp.hasAction =1;
     wp.actionTimeLimit = 100;
-    wp.actionNumber= 1;
-    wp.commandList[0] = DJI::OSDK::WayPointSettings::WP_ACTION_GIMBAL_PITCH; // WP_ACTION_STAY= 0,  WP_ACTION_SIMPLE_SHOT= 1,  WP_ACTION_VIDEO_START= 2,  WP_ACTION_VIDEO_STOP= 3,
+    if (wp.index = gpsList.size())      wp.actionNumber =2;else wp.actionNumber= 1;
+    wp.commandList[0] = 5; // WP_ACTION_STAY= 0,  WP_ACTION_SIMPLE_SHOT= 1,  WP_ACTION_VIDEO_START= 2,  WP_ACTION_VIDEO_STOP= 3,
                            // WP_ACTION_CRAFT_YAW = 4,  WP_ACTION_GIMBAL_PITCH         = 5
     wp.commandParameter[0] = gimbalPitchList.data[i];
-    
+    if (wp.index = gpsList.size()) wp.commandList[1] = 3; //stop recording if we finish the mission
     // Turn mode values:  0: clockwise, 1: counter-clockwise 
     if (wp.yaw < yawList.data[i+1] && wp.index <= gpsList.size())
       wp.turnMode           = 0; // depends on the yaw
