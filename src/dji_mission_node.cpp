@@ -209,6 +209,7 @@ createWaypoints(std::vector<sensor_msgs::NavSatFix> gpsList, std_msgs::Float64Mu
   start_wp.latitude  = gps_pos.latitude;
   start_wp.longitude = gps_pos.longitude;
   start_wp.altitude  = start_alt;
+  start_wp.hasAction = 1;
   start_wp.actionNumber= 1;
   start_wp.actionTimeLimit = 100;
   start_wp.commandList[0] = 2; //start recording
