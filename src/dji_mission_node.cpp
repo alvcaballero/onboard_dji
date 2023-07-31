@@ -278,6 +278,9 @@ void uploadWaypoints(std::vector<DJI::OSDK::WayPointSettings>& wp_list,
     waypoint.waypoint_action.action_repeat =1 ;
     waypoint.waypoint_action.command_list[0] = wp->commandList[0];
     waypoint.waypoint_action.command_parameter[0] = wp->commandParameter[0];
+    waypoint.waypoint_action.command_list[1] = wp->commandList[1];
+    //waypoint.waypoint_action.command_parameter[0] = wp->commandParameter[0];
+    
     waypointTask.mission_waypoint.push_back(waypoint);
   }
 }
