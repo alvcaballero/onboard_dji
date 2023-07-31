@@ -251,6 +251,12 @@ createWaypoints(std::vector<sensor_msgs::NavSatFix> gpsList, std_msgs::Float64Mu
       wp.commandParameter[1] = 0;
     }
     
+    if (wp.index == 3){
+      wp.actionNumber =2;
+      wp.actionTimeLimit = 6000;
+      wp.commandList[1] = 1; //simple shoot to test if we can do both, recording and taking pictures
+      wp.commandParameter[1] = 1;
+    }
      // Turn mode values:  0: clockwise, 1: counter-clockwise 
     if (wp.yaw < yawList.data[i+1] && wp.index <= gpsList.size())
       wp.turnMode           = 0; // depends on the yaw
