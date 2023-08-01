@@ -120,7 +120,7 @@ long double haversine(long double lat1, long double lon1, long double lat2, long
 
     long double c = 2.0L * std::atan2(std::sqrt(a), std::sqrt(1.0L - a));
 
-    return earth_radius_meters * c;
+    return C_EARTH * c;
 }
 
 // Function to detect in what waypoint the drone is
@@ -512,7 +512,7 @@ int main(int argc, char** argv)
   command_mission_pub = nh.advertise<std_msgs::Bool>("dji_sm/command_mission", 1);
 
   //waypoint reached function
-  waypoint_reached_pub = nh.subscribe<sensor_msgs::NavSatFix>("dji_osdk_ros/gps_position", 10, &wpReachedCB);
+  ros::Subscriber waypoint_reached_sub = nh.subscribe<sensor_msgs::NavSatFix>("dji_osdk_ros/gps_position", 10, &wpReachedCB);
   
   ros::spin();
 
