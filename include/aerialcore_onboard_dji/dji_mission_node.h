@@ -47,11 +47,12 @@
 #include <ros/ros.h>
 #include <sensor_msgs/NavSatFix.h>
 #include <std_msgs/Float64MultiArray.h>
+#include <std_msgs/Float64.h>
 #include <std_msgs/Bool.h>
 #include <geographic_msgs/GeoPoint.h>
 
-#define C_EARTH (double)6378137.0
-#define C_PI (double)3.141592653589793
+#define C_EARTH (std_msgs::Float64)6378137.0
+#define C_PI (std_msgs::Float64)3.141592653589793
 #define DEG2RAD(DEG) ((DEG) * ((C_PI) / (180.0)))
 
 typedef struct ServiceAck
@@ -109,5 +110,8 @@ ServiceAck hotpointUpdateRadius(float radius);
 ServiceAck hotpointUpdateYawRate(float yawRate, int direction);
 
 void gpsPosCallback(const sensor_msgs::NavSatFix::ConstPtr& msg);
+
+int wpReachedCB(std::vector<sensor_msgs::NavSatFix> gpsList,const sensor_msgs::NavSatFix::ConstPtr& msg);
+float haversine(float lat1, float lon1, float lat2, float lon2);
 
 #endif // MISSION_NODE_H
