@@ -107,19 +107,19 @@ bool sendFiles(std_srvs::SetBool::Request  &req, std_srvs::SetBool::Response &re
 
 double haversine(std_msgs::Float64 lat1, std_msgs::Float64 lon1, std_msgs::Float64 lat2, std_msgs::Float64 lon2)
 {
-    lat1 = DEG2RAD(lat1);
-    lon1 = DEG2RAD(lon1);
-    lat2 = DEG2RAD(lat2);
-    lon2 = DEG2RAD(lon2);
+    lat1 = DEG2RAD((double) lat1);
+    lon1 = DEG2RAD((double) lon1);
+    lat2 = DEG2RAD((double) lat2);
+    lon2 = DEG2RAD((double) lon2);
 
     double dlat = lat2 - lat1;
     double dlon = lon2 - lon1;
 
-    double a = std::sin(dlat / 2.0L) * std::sin(dlat / 2.0L) +
+    double a = std::sin(dlat / 2.0) * std::sin(dlat / 2.0) +
                     std::cos(lat1) * std::cos(lat2) *
-                    std::sin(dlon / 2.0L) * std::sin(dlon / 2.0L);
+                    std::sin(dlon / 2.0) * std::sin(dlon / 2.0);
 
-    double c = 2.0L * std::atan2(std::sqrt(a), std::sqrt(1.0L - a));
+    double c = 2.0 * std::atan2(std::sqrt(a), std::sqrt(1.0 - a));
 
     return C_EARTH * c;
 }
