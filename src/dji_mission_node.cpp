@@ -254,9 +254,9 @@ createWaypoints(std::vector<sensor_msgs::NavSatFix> gpsList, std_msgs::Float64Mu
   start_wp.altitude  = start_alt;
   start_wp.hasAction = 1;
   start_wp.actionNumber= 1;
-  start_wp.actionTimeLimit = 6000;
-  start_wp.commandList[0] = 1; //start recording, 1 for simple shot
-  start_wp.commandParameter[0] = 1;
+  start_wp.actionTimeLimit = 100;
+  start_wp.commandList[0] = 0; //start recording, 1 for simple shot
+  start_wp.commandParameter[0] = 100;
   ROS_INFO("Waypoint created at (LLA): %f \t%f \t%f\n", gps_pos.latitude,
            gps_pos.longitude, start_alt);
 
@@ -280,26 +280,23 @@ createWaypoints(std::vector<sensor_msgs::NavSatFix> gpsList, std_msgs::Float64Mu
     wp.gimbalPitch = gimbalPitchList.data[i];
     wp.hasAction =1;
     wp.actionTimeLimit = 100;
-    if (wp.index == gpsList.size())      wp.actionNumber =2;else wp.actionNumber= 2; //for all the wp 2 actions
+    wp.actionNumber = 2;
+    // gimbal pitch action
     wp.commandList[0] = 5; // WP_ACTION_STAY= 0,  WP_ACTION_SIMPLE_SHOT= 1,  WP_ACTION_VIDEO_START= 2,  WP_ACTION_VIDEO_STOP= 3,
                            // WP_ACTION_CRAFT_YAW = 4,  WP_ACTION_GIMBAL_PITCH         = 5
     wp.commandParameter[0] = gimbalPitchList.data[i];
+
+    // test actions
     if (wp.index == gpsList.size()){
       wp.actionTimeLimit = 6000;
-      wp.commandList[1] = 1; //stop recording if we finish the mission, 1 simple shot
-      wp.commandParameter[1] = 1;
+      wp.commandList[1] = 0; //stop recording if we finish the mission, 1 simple shot, 0 stays
+      wp.commandParameter[1] = 5000;
     }else {
-      wp.actionTimeLimit = 2000; // to test if it stays 2 seconds
+      wp.actionTimeLimit = i*1000; // to test if it stays 4 seconds
       wp.commandList[1] = 0; 
-      wp.commandParameter[1] = 2000;
+      wp.commandParameter[1] = i*1000;
     }
     
-    if (wp.index == 3){
-      wp.actionNumber =2;
-      wp.actionTimeLimit = 6000;
-      wp.commandList[1] = 1; //simple shoot to test if we can do both, recording and taking pictures NOT POSSIBLE
-      wp.commandParameter[1] = 1;
-    }
      // Turn mode values:  0: clockwise, 1: counter-clockwise 
     if (wp.yaw < yawList.data[i+1] && wp.index <= gpsList.size())
       wp.turnMode           = 0; // depends on the yaw
@@ -338,7 +335,7 @@ void uploadWaypoints(std::vector<DJI::OSDK::WayPointSettings>& wp_list,
     waypoint.waypoint_action.command_list[0] = wp->commandList[0];
     waypoint.waypoint_action.command_parameter[0] = wp->commandParameter[0];
     waypoint.waypoint_action.command_list[1] = wp->commandList[1];
-    //waypoint.waypoint_action.command_parameter[0] = wp->commandParameter[0];
+    waypoint.waypoint_action.command_parameter[1] = wp->commandParameter[1];
     
     waypointTask.mission_waypoint.push_back(waypoint);
   }
