@@ -105,20 +105,20 @@ bool sendFiles(std_srvs::SetBool::Request  &req, std_srvs::SetBool::Response &re
   return true;
 }
 
-long double haversine(long double lat1, long double lon1, long double lat2, long double lon2) {
+float haversine(float lat1, long double lon1, long double lat2, long double lon2) {
     lat1 = DEG2RAD(lat1);
     lon1 = DEG2RAD(lon1);
     lat2 = DEG2RAD(lat2);
     lon2 = DEG2RAD(lon2);
 
-    long double dlat = lat2 - lat1;
-    long double dlon = lon2 - lon1;
+    float dlat = lat2 - lat1;
+    float dlon = lon2 - lon1;
 
-    long double a = std::sin(dlat / 2.0L) * std::sin(dlat / 2.0L) +
+    float a = std::sin(dlat / 2.0L) * std::sin(dlat / 2.0L) +
                     std::cos(lat1) * std::cos(lat2) *
                     std::sin(dlon / 2.0L) * std::sin(dlon / 2.0L);
 
-    long double c = 2.0L * std::atan2(std::sqrt(a), std::sqrt(1.0L - a));
+    float c = 2.0L * std::atan2(std::sqrt(a), std::sqrt(1.0L - a));
 
     return C_EARTH * c;
 }
