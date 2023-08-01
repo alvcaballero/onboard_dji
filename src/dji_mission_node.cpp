@@ -140,9 +140,10 @@ int wpReachedCB(const sensor_msgs::NavSatFix::ConstPtr& msg)
     {
       min_dist = dist;
       index = i;
+      ROS_INFO("Waypoint [%d] reached", index);
     }
   }
-  ROS_INFO("Waypoint [%d] reached", index);
+  
   return index;
 
 }
