@@ -105,6 +105,44 @@ bool sendFiles(std_srvs::SetBool::Request  &req, std_srvs::SetBool::Response &re
   return true;
 }
 
+long double haversine(long double lat1, long double lon1, long double lat2, long double lon2) {
+    lat1 = DEG2RAD(lat1);
+    lon1 = DEG2RAD(lon1);
+    lat2 = DEG2RAD(lat2);
+    lon2 = DEG2RAD(lon2);
+
+    long double dlat = lat2 - lat1;
+    long double dlon = lon2 - lon1;
+
+    long double a = std::sin(dlat / 2.0L) * std::sin(dlat / 2.0L) +
+                    std::cos(lat1) * std::cos(lat2) *
+                    std::sin(dlon / 2.0L) * std::sin(dlon / 2.0L);
+
+    long double c = 2.0L * std::atan2(std::sqrt(a), std::sqrt(1.0L - a));
+
+    return earth_radius_meters * c;
+}
+
+// Function to detect in what waypoint the drone is
+int wpReachedCB(std::vector<sensor_msgs::NavSatFix> gpsList,const sensor_msgs::NavSatFix::ConstPtr& msg)
+{
+  int index = 0;
+  float min_dist = 1.0; // min distance in meters
+
+  for (int i = 0; i < gpsList.size(); i++)
+  {
+    float dist = haversine(gpsList[i].latitude, gpsList[i].longitude, msg->latitude, msg->longitude);
+    if (dist < min_dist)
+    {
+      min_dist = dist;
+      index = i;
+    }
+  }
+  ROS_INFO("Waypoint [%d] reached", index);
+  return index;
+
+}
+
 void gpsPosCallback(const sensor_msgs::NavSatFix::ConstPtr& msg)
 {
   gps_pos = *msg;
@@ -212,7 +250,7 @@ createWaypoints(std::vector<sensor_msgs::NavSatFix> gpsList, std_msgs::Float64Mu
   start_wp.hasAction = 1;
   start_wp.actionNumber= 1;
   start_wp.actionTimeLimit = 6000;
-  start_wp.commandList[0] = 2; //start recording
+  start_wp.commandList[0] = 1; //start recording, 1 for simple shot
   start_wp.commandParameter[0] = 1;
   ROS_INFO("Waypoint created at (LLA): %f \t%f \t%f\n", gps_pos.latitude,
            gps_pos.longitude, start_alt);
@@ -237,24 +275,24 @@ createWaypoints(std::vector<sensor_msgs::NavSatFix> gpsList, std_msgs::Float64Mu
     wp.gimbalPitch = gimbalPitchList.data[i];
     wp.hasAction =1;
     wp.actionTimeLimit = 100;
-    if (wp.index == gpsList.size())      wp.actionNumber =2;else wp.actionNumber= 1;
+    if (wp.index == gpsList.size())      wp.actionNumber =2;else wp.actionNumber= 2; //for all the wp 2 actions
     wp.commandList[0] = 5; // WP_ACTION_STAY= 0,  WP_ACTION_SIMPLE_SHOT= 1,  WP_ACTION_VIDEO_START= 2,  WP_ACTION_VIDEO_STOP= 3,
                            // WP_ACTION_CRAFT_YAW = 4,  WP_ACTION_GIMBAL_PITCH         = 5
     wp.commandParameter[0] = gimbalPitchList.data[i];
     if (wp.index == gpsList.size()){
       wp.actionTimeLimit = 6000;
-      wp.commandList[1] = 3; //stop recording if we finish the mission
+      wp.commandList[1] = 1; //stop recording if we finish the mission, 1 simple shot
       wp.commandParameter[1] = 1;
     }else {
-      wp.actionTimeLimit = 100;
+      wp.actionTimeLimit = 2000; // to test if it stays 2 seconds
       wp.commandList[1] = 0; 
-      wp.commandParameter[1] = 0;
+      wp.commandParameter[1] = 2000;
     }
     
     if (wp.index == 3){
       wp.actionNumber =2;
       wp.actionTimeLimit = 6000;
-      wp.commandList[1] = 1; //simple shoot to test if we can do both, recording and taking pictures
+      wp.commandList[1] = 1; //simple shoot to test if we can do both, recording and taking pictures NOT POSSIBLE
       wp.commandParameter[1] = 1;
     }
      // Turn mode values:  0: clockwise, 1: counter-clockwise 
@@ -472,6 +510,9 @@ int main(int argc, char** argv)
   //info publishers 
   upload_mission_pub = nh.advertise<std_msgs::Bool>("dji_sm/upload_mission", 1);
   command_mission_pub = nh.advertise<std_msgs::Bool>("dji_sm/command_mission", 1);
+
+  //waypoint reached function
+  waypoint_reached_pub = nh.subscribe<sensor_msgs::NavSatFix>("dji_osdk_ros/gps_position", 10, &wpReachedCB);
   
   ros::spin();
 
