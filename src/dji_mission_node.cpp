@@ -125,7 +125,7 @@ double haversine(std_msgs::Float64 lat1, std_msgs::Float64 lon1, std_msgs::Float
 }
 
 // Function to detect in what waypoint the drone is
-int wpReachedCB(std::vector<sensor_msgs::NavSatFix> gpsList,const sensor_msgs::NavSatFix::ConstPtr& msg)
+int wpReachedCB(std::vector<sensor_msgs::NavSatFix> gpsList, sensor_msgs::NavSatFix::ConstPtr& msg)
 {
   int index = 0;
   double min_dist = 1.0; // min distance in meters
