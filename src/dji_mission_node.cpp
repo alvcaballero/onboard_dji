@@ -227,7 +227,7 @@ void setWaypointInitDefaults(dji_osdk_ros::MissionWaypointTask& waypointTask)
     ROS_WARN("Mission final action: Continue motion");
   }
   waypointTask.mission_exec_times = 1;
-  waypointTask.yaw_mode           = yaw_mode; //dji_osdk_ros::MissionWaypointTask::YAW_MODE_AUTO;
+  waypointTask.yaw_mode           = 1;//yaw_mode; //dji_osdk_ros::MissionWaypointTask::YAW_MODE_AUTO;
   waypointTask.trace_mode         = trace_mode; //dji_osdk_ros::MissionWaypointTask::TRACE_POINT;
   waypointTask.action_on_rc_lost  = dji_osdk_ros::MissionWaypointTask::ACTION_AUTO;
   if(gimbal_pitch_mode == 0){
@@ -254,8 +254,8 @@ createWaypoints(std::vector<sensor_msgs::NavSatFix> gpsList, std_msgs::Float64Mu
   start_wp.altitude  = start_alt;
   start_wp.hasAction = 1;
   start_wp.actionNumber= 1;
-  start_wp.actionTimeLimit = 100;
-  start_wp.commandList[0] = 2; //start recording, 1 for simple shot
+  start_wp.actionTimeLimit = 6000;
+  start_wp.commandList[0] = 2; //2 start recording, 1 for simple shot
   start_wp.commandParameter[0] = 0;
   ROS_INFO("Waypoint created at (LLA): %f \t%f \t%f\n", gps_pos.latitude,
            gps_pos.longitude, start_alt);
@@ -289,12 +289,12 @@ createWaypoints(std::vector<sensor_msgs::NavSatFix> gpsList, std_msgs::Float64Mu
     // test actions
     if (wp.index == gpsList.size()){
       wp.actionTimeLimit = 6000;
-      wp.commandList[1] = 3; //stop recording if we finish the mission, 1 simple shot, 0 stays
-      wp.commandParameter[1] = 0;
+      wp.commandList[1] = 4; //4 craft yaw, 3 stop recording if we finish the mission, 1 simple shot, 0 stays
+      wp.commandParameter[1] = yawList.data[i];
     }else {
       wp.actionTimeLimit = i*1000; // to test if it stays 4 seconds
-      wp.commandList[1] = 0; 
-      wp.commandParameter[1] = i*1000;
+      wp.commandList[1] = 4; 
+      wp.commandParameter[1] = yaList.data[i];
     }
     
      // Turn mode values:  0: clockwise, 1: counter-clockwise 
