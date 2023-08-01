@@ -255,8 +255,8 @@ createWaypoints(std::vector<sensor_msgs::NavSatFix> gpsList, std_msgs::Float64Mu
   start_wp.hasAction = 1;
   start_wp.actionNumber= 1;
   start_wp.actionTimeLimit = 100;
-  start_wp.commandList[0] = 0; //start recording, 1 for simple shot
-  start_wp.commandParameter[0] = 100;
+  start_wp.commandList[0] = 2; //start recording, 1 for simple shot
+  start_wp.commandParameter[0] = 0;
   ROS_INFO("Waypoint created at (LLA): %f \t%f \t%f\n", gps_pos.latitude,
            gps_pos.longitude, start_alt);
 
@@ -289,8 +289,8 @@ createWaypoints(std::vector<sensor_msgs::NavSatFix> gpsList, std_msgs::Float64Mu
     // test actions
     if (wp.index == gpsList.size()){
       wp.actionTimeLimit = 6000;
-      wp.commandList[1] = 0; //stop recording if we finish the mission, 1 simple shot, 0 stays
-      wp.commandParameter[1] = 5000;
+      wp.commandList[1] = 3; //stop recording if we finish the mission, 1 simple shot, 0 stays
+      wp.commandParameter[1] = 0;
     }else {
       wp.actionTimeLimit = i*1000; // to test if it stays 4 seconds
       wp.commandList[1] = 0; 
