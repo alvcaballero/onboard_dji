@@ -227,7 +227,7 @@ void setWaypointInitDefaults(dji_osdk_ros::MissionWaypointTask& waypointTask)
     ROS_WARN("Mission final action: Continue motion");
   }
   waypointTask.mission_exec_times = 1;
-  waypointTask.yaw_mode           = 1;//yaw_mode; //dji_osdk_ros::MissionWaypointTask::YAW_MODE_AUTO;
+  waypointTask.yaw_mode           = yaw_mode; //dji_osdk_ros::MissionWaypointTask::YAW_MODE_AUTO;
   waypointTask.trace_mode         = trace_mode; //dji_osdk_ros::MissionWaypointTask::TRACE_POINT;
   waypointTask.action_on_rc_lost  = dji_osdk_ros::MissionWaypointTask::ACTION_AUTO;
   if(gimbal_pitch_mode == 0){
@@ -252,6 +252,7 @@ createWaypoints(std::vector<sensor_msgs::NavSatFix> gpsList, std_msgs::Float64Mu
   start_wp.latitude  = gps_pos.latitude;
   start_wp.longitude = gps_pos.longitude;
   start_wp.altitude  = start_alt;
+  // only will have one action: start recording the video
   start_wp.hasAction = 1;
   start_wp.actionNumber= 1;
   start_wp.actionTimeLimit = 6000;
@@ -280,22 +281,29 @@ createWaypoints(std::vector<sensor_msgs::NavSatFix> gpsList, std_msgs::Float64Mu
     wp.gimbalPitch = gimbalPitchList.data[i];
     wp.hasAction =1;
     wp.actionTimeLimit = 100;
-    wp.actionNumber = 2;
-    // gimbal pitch action
-    wp.commandList[0] = 5; // WP_ACTION_STAY= 0,  WP_ACTION_SIMPLE_SHOT= 1,  WP_ACTION_VIDEO_START= 2,  WP_ACTION_VIDEO_STOP= 3,
-                           // WP_ACTION_CRAFT_YAW = 4,  WP_ACTION_GIMBAL_PITCH         = 5
-    wp.commandParameter[0] = gimbalPitchList.data[i];
+    wp.actionNumber = 10; // fixed in 10 for now
 
-    // test actions
-    if (wp.index == gpsList.size()){
-      wp.actionTimeLimit = 6000;
-      wp.commandList[1] = 4; //4 craft yaw, 3 stop recording if we finish the mission, 1 simple shot, 0 stays
-      wp.commandParameter[1] = yawList.data[i];
-    }else {
-      wp.actionTimeLimit = i*1000; // to test if it stays 4 seconds
-      wp.commandList[1] = 4; 
-      wp.commandParameter[1] = yaList.data[i];
+    //full information for actions:     Onboard-SDK/osdk-core/api/inc/dji_mission_type.hpp
+    for (int j = 0; j < wp.actionNumber; j++)
+    {
+      wp.commandList[j]      = acommandList.data[i][j];
+      wp.commandParameter[j] = acommandParameter.data[i][j];
     }
+    // // gimbal pitch action
+    // wp.commandList[0] = 5; // WP_ACTION_STAY= 0,  WP_ACTION_SIMPLE_SHOT= 1,  WP_ACTION_VIDEO_START= 2,  WP_ACTION_VIDEO_STOP= 3,
+    //                        // WP_ACTION_CRAFT_YAW = 4,  WP_ACTION_GIMBAL_PITCH         = 5
+    // wp.commandParameter[0] = gimbalPitchList.data[i];
+
+    //actions debug
+    // if (wp.index == gpsList.size()){
+    //   wp.actionTimeLimit = 6000;
+    //   wp.commandList[1] = 4; //4 craft yaw, 3 stop recording if we finish the mission, 1 simple shot, 0 stays
+    //   wp.commandParameter[1] = yawList.data[i];
+    // }else {
+    //   wp.actionTimeLimit = i*1000; // to test if it stays 4 seconds
+    //   wp.commandList[1] = 4; 
+    //   wp.commandParameter[1] = yaList.data[i];
+    // }
     
      // Turn mode values:  0: clockwise, 1: counter-clockwise 
     if (wp.yaw < yawList.data[i+1] && wp.index <= gpsList.size())
@@ -332,11 +340,16 @@ void uploadWaypoints(std::vector<DJI::OSDK::WayPointSettings>& wp_list,
     waypoint.has_action          = wp->hasAction;
     waypoint.action_time_limit     = wp->actionTimeLimit;
     waypoint.waypoint_action.action_repeat =1 ;
-    waypoint.waypoint_action.command_list[0] = wp->commandList[0];
-    waypoint.waypoint_action.command_parameter[0] = wp->commandParameter[0];
-    waypoint.waypoint_action.command_list[1] = wp->commandList[1];
-    waypoint.waypoint_action.command_parameter[1] = wp->commandParameter[1];
-    
+
+    // waypoint.waypoint_action.command_list[0] = wp->commandList[0];
+    // waypoint.waypoint_action.command_parameter[0] = wp->commandParameter[0];
+    // waypoint.waypoint_action.command_list[1] = wp->commandList[1];
+    // waypoint.waypoint_action.command_parameter[1] = wp->commandParameter[1];
+    for (j=0; j<wp->actionNumber; j++){
+      waypoint.waypoint_action.command_list[j] = wp->commandList[j];
+      waypoint.waypoint_action.command_parameter[j] = wp->commandParameter[j];
+    }
+
     waypointTask.mission_waypoint.push_back(waypoint);
   }
 }
@@ -410,7 +423,11 @@ bool config_mission(aerialcore_common::ConfigMission::Request  &req,
   finish_action = req.finishAction;
   ROS_WARN("Finish action: %d",finish_action);
   ROS_WARN("Gimbal Pitch Mode: %d",gimbal_pitch_mode);
-  
+
+  //actions functionality
+  std_msgs::Float64MultiArray acommandList = req.commandList;
+  std_msgs::Float64MultiArray acommandParameter = req.commandParameter;
+
   res.success = runWaypointMission(gps_list, yaw_list,gimbal_pitch_list, 1);
   return true;
 }
