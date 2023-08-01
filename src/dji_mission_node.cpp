@@ -105,21 +105,21 @@ bool sendFiles(std_srvs::SetBool::Request  &req, std_srvs::SetBool::Response &re
   return true;
 }
 
-std_msgs::Float64 haversine(std_msgs::Float64 lat1, std_msgs::Float64 lon1, std_msgs::Float64 lat2, std_msgs::Float64 lon2)
+double haversine(std_msgs::Float64 lat1, std_msgs::Float64 lon1, std_msgs::Float64 lat2, std_msgs::Float64 lon2)
 {
     lat1 = DEG2RAD(lat1);
     lon1 = DEG2RAD(lon1);
     lat2 = DEG2RAD(lat2);
     lon2 = DEG2RAD(lon2);
 
-    std_msgs::Float64 dlat = lat2 - lat1;
-    std_msgs::Float64 dlon = lon2 - lon1;
+    double dlat = lat2 - lat1;
+    double dlon = lon2 - lon1;
 
-    std_msgs::Float64 a = std::sin(dlat / 2.0L) * std::sin(dlat / 2.0L) +
+    double a = std::sin(dlat / 2.0L) * std::sin(dlat / 2.0L) +
                     std::cos(lat1) * std::cos(lat2) *
                     std::sin(dlon / 2.0L) * std::sin(dlon / 2.0L);
 
-    std_msgs::Float64 c = 2.0L * std::atan2(std::sqrt(a), std::sqrt(1.0L - a));
+    double c = 2.0L * std::atan2(std::sqrt(a), std::sqrt(1.0L - a));
 
     return C_EARTH * c;
 }
@@ -128,12 +128,12 @@ std_msgs::Float64 haversine(std_msgs::Float64 lat1, std_msgs::Float64 lon1, std_
 int wpReachedCB(std::vector<sensor_msgs::NavSatFix> gpsList,const sensor_msgs::NavSatFix::ConstPtr& msg)
 {
   int index = 0;
-  std_msgs::Float64 min_dist = 1.0; // min distance in meters
+  double min_dist = 1.0; // min distance in meters
 
   for (int i = 0; i < gpsList.size(); i++)
   {
-    std_msgs::Float64 dist = haversine(gpsList[i].latitude, gpsList[i].longitude, msg->latitude, msg->longitude);
-    if (dist < min_dist)
+    double dist = haversine(gpsList[i].latitude, gpsList[i].longitude, msg->latitude, msg->longitude);
+    if (dist <= min_dist)
     {
       min_dist = dist;
       index = i;
