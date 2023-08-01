@@ -112,6 +112,6 @@ ServiceAck hotpointUpdateYawRate(float yawRate, int direction);
 void gpsPosCallback(const sensor_msgs::NavSatFix::ConstPtr& msg);
 
 int wpReachedCB(std::vector<sensor_msgs::NavSatFix> gpsList,const sensor_msgs::NavSatFix::ConstPtr& msg);
-double haversine(std_msgs::Float64 lat1, std_msgs::Float64 lon1, std_msgs::Float64 lat2, std_msgs::Float64 lon2);
+double haversine(double lat1, double lon1, double lat2, double lon2);
 
 #endif // MISSION_NODE_H
