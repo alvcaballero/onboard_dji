@@ -74,6 +74,7 @@ bool dont_more_missionwaypoints = true;
 
 std_msgs::Bool command_mission_msg ;
 std_msgs::Bool upload_mission_msg;
+std::vector<sensor_msgs::NavSatFix> wpList;
 
 void StartRosbag()
 {
@@ -125,16 +126,16 @@ double haversine(double lat1, double lon1, double lat2, double lon2)
 }
 
 // Function to detect in what waypoint the drone is
-int wpReachedCB(std::vector<sensor_msgs::NavSatFix> gpsList,const sensor_msgs::NavSatFix::ConstPtr& msg)
+int wpReachedCB(const sensor_msgs::NavSatFix::ConstPtr& msg)
 {
   int index = 0;
   double min_dist = 1.0; // min distance in meters
   sensor_msgs::NavSatFix current_pos;
 
   current_pos = *msg;
-  for (int i = 0; i < gpsList.size(); i++)
+  for (int i = 0; i < wpList.size(); i++)
   {
-    double dist = haversine(gpsList[i].latitude, gpsList[i].longitude, current_pos.latitude, current_pos.longitude);
+    double dist = haversine(wpList[i].latitude, wpList[i].longitude, current_pos.latitude, current_pos.longitude);
     if (dist <= min_dist)
     {
       min_dist = dist;
@@ -400,6 +401,7 @@ bool config_mission(aerialcore_common::ConfigMission::Request  &req,
          aerialcore_common::ConfigMission::Response &res){
   ROS_WARN("Received mission");
   std::vector<sensor_msgs::NavSatFix> gps_list = req.waypoint;
+  wpList = req.waypoint;
   std_msgs::Float64MultiArray yaw_list = req.yaw;  
   std_msgs::Float64MultiArray gimbal_pitch_list = req.gimbalPitch; //new to include gimbal pitch
   velocity_range = req.maxVel;
