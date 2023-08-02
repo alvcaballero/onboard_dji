@@ -79,7 +79,7 @@ void setWaypointDefaults(DJI::OSDK::WayPointSettings* wp);
 
 void setWaypointInitDefaults(dji_osdk_ros::MissionWaypointTask& waypointTask);
 
-createWaypoints(std::vector<sensor_msgs::NavSatFix> gpsList, std_msgs::Float64MultiArray yawList, std_msgs::Float64MultiArray gimbalPitchList,
+std::vector<WayPointSettings> createWaypoints(std::vector<sensor_msgs::NavSatFix> gpsList, std_msgs::Float64MultiArray yawList, std_msgs::Float64MultiArray gimbalPitchList,
                 std_msgs::Float64MultiArray acommandList, std_msgs::Float64MultiArray acommandParameter,
                 float32_t start_alt);
 

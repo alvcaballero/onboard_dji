@@ -426,10 +426,32 @@ bool config_mission(aerialcore_common::ConfigMission::Request  &req,
   ROS_WARN("Finish action: %d",finish_action);
   ROS_WARN("Gimbal Pitch Mode: %d",gimbal_pitch_mode);
 
-  //actions functionality
+  // actions functionality
   std_msgs::Float64MultiArray acommandList = req.commandList;
   std_msgs::Float64MultiArray acommandParameter = req.commandParameter;
 
+  // fill out the MultiArray message to make a Matrix
+  acommandList.layout.dim.push_back(std_msgs::MultiArrayDimension());
+  acommandList.layout.dim.push_back(std_msgs::MultiArrayDimension());
+  acommandList.layout.dim[0].label = "wp";
+  acommandList.layout.dim[1].label = "nActions";
+  acommandList.layout.dim[0].size = gps_list.size();
+  acommandList.layout.dim[1].size = 10;
+  acommandList.layout.dim[0].stride = gps_list.size()*10;
+  acommandList.layout.dim[1].stride = 10;
+  acommandList.layout.data_offset = 0; 
+
+  acommandParameter.layout.dim.push_back(std_msgs::MultiArrayDimension());
+  acommandParameter.layout.dim.push_back(std_msgs::MultiArrayDimension());
+  acommandParameter.layout.dim[0].label = "wp";
+  acommandParameter.layout.dim[1].label = "nActions";
+  acommandParameter.layout.dim[0].size = gps_list.size();
+  acommandParameter.layout.dim[1].size = 10;
+  acommandParameter.layout.dim[0].stride = gps_list.size()*10;
+  acommandParameter.layout.dim[1].stride = 10;
+  acommandParameter.layout.data_offset = 0;
+
+  // if everything goes right we run the whole thing
   res.success = runWaypointMission(gps_list, yaw_list,gimbal_pitch_list,acommandList,acommandParameter, 1);
   return true;
 }
