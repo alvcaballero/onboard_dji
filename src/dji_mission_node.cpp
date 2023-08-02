@@ -253,9 +253,9 @@ createWaypoints(std::vector<sensor_msgs::NavSatFix> gpsList, std_msgs::Float64Mu
   acommandList.layout.dim.push_back(std_msgs::MultiArrayDimension());
   acommandList.layout.dim[0].label = "wp";
   acommandList.layout.dim[1].label = "nActions";
-  acommandList.layout.dim[0].size = gps_list.size();
+  acommandList.layout.dim[0].size = gpsList.size();
   acommandList.layout.dim[1].size = 10;
-  acommandList.layout.dim[0].stride = gps_list.size()*10;
+  acommandList.layout.dim[0].stride = gpsList.size()*10;
   acommandList.layout.dim[1].stride = 10;
   acommandList.layout.data_offset = 0; 
 
@@ -263,9 +263,9 @@ createWaypoints(std::vector<sensor_msgs::NavSatFix> gpsList, std_msgs::Float64Mu
   acommandParameter.layout.dim.push_back(std_msgs::MultiArrayDimension());
   acommandParameter.layout.dim[0].label = "wp";
   acommandParameter.layout.dim[1].label = "nActions";
-  acommandParameter.layout.dim[0].size = gps_list.size();
+  acommandParameter.layout.dim[0].size = gpsList.size();
   acommandParameter.layout.dim[1].size = 10;
-  acommandParameter.layout.dim[0].stride = gps_list.size()*10;
+  acommandParameter.layout.dim[0].stride = gpsList.size()*10;
   acommandParameter.layout.dim[1].stride = 10;
   acommandParameter.layout.data_offset = 0;
 
@@ -309,8 +309,8 @@ createWaypoints(std::vector<sensor_msgs::NavSatFix> gpsList, std_msgs::Float64Mu
     //full information for actions:     Onboard-SDK/osdk-core/api/inc/dji_mission_type.hpp
     for (int j = 0; j < wp.actionNumber; j++)
     {
-      wp.commandList[j]      = acommandList.data[i][j];
-      wp.commandParameter[j] = acommandParameter.data[i][j];
+      wp.commandList[j]      = acommandList.data[i*wp.actionNumber+j];
+      wp.commandParameter[j] = acommandParameter.data[i*wp.actionNumber+j];
     }
     // // gimbal pitch action
     // wp.commandList[0] = 5; // WP_ACTION_STAY= 0,  WP_ACTION_SIMPLE_SHOT= 1,  WP_ACTION_VIDEO_START= 2,  WP_ACTION_VIDEO_STOP= 3,
