@@ -153,7 +153,8 @@ void gpsPosCallback(const sensor_msgs::NavSatFix::ConstPtr& msg)
   gps_pos = *msg;
 }
 
-bool runWaypointMission(std::vector<sensor_msgs::NavSatFix> gpsList, std_msgs::Float64MultiArray yawList,std_msgs::Float64MultiArray gimbalPitchList, int responseTimeout){
+bool runWaypointMission(std::vector<sensor_msgs::NavSatFix> gpsList, std_msgs::Float64MultiArray yawList,std_msgs::Float64MultiArray gimbalPitchList,
+                        std_msgs::Float64MultiArray acommandList,std_msgs::Float64MultiArray acommandParameter, int responseTimeout){
   ros::spinOnce();
 
   // Waypoint Mission : Initialization
@@ -165,7 +166,7 @@ bool runWaypointMission(std::vector<sensor_msgs::NavSatFix> gpsList, std_msgs::F
   ROS_INFO("Creating Waypoints..\n");
 
   std::vector<WayPointSettings> generatedWaypts =
-  createWaypoints(gpsList,yawList,gimbalPitchList, start_alt);
+  createWaypoints(gpsList,yawList,gimbalPitchList, acommandList, acommandParameter, start_alt);
 
   // Waypoint Mission: Upload the waypoints
   ROS_INFO("Uploading Waypoints..\n");
@@ -244,6 +245,7 @@ void setWaypointInitDefaults(dji_osdk_ros::MissionWaypointTask& waypointTask)
 
 std::vector<WayPointSettings>
 createWaypoints(std::vector<sensor_msgs::NavSatFix> gpsList, std_msgs::Float64MultiArray yawList, std_msgs::Float64MultiArray gimbalPitchList,
+                std_msgs::Float64MultiArray acommandList, std_msgs::Float64MultiArray acommandParameter,
                 float32_t start_alt)
 {
   // Create Start Waypoint
@@ -345,7 +347,7 @@ void uploadWaypoints(std::vector<DJI::OSDK::WayPointSettings>& wp_list,
     // waypoint.waypoint_action.command_parameter[0] = wp->commandParameter[0];
     // waypoint.waypoint_action.command_list[1] = wp->commandList[1];
     // waypoint.waypoint_action.command_parameter[1] = wp->commandParameter[1];
-    for (j=0; j<wp->actionNumber; j++){
+    for (int j=0; j<wp->actionNumber; j++){
       waypoint.waypoint_action.command_list[j] = wp->commandList[j];
       waypoint.waypoint_action.command_parameter[j] = wp->commandParameter[j];
     }
@@ -428,7 +430,7 @@ bool config_mission(aerialcore_common::ConfigMission::Request  &req,
   std_msgs::Float64MultiArray acommandList = req.commandList;
   std_msgs::Float64MultiArray acommandParameter = req.commandParameter;
 
-  res.success = runWaypointMission(gps_list, yaw_list,gimbal_pitch_list, 1);
+  res.success = runWaypointMission(gps_list, yaw_list,gimbal_pitch_list,acommandList,acommandParameter, 1);
   return true;
 }
 
