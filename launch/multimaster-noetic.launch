@@ -1,9 +1,9 @@
 <launch>
   <node name="master_discovery" pkg="fkie_master_discovery" type="master_discovery">
     <rosparam param="robot_hosts">[ubuntu18-Lenovo,grvc-Lenovo-15IKB,ubuntugrvc-Lenovo-ideapad-330-15ICH
-]</rosparam>
+,grvc-Lenovo-15IKB]</rosparam>
     <rosparam param="static_hosts">[ubuntu18-Lenovo,grvc-Lenovo-15IKB,ubuntugrvc-Lenovo-ideapad-330-15ICH
-]</rosparam>
+,grvc-Lenovo-15IKB]</rosparam>
     <rosparam param="send_mcast">False</rosparam>
     <rosparam param="listen_mcast">False</rosparam>
   </node>
