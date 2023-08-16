@@ -75,6 +75,7 @@ bool dont_more_missionwaypoints = true;
 std_msgs::Bool command_mission_msg ;
 std_msgs::Bool upload_mission_msg;
 std::vector<sensor_msgs::NavSatFix> wpList;
+dji_osdk_ros::MissionWaypointTask current_waypoint_task;
 
 void StartRosbag()
 {
@@ -131,6 +132,7 @@ int wpReachedCB(const sensor_msgs::NavSatFix::ConstPtr& msg)
   int index = 0;
   double min_dist = 1.0; // min distance in meters
   sensor_msgs::NavSatFix current_pos;
+  
 
   current_pos = *msg;
   for (int i = 0; i < wpList.size(); i++)
@@ -140,9 +142,17 @@ int wpReachedCB(const sensor_msgs::NavSatFix::ConstPtr& msg)
     {
       min_dist = dist;
       index = i;
-      ROS_INFO("Waypoint [%d] reached", index);
+      //ROS_INFO("Waypoint [%d] reached", index); // only for debug, works
+      // update the current waypoint task deleting the reached waypoint
+      current_waypoint_task.mission_waypoint.erase(index);
+      
+
     }
   }
+  // we publish both the index and the current waypoint task
+  waypoint_reached_pub.publish(index);
+  waypoint_task_pub.publish(current_waypoint_task);
+
   
   return index;
 
@@ -174,6 +184,7 @@ bool runWaypointMission(std::vector<sensor_msgs::NavSatFix> gpsList, std_msgs::F
 
   // Waypoint Mission: Init mission
   ROS_INFO("Initializing Waypoint Mission..\n");
+  current_waypoint_task=waypointTask; // for the wp reached callback, if does not work define waypointTask as global
   if (initWaypointMission(waypointTask).result)
   {
     ROS_INFO("Waypoint upload command sent successfully");
@@ -558,7 +569,10 @@ int main(int argc, char** argv)
 
   //waypoint reached function
   ros::Subscriber waypoint_reached_sub = nh.subscribe<sensor_msgs::NavSatFix>("dji_osdk_ros/gps_position", 10, &wpReachedCB);
-  
+
+  ros::Publisher waypoint_reached_pub = nh.advertise<std_msgs::UInt8>("dji_sm/wp_reached", 10); // just the index
+  ros::Publisher waypoint_list_pub = nh.advertise<dji_osdk_ros::MissionWaypointTask>("dji_sm/wp_list", 10); // Current waypoint table, update on changes
+
   ros::spin();
 
   return 0;
