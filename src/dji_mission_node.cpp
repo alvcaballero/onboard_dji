@@ -127,7 +127,7 @@ double haversine(double lat1, double lon1, double lat2, double lon2)
 }
 
 // Function to detect in what waypoint the drone is
-int wpReachedCB(const sensor_msgs::NavSatFix::ConstPtr& msg)
+/*int wpReachedCB(const sensor_msgs::NavSatFix::ConstPtr& msg)
 {
   int index = 0;
   double min_dist = 1.0; // min distance in meters
@@ -156,7 +156,7 @@ int wpReachedCB(const sensor_msgs::NavSatFix::ConstPtr& msg)
   
   return index;
 
-}
+}*/
 
 void gpsPosCallback(const sensor_msgs::NavSatFix::ConstPtr& msg)
 {
@@ -568,10 +568,10 @@ int main(int argc, char** argv)
   command_mission_pub = nh.advertise<std_msgs::Bool>("dji_sm/command_mission", 1);
 
   //waypoint reached function
-  ros::Subscriber waypoint_reached_sub = nh.subscribe<sensor_msgs::NavSatFix>("dji_osdk_ros/gps_position", 10, &wpReachedCB);
+  //ros::Subscriber waypoint_reached_sub = nh.subscribe<sensor_msgs::NavSatFix>("dji_osdk_ros/gps_position", 10, &wpReachedCB);
 
-  ros::Publisher waypoint_reached_pub = nh.advertise<std_msgs::UInt8>("dji_sm/wp_reached", 10); // just the index
-  ros::Publisher waypoint_list_pub = nh.advertise<dji_osdk_ros::MissionWaypointTask>("dji_sm/wp_list", 10); // Current waypoint table, update on changes
+  //ros::Publisher waypoint_reached_pub = nh.advertise<std_msgs::UInt8>("dji_sm/wp_reached", 10); // just the index
+  //ros::Publisher waypoint_list_pub = nh.advertise<dji_osdk_ros::MissionWaypointTask>("dji_sm/wp_list", 10); // Current waypoint table, update on changes
 
   ros::spin();
 

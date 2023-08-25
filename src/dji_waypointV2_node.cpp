@@ -37,14 +37,15 @@
 // Our changes goes from here:
 //Global Variables:
 std::vector<sensor_msgs::NavSatFix> gpsList_global;
-
+ros::NodeHandle nodehandler;
 
 // Configuration of the mission obtained from the .YAML file
 bool config_mission(aerialcore_common::ConfigMission::Request  &req,
          aerialcore_common::ConfigMission::Response &res){
   ROS_WARN("Received mission");
+  
   gpsList_global = req.waypoint; // TEST: First thing to test
-  wpList = req.waypoint;
+  /*wpList = req.waypoint;
   std_msgs::Float64MultiArray yaw_list = req.yaw;  //TEST
   std_msgs::Float64MultiArray gimbal_pitch_list = req.gimbalPitch; //TEST:  to include gimbal pitch
   velocity_range = req.maxVel;
@@ -55,14 +56,14 @@ bool config_mission(aerialcore_common::ConfigMission::Request  &req,
   finish_action = req.finishAction;
   ROS_WARN("Finish action: %d",finish_action);
   ROS_WARN("Gimbal Pitch Mode: %d",gimbal_pitch_mode);
-
+*/
   // actions functionality
   std_msgs::Float64MultiArray acommandList = req.commandList;
   std_msgs::Float64MultiArray acommandParameter = req.commandParameter;
-
+  	
 
   // if everything goes right we run the whole thing
-  res.success = runWaypointV2Mission(nh);
+  res.success = runWaypointV2Mission(nodehandler);
   return true;
 }
 
@@ -84,8 +85,8 @@ std::vector<dji_osdk_ros::WaypointV2> createWaypoints(ros::NodeHandle &nh,std::v
   for (int i = 0; i < gpsList.size(); i++) {
     
     setWaypointV2Defaults(waypointV2);
-    waypointV2.latitude       = gpsList[i].latitude* C_PI / 180.0;
-    waypointV2.longitude      = gpsList[i]* C_PI / 180.0;
+    waypointV2.latitude       = gpsList[i].latitude * C_PI / 180.0;
+    waypointV2.longitude      = gpsList[i].longitude * C_PI / 180.0;
     waypointV2.relativeHeight = gpsList[i].altitude;
     waypointList.push_back(waypointV2);
   }
@@ -502,7 +503,7 @@ int main(int argc, char** argv)
 {
   ros::init(argc, argv, "waypointV2_node");
   ros::NodeHandle nh;
-
+  nodehandler = nh;
   ros::Subscriber gpsPositionSub = nh.subscribe("dji_osdk_ros/gps_position", 10, &gpsPositionSubCallback);
   auto obtain_ctrl_authority_client = nh.serviceClient<dji_osdk_ros::ObtainControlAuthority>(
     "obtain_release_control_authority");
@@ -514,8 +515,8 @@ int main(int argc, char** argv)
 
   // Our changes goes from here:
   ros::ServiceServer service_config_mission = nh.advertiseService("dji_control/configure_mission", config_mission);
-  ros::ServiceServer service_run_mission = nh.advertiseService("dji_control/start_mission", run_mission);
-  ros::ServiceServer service_send_bags = nh.advertiseService("dji_control/send_bags", sendFiles);
+  //ros::ServiceServer service_run_mission = nh.advertiseService("dji_control/start_mission", run_mission);
+  //ros::ServiceServer service_send_bags = nh.advertiseService("dji_control/send_bags", sendFiles);
 
   ros::Duration(1).sleep();
   ros::AsyncSpinner spinner(1);
