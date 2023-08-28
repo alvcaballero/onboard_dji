@@ -37,6 +37,8 @@
 // Our changes goes from here:
 //Global Variables:
 std::vector<sensor_msgs::NavSatFix> gpsList_global;
+std_msgs::Float64MultiArray yaw_list_global;
+int yaw_mode_global;
 
 // Configuration of the mission obtained from the .YAML file
 bool config_mission(aerialcore_common::ConfigMission::Request  &req,
@@ -46,13 +48,14 @@ bool config_mission(aerialcore_common::ConfigMission::Request  &req,
   ros::NodeHandle nodehandler;
 
   
-  gpsList_global = req.waypoint; // TEST: First thing to test
-  /*wpList = req.waypoint;
-  std_msgs::Float64MultiArray yaw_list = req.yaw;  //TEST
+  gpsList_global = req.waypoint; // WORKS
+  yaw_list_global = req.yaw; // TEST: Second thing to test
+  yaw_mode_global = req.yawMode;
+  /*
   std_msgs::Float64MultiArray gimbal_pitch_list = req.gimbalPitch; //TEST:  to include gimbal pitch
   velocity_range = req.maxVel;
   idle_velocity = req.idleVel;
-  yaw_mode = req.yawMode;
+  
   trace_mode = req.traceMode;
   gimbal_pitch_mode = req.gimbalPitchMode; // See if it's needed
   finish_action = req.finishAction;
@@ -90,8 +93,18 @@ std::vector<dji_osdk_ros::WaypointV2> createWaypoints(ros::NodeHandle &nh,std::v
     waypointV2.latitude       = gpsList[i].latitude * C_PI / 180.0;
     waypointV2.longitude      = gpsList[i].longitude * C_PI / 180.0;
     waypointV2.relativeHeight = gpsList[i].altitude;
+    
+    
+    // Heading management
+    waypointV2.heading = yaw_list_global.data[i];
+    if (wp.yaw < yawList.data[i+1] && wp.index <= gpsList.size())
+      waypointV2.turnMode           = 0; // depends on the yaw
+    else{
+      waypointV2.turnMode           = 1;
+    }
     waypointList.push_back(waypointV2);
-    ROS_INFO("Waypoint created at (LLA): %f \t%f \t%f ", waypointV2.latitude, waypointV2.longitude, waypointV2.relativeHeight);
+    ROS_INFO("Waypoint created at (LLA): %f \t%f \t%f ", waypointV2.latitude, waypointV2.longitude, waypointV2.relativeHeight); // add more info when advances come
+
   }
   waypointList.push_back(startPoint); // starts and end at the same point
 
@@ -153,7 +166,7 @@ void waypointV2MissionStateSubCallback(const dji_osdk_ros::WaypointV2MissionStat
 void setWaypointV2Defaults(dji_osdk_ros::WaypointV2& waypointV2)
 {
   waypointV2.waypointType = dji_osdk_ros::DJIWaypointV2FlightPathModeGoToPointInAStraightLineAndStop;
-  waypointV2.headingMode = dji_osdk_ros::DJIWaypointV2HeadingModeAuto;
+  waypointV2.headingMode = dji_osdk_ros::DJIWaypointV2HeadingWaypointCustom;//DJIWaypointV2HeadingModeAuto; // TBD: Change it acording to user needs
   waypointV2.config.useLocalCruiseVel = 0;
   waypointV2.config.useLocalMaxVel = 0;
 
