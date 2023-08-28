@@ -37,12 +37,14 @@
 // Our changes goes from here:
 //Global Variables:
 std::vector<sensor_msgs::NavSatFix> gpsList_global;
-ros::NodeHandle nodehandler;
 
 // Configuration of the mission obtained from the .YAML file
 bool config_mission(aerialcore_common::ConfigMission::Request  &req,
          aerialcore_common::ConfigMission::Response &res){
   ROS_WARN("Received mission");
+
+  ros::NodeHandle nodehandler;
+
   
   gpsList_global = req.waypoint; // TEST: First thing to test
   /*wpList = req.waypoint;
@@ -89,6 +91,7 @@ std::vector<dji_osdk_ros::WaypointV2> createWaypoints(ros::NodeHandle &nh,std::v
     waypointV2.longitude      = gpsList[i].longitude * C_PI / 180.0;
     waypointV2.relativeHeight = gpsList[i].altitude;
     waypointList.push_back(waypointV2);
+    ROS_INFO("Waypoint created at (LLA): %f \t%f \t%f ", waypointV2.latitude, waypointV2.longitude, waypointV2.altitude);
   }
   waypointList.push_back(startPoint); // starts and end at the same point
 
@@ -457,12 +460,12 @@ bool runWaypointV2Mission(ros::NodeHandle &nh)
   }
   sleep(timeout);
 
-  /*! start mission */
+  /*! start mission 
   result = startWaypointV2Mission(nh);
   if(!result)
   {
     return false;
-  }
+  }*/
   /*sleep(20);
 
   /*! set global cruise speed /
@@ -503,7 +506,7 @@ int main(int argc, char** argv)
 {
   ros::init(argc, argv, "waypointV2_node");
   ros::NodeHandle nh;
-  nodehandler = nh;
+  //nodehandler = nh;
   ros::Subscriber gpsPositionSub = nh.subscribe("dji_osdk_ros/gps_position", 10, &gpsPositionSubCallback);
   auto obtain_ctrl_authority_client = nh.serviceClient<dji_osdk_ros::ObtainControlAuthority>(
     "obtain_release_control_authority");
