@@ -91,7 +91,7 @@ std::vector<dji_osdk_ros::WaypointV2> createWaypoints(ros::NodeHandle &nh,std::v
     waypointV2.longitude      = gpsList[i].longitude * C_PI / 180.0;
     waypointV2.relativeHeight = gpsList[i].altitude;
     waypointList.push_back(waypointV2);
-    ROS_INFO("Waypoint created at (LLA): %f \t%f \t%f ", waypointV2.latitude, waypointV2.longitude, waypointV2.altitude);
+    ROS_INFO("Waypoint created at (LLA): %f \t%f \t%f ", waypointV2.latitude, waypointV2.longitude, waypointV2.relativeHeight);
   }
   waypointList.push_back(startPoint); // starts and end at the same point
 
