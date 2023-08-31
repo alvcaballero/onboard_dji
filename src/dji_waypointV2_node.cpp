@@ -280,8 +280,8 @@ bool initWaypointV2Setting(ros::NodeHandle &nh)
     initWaypointV2Setting_.request.actionNum = gpsList_global.size();//TBD: Change it acording to the number of actions given by the user
 
     /*! Generate actions*/
-    //generateWaypointV2Actions(nh, initWaypointV2Setting_.request.actionNum);
-    generateGimbalActions(nh, initWaypointV2Setting_.request.actionNum);
+    generateWaypointV2Actions(nh, initWaypointV2Setting_.request.actionNum);
+    //generateGimbalActions(nh, initWaypointV2Setting_.request.actionNum);
     //generateHeadingV2Actions(nh, initWaypointV2Setting_.request.actionNum);
 
     // Configure General Init Settings
