@@ -120,7 +120,7 @@ bool generateGimbalActions(ros::NodeHandle &nh, uint16_t actionNum)
     dji_osdk_ros::WaypointV2Action actionVector;
     for (uint16_t i = 0; i < actionNum; i++)
     {
-      actionVector.actionId  = 2*i + 1; // to be different than the camera actions 
+      actionVector.actionId  = i; // to be different than the camera actions 
       actionVector.waypointV2ActionTriggerType  = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionTriggerTypeSampleReachPoint; // Good for now
       actionVector.waypointV2SampleReachPointTrigger.waypointIndex = i;
       actionVector.waypointV2SampleReachPointTrigger.terminateNum = 0;
@@ -156,7 +156,7 @@ bool generateHeadingV2Actions(ros::NodeHandle &nh, uint16_t actionNum)
     dji_osdk_ros::WaypointV2Action actionVector;
     for (uint16_t i = 0; i < actionNum; i++)
     {
-      actionVector.actionId  = i*3 + 1;
+      actionVector.actionId  = i;
       actionVector.waypointV2ActionTriggerType  = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionTriggerTypeSampleReachPoint;
       actionVector.waypointV2SampleReachPointTrigger.waypointIndex = i;
       actionVector.waypointV2SampleReachPointTrigger.terminateNum = 0;
@@ -280,9 +280,9 @@ bool initWaypointV2Setting(ros::NodeHandle &nh)
     initWaypointV2Setting_.request.actionNum = gpsList_global.size();//TBD: Change it acording to the number of actions given by the user
 
     /*! Generate actions*/
-    generateWaypointV2Actions(nh, initWaypointV2Setting_.request.actionNum);
+    //generateWaypointV2Actions(nh, initWaypointV2Setting_.request.actionNum);
     generateGimbalActions(nh, initWaypointV2Setting_.request.actionNum);
-    generateHeadingV2Actions(nh, initWaypointV2Setting_.request.actionNum);
+    //generateHeadingV2Actions(nh, initWaypointV2Setting_.request.actionNum);
 
     // Configure General Init Settings
     initWaypointV2Setting_.request.waypointV2InitSettings.repeatTimes = 1;
