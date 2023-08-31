@@ -118,9 +118,9 @@ bool generateGimbalActions(ros::NodeHandle &nh, uint16_t actionNum)
 {
     waypointV2_generate_actions_client = nh.serviceClient<dji_osdk_ros::GenerateWaypointV2Action>("dji_osdk_ros/waypointV2_generateActions");
     dji_osdk_ros::WaypointV2Action actionVector;
-    for (uint16_t i = 0; i < actionNum; i++)
+    for (uint16_t i = 0; i <= actionNum; i++)
     {
-      actionVector.actionId  = i; // to be different than the camera actions 
+      actionVector.actionId  = i + actionNum + 1; // to be different than the camera actions 
       actionVector.waypointV2ActionTriggerType  = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionTriggerTypeSampleReachPoint; // Good for now
       actionVector.waypointV2SampleReachPointTrigger.waypointIndex = i+1;
       actionVector.waypointV2SampleReachPointTrigger.terminateNum = 0;
@@ -161,9 +161,9 @@ bool generateHeadingV2Actions(ros::NodeHandle &nh, uint16_t actionNum)
 {
     waypointV2_generate_actions_client = nh.serviceClient<dji_osdk_ros::GenerateWaypointV2Action>("dji_osdk_ros/waypointV2_generateActions");
     dji_osdk_ros::WaypointV2Action actionVector;
-    for (uint16_t i = 0; i < actionNum; i++)
+    for (uint16_t i = 0; i <= actionNum; i++)
     {
-      actionVector.actionId  = i;
+      actionVector.actionId  = i+actionNum*2+1;
       actionVector.waypointV2ActionTriggerType  = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionTriggerTypeSampleReachPoint;
       actionVector.waypointV2SampleReachPointTrigger.waypointIndex = i+1;
       actionVector.waypointV2SampleReachPointTrigger.terminateNum = 0;
@@ -172,7 +172,7 @@ bool generateHeadingV2Actions(ros::NodeHandle &nh, uint16_t actionNum)
       actionVector.waypointV2AircraftControlActuator.actuatorIndex = 0;
       actionVector.waypointV2AircraftControlActuator.DJIWaypointV2ActionActuatorAircraftControlOperationType = dji_osdk_ros::WaypointV2AircraftControlActuator::DJIWaypointV2ActionActuatorAircraftControlOperationTypeRotateYaw;
       actionVector.waypointV2AircraftControlActuator.waypointV2AircraftControlActuatorRotateHeading.isRelative = 0;
-      actionVector.waypointV2AircraftControlActuator.waypointV2AircraftControlActuatorRotateHeading.yaw = yaw_list_global.data[i]; // TEST
+      actionVector.waypointV2AircraftControlActuator.waypointV2AircraftControlActuatorRotateHeading.yaw = yaw_list_global.data[i]; // works with manual mode
 
       generateWaypointV2Action_.request.actions.push_back(actionVector);
     }
@@ -287,8 +287,8 @@ bool initWaypointV2Setting(ros::NodeHandle &nh)
     initWaypointV2Setting_.request.actionNum = gpsList_global.size();//TBD: Change it acording to the number of actions given by the user
 
     /*! Generate actions*/
-    //generateWaypointV2Actions(nh, initWaypointV2Setting_.request.actionNum);
-    //generateGimbalActions(nh, initWaypointV2Setting_.request.actionNum);
+    generateWaypointV2Actions(nh, initWaypointV2Setting_.request.actionNum);
+    generateGimbalActions(nh, initWaypointV2Setting_.request.actionNum);
     generateHeadingV2Actions(nh, initWaypointV2Setting_.request.actionNum);
 
     // Configure General Init Settings
