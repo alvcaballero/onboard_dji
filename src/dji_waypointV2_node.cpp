@@ -125,20 +125,27 @@ bool generateGimbalActions(ros::NodeHandle &nh, uint16_t actionNum)
       actionVector.waypointV2SampleReachPointTrigger.waypointIndex = i;
       actionVector.waypointV2SampleReachPointTrigger.terminateNum = 0;
       actionVector.waypointV2ACtionActuatorType = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionActuatorTypeGimbal;
-      actionVector.waypointV2GimbalActuator.actuatorIndex = 0;
+      
       // We are gonna rotate the gimbal somehow so we need to set this operation type
       actionVector.waypointV2GimbalActuator.DJIWaypointV2ActionActuatorGimbalOperationType = dji_osdk_ros::WaypointV2GimbalActuator::DJIWaypointV2ActionActuatorGimbalOperationTypeRotateGimbal;
+      actionVector.waypointV2GimbalActuator.actuatorIndex = 0;
       // Gimbal Parameters
       // Gimbal roll angle
       actionVector.waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.x = 0; 
       // Gimbal pitch angle
-      actionVector.waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.y = -i*10; // TBD: Change it acording to user needs -> gimbal_pitch_list_global.data[i];
+      actionVector.waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.y = gimbal_pitch_list_global.data[i]; // TBD: Change it acording to user needs -> gimbal_pitch_list_global.data[i];
       // Gimbal yaw angle
-      actionVector.waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.z = 0;
+      actionVector.waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.z = yaw_list_global.data[i]; 
 
       // Gimbal Control mode
       actionVector.waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.ctrl_mode = 0; // 0: absolute angle, 1: relative angle
 
+      actionVector.waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.rollCmdIgnore = 0;
+      actionVector.waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.pitchCmdIgnore = 0;
+      actionVector.waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.yawCmdIgnore = 0;
+
+      actionVector.waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.absYawModeRef = 1; //0: relative to the aircraft, 1: relative to North
+   
       // Gimbal Control speed
       actionVector.waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.duationTime = 0.2; // rotate time
 
@@ -228,7 +235,7 @@ void waypointV2MissionStateSubCallback(const dji_osdk_ros::WaypointV2MissionStat
 void setWaypointV2Defaults(dji_osdk_ros::WaypointV2& waypointV2)
 {
   waypointV2.waypointType = dji_osdk_ros::DJIWaypointV2FlightPathModeGoToPointInAStraightLineAndStop;
-  waypointV2.headingMode = dji_osdk_ros::DJIWaypointV2HeadingModeAuto;//DJIWaypointV2HeadingWaypointCustom;//DJIWaypointV2HeadingModeAuto; // TBD: Change it acording to user needs
+  waypointV2.headingMode = dji_osdk_ros::DJIWaypointV2HeadingGimbalYawFollow;//DJIWaypointV2HeadingWaypointCustom;//DJIWaypointV2HeadingModeAuto; // TBD: Change it acording to user needs
   waypointV2.config.useLocalCruiseVel = 0;
   waypointV2.config.useLocalMaxVel = 0;
 
@@ -280,8 +287,8 @@ bool initWaypointV2Setting(ros::NodeHandle &nh)
     initWaypointV2Setting_.request.actionNum = gpsList_global.size();//TBD: Change it acording to the number of actions given by the user
 
     /*! Generate actions*/
-    generateWaypointV2Actions(nh, initWaypointV2Setting_.request.actionNum);
-    //generateGimbalActions(nh, initWaypointV2Setting_.request.actionNum);
+    //generateWaypointV2Actions(nh, initWaypointV2Setting_.request.actionNum);
+    generateGimbalActions(nh, initWaypointV2Setting_.request.actionNum);
     //generateHeadingV2Actions(nh, initWaypointV2Setting_.request.actionNum);
 
     // Configure General Init Settings
