@@ -99,7 +99,7 @@ std::vector<dji_osdk_ros::WaypointV2> createWaypoints(ros::NodeHandle &nh,std::v
     
     // Heading management
     //waypointV2.heading = yaw_list_global.data[i];
-    if (wp.yaw < yawList.data[i+1] && wp.index <= gpsList.size())
+    if (yaw_list_global.data[i]< yaw_list_global.data[i+1] && i <= gpsList.size())
       waypointV2.turnMode           = 0; // depends on the yaw
     else{
       waypointV2.turnMode           = 1;
@@ -130,17 +130,17 @@ bool generateGimbalActions(ros::NodeHandle &nh, uint16_t actionNum)
       actionVector.waypointV2GimbalActuator.DJIWaypointV2ActionActuatorGimbalOperationType = dji_osdk_ros::WaypointV2GimbalActuator::DJIWaypointV2ActionActuatorGimbalOperationTypeRotateGimbal;
       // Gimbal Parameters
       // Gimbal roll angle
-      actionVector.waypointV2GimbalActuator.WaypointV2GimbalActuatorRotationParam.x = 0; 
+      actionVector.waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.x = 0; 
       // Gimbal pitch angle
-      actionVector.waypointV2GimbalActuator.WaypointV2GimbalActuatorRotationParam.y = -i*10; // TBD: Change it acording to user needs -> gimbal_pitch_list_global.data[i];
+      actionVector.waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.y = -i*10; // TBD: Change it acording to user needs -> gimbal_pitch_list_global.data[i];
       // Gimbal yaw angle
-      actionVector.waypointV2GimbalActuator.WaypointV2GimbalActuatorRotationParam.z = 0;
+      actionVector.waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.z = 0;
 
       // Gimbal Control mode
-      actionVector.waypointV2GimbalActuator.WaypointV2GimbalActuatorRotationParam.ctrl_mode = 0; // 0: absolute angle, 1: relative angle
+      actionVector.waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.ctrl_mode = 0; // 0: absolute angle, 1: relative angle
 
       // Gimbal Control speed
-      actionVector.waypointV2GimbalActuator.WaypointV2GimbalActuatorRotationParam.duationTime = 0.2; // rotate time
+      actionVector.waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.duationTime = 0.2; // rotate time
 
       generateWaypointV2Action_.request.actions.push_back(actionVector);
     }
