@@ -147,7 +147,7 @@ bool generateGimbalActions(ros::NodeHandle &nh, uint16_t actionNum)
       actionVector.waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.absYawModeRef = 1; //0: relative to the aircraft, 1: relative to North
    
       // Gimbal Control speed
-      actionVector.waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.duationTime = 0.2; // rotate time
+      actionVector.waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.duationTime = 5; // rotate time
 
       generateWaypointV2Action_.request.actions.push_back(actionVector);
     }
