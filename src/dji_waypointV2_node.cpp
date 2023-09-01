@@ -128,10 +128,10 @@ bool generateWaypointV2AllActions(ros::NodeHandle &nh, uint16_t actionNum)
     actionVector.waypointV2CameraActuator.DJIWaypointV2ActionActuatorCameraOperationType = dji_osdk_ros::WaypointV2CameraActuator::DJIWaypointV2ActionActuatorCameraOperationTypeStartRecordVideo;
     generateWaypointV2Action_.request.actions.push_back(actionVector);
 
-    for (uint16_t i = 0; i <= actionNum; i++)
+    for (uint16_t i = 1; i <= actionNum; i++)
     {
       // If it is not the first wp, we start doing photos
-      actionVector.actionId  = i;
+      /*actionVector.actionId  = i;
       actionVector.waypointV2ActionTriggerType  = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionTriggerTypeSampleReachPoint;
       actionVector.waypointV2SampleReachPointTrigger.waypointIndex = i;
       actionVector.waypointV2SampleReachPointTrigger.terminateNum = 0;
@@ -139,13 +139,15 @@ bool generateWaypointV2AllActions(ros::NodeHandle &nh, uint16_t actionNum)
       actionVector.waypointV2CameraActuator.actuatorIndex = 0;
       actionVector.waypointV2CameraActuator.DJIWaypointV2ActionActuatorCameraOperationType = dji_osdk_ros::WaypointV2CameraActuator::DJIWaypointV2ActionActuatorCameraOperationTypeTakePhoto;
       generateWaypointV2Action_.request.actions.push_back(actionVector);
-      
+      */
       // Gimbal control, we need to use different IDs for the actions obviously
-      actionVector.actionId  = i + actionNum + 1;
+      actionVector.actionId  = i ;//+ actionNum + 1;
       actionVector.waypointV2ActionTriggerType  = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionTriggerTypeSampleReachPoint; // Good for now
       actionVector.waypointV2SampleReachPointTrigger.waypointIndex = i;
       actionVector.waypointV2SampleReachPointTrigger.terminateNum = 0;
       actionVector.waypointV2ACtionActuatorType = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionActuatorTypeGimbal;
+      ROS_INFO("Gimbal action created with ID: %d at wp: %d ", actionVector.actionId, actionVector.waypointV2SampleReachPointTrigger.waypointIndex); // add more info when advances come
+
       
       // We are gonna rotate the gimbal somehow so we need to set this operation type
       actionVector.waypointV2GimbalActuator.DJIWaypointV2ActionActuatorGimbalOperationType = dji_osdk_ros::WaypointV2GimbalActuator::DJIWaypointV2ActionActuatorGimbalOperationTypeRotateGimbal;
@@ -156,7 +158,7 @@ bool generateWaypointV2AllActions(ros::NodeHandle &nh, uint16_t actionNum)
       // Gimbal pitch angle
       actionVector.waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.y = 10*gimbal_pitch_list_global.data[i]; // TBD: Change it acording to user needs -> gimbal_pitch_list_global.data[i];
       // Gimbal yaw angle
-      actionVector.waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.z = 10*yaw_list_global.data[i]; 
+      actionVector.waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.z = 0;//10*yaw_list_global.data[i]; 
 
       // Gimbal Control mode
       actionVector.waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.ctrl_mode = 0; // 0: absolute angle, 1: relative angle
@@ -174,7 +176,7 @@ bool generateWaypointV2AllActions(ros::NodeHandle &nh, uint16_t actionNum)
 
 
       // Heading control
-      actionVector.actionId  = i + actionNum*2 + 1;
+      actionVector.actionId  = i + actionNum + 1;//*2 + 1;
       actionVector.waypointV2ActionTriggerType  = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionTriggerTypeSampleReachPoint;
       actionVector.waypointV2SampleReachPointTrigger.waypointIndex = i;
       actionVector.waypointV2SampleReachPointTrigger.terminateNum = 0;
@@ -185,12 +187,14 @@ bool generateWaypointV2AllActions(ros::NodeHandle &nh, uint16_t actionNum)
       actionVector.waypointV2AircraftControlActuator.waypointV2AircraftControlActuatorRotateHeading.isRelative = 0;
       actionVector.waypointV2AircraftControlActuator.waypointV2AircraftControlActuatorRotateHeading.yaw = yaw_list_global.data[i]; // works with manual mode
 
+      ROS_INFO("Heading action created with ID: %d at wp: %d ", actionVector.actionId, actionVector.waypointV2SampleReachPointTrigger.waypointIndex); // add more info when advances come
+
       generateWaypointV2Action_.request.actions.push_back(actionVector);
 
 
     }
     // Stop recording the video
-    actionVector.actionId  = actionNum*3+1;
+    actionVector.actionId  = actionNum*2+1;
     actionVector.waypointV2ActionTriggerType  = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionTriggerTypeSampleReachPoint;
     actionVector.waypointV2SampleReachPointTrigger.waypointIndex = actionNum;
     actionVector.waypointV2SampleReachPointTrigger.terminateNum = 0;
@@ -314,12 +318,12 @@ void waypointV2MissionStateSubCallback(const dji_osdk_ros::WaypointV2MissionStat
 {
   waypoint_V2_mission_state_push_ = *waypointV2MissionStatePush;
 
-  ROS_INFO("waypointV2MissionStateSubCallback");
+  /*ROS_INFO("waypointV2MissionStateSubCallback");
   ROS_INFO("missionStatePushAck->commonDataVersion:%d\n",waypoint_V2_mission_state_push_.commonDataVersion);
   ROS_INFO("missionStatePushAck->commonDataLen:%d\n",waypoint_V2_mission_state_push_.commonDataLen);
   ROS_INFO("missionStatePushAck->data.state:0x%x\n",waypoint_V2_mission_state_push_.state);
   ROS_INFO("missionStatePushAck->data.curWaypointIndex:%d\n",waypoint_V2_mission_state_push_.curWaypointIndex);
-  ROS_INFO("missionStatePushAck->data.velocity:%d\n",waypoint_V2_mission_state_push_.velocity);
+  ROS_INFO("missionStatePushAck->data.velocity:%d\n",waypoint_V2_mission_state_push_.velocity);*/
 }
 //TBD: Better understanding
 //TBD: modify this function with the parameters given by the user from the GCS
