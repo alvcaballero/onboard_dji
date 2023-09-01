@@ -121,7 +121,7 @@ bool generateWaypointV2AllActions(ros::NodeHandle &nh, uint16_t actionNum)
     // could be interesting testing if we can do photos at the same time
     actionVector.actionId  = 0;
     actionVector.waypointV2ActionTriggerType  = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionTriggerTypeSampleReachPoint;
-    actionVector.waypointV2SampleReachPointTrigger.waypointIndex = i;
+    actionVector.waypointV2SampleReachPointTrigger.waypointIndex = 0;
     actionVector.waypointV2SampleReachPointTrigger.terminateNum = 0;
     actionVector.waypointV2ACtionActuatorType = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionActuatorTypeCamera;
     actionVector.waypointV2CameraActuator.actuatorIndex = 0;
@@ -190,9 +190,9 @@ bool generateWaypointV2AllActions(ros::NodeHandle &nh, uint16_t actionNum)
 
     }
     // Stop recording the video
-    actionVector.actionId  = i+1;
+    actionVector.actionId  = actionNum*3+1;
     actionVector.waypointV2ActionTriggerType  = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionTriggerTypeSampleReachPoint;
-    actionVector.waypointV2SampleReachPointTrigger.waypointIndex = i;
+    actionVector.waypointV2SampleReachPointTrigger.waypointIndex = actionNum;
     actionVector.waypointV2SampleReachPointTrigger.terminateNum = 0;
     actionVector.waypointV2ACtionActuatorType = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionActuatorTypeCamera;
     actionVector.waypointV2CameraActuator.actuatorIndex = 0;
