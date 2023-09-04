@@ -250,7 +250,7 @@ bool generateWaypointV2AllActions_(ros::NodeHandle &nh, uint16_t actionNum)
       actionVector_gimbal.waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.absYawModeRef = 1; //0: relative to the aircraft, 1: relative to North
    
       // Gimbal Control speed
-      actionVector_gimbal.waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.duationTime = 10; // rotate time
+      actionVector_gimbal.waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.duationTime = 5; // rotate time
       id+=1;  
       ROS_INFO("Gimbal action created with ID: %d at wp: %d and angle %d", actionVector_gimbal.actionId, actionVector_gimbal.waypointV2SampleReachPointTrigger.waypointIndex, actionVector_gimbal.waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.y); // add more info when advances come
 
@@ -261,7 +261,7 @@ bool generateWaypointV2AllActions_(ros::NodeHandle &nh, uint16_t actionNum)
 
     }
 
-    for (uint16_t j = 1; j <= gpsList_global.size(); j++)
+   /* for (uint16_t j = 1; j <= gpsList_global.size(); j++)
     {
       // Heading control
       actionVector_heading.actionId  = id;//*2 + 1;
@@ -279,7 +279,7 @@ bool generateWaypointV2AllActions_(ros::NodeHandle &nh, uint16_t actionNum)
       id+=1;  
       generateWaypointV2Action_.request.actions.push_back(actionVector_heading);
 
-    }
+    }*/
     
     waypointV2_generate_actions_client.call(generateWaypointV2Action_);
 
