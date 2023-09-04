@@ -219,15 +219,38 @@ bool generateWaypointV2AllActions_(ros::NodeHandle &nh, uint16_t actionNum)
     dji_osdk_ros::WaypointV2Action actionVector_heading;
     int id=1;
     
+    for (uint16_t j = 1; j <= gpsList_global.size(); j++)
+    {
+      // Heading control
+      actionVector_heading.actionId  = id;//*2 + 1;
+      actionVector_gimbal.waypointV2ActionTriggerType  = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionTriggerTypeSampleReachPoint; // Good for now
+      actionVector_gimbal.waypointV2SampleReachPointTrigger.waypointIndex = i;
+      actionVector_gimbal.waypointV2SampleReachPointTrigger.terminateNum = 0;
+
+      actionVector_heading.waypointV2ACtionActuatorType = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionActuatorTypeAircraftControl;
+      // Config of the aircraft control (our case yaw angles)
+      actionVector_heading.waypointV2AircraftControlActuator.actuatorIndex = 0;
+      actionVector_heading.waypointV2AircraftControlActuator.DJIWaypointV2ActionActuatorAircraftControlOperationType = dji_osdk_ros::WaypointV2AircraftControlActuator::DJIWaypointV2ActionActuatorAircraftControlOperationTypeRotateYaw;
+      actionVector_heading.waypointV2AircraftControlActuator.waypointV2AircraftControlActuatorRotateHeading.isRelative = 0;
+      actionVector_heading.waypointV2AircraftControlActuator.waypointV2AircraftControlActuatorRotateHeading.yaw = yaw_list_global.data[j-1]; // works with manual mode
+
+      ROS_INFO("Heading action created with ID: %d at wp: %d and angle %d ", actionVector_heading.actionId, actionVector_heading.waypointV2SampleReachPointTrigger.waypointIndex, actionVector_heading.waypointV2AircraftControlActuator.waypointV2AircraftControlActuatorRotateHeading.yaw); // add more info when advances come
+      id+=1;  
+      generateWaypointV2Action_.request.actions.push_back(actionVector_heading);
+
+    }
     
     for (uint16_t i = 1; i <= gpsList_global.size(); i++)
     {
       
       // Gimbal control, we need to use different IDs for the actions obviously
       actionVector_gimbal.actionId  = id;//+ actionNum + 1;
-      actionVector_gimbal.waypointV2ActionTriggerType  = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionTriggerTypeSampleReachPoint; // Good for now
-      actionVector_gimbal.waypointV2SampleReachPointTrigger.waypointIndex = i;
-      actionVector_gimbal.waypointV2SampleReachPointTrigger.terminateNum = 0;
+
+      actionVector_heading.waypointV2ActionTriggerType  = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionTriggerTypeActionAssociated;
+      actionVector_heading.waypointV2AssociateTrigger.actionAssociatedType = dji_osdk_ros::WaypointV2AssociateTrigger::DJIWaypointV2TriggerAssociatedTimingTypeSimultaneously;
+      actionVector_heading.waypointV2AssociateTrigger.waitingTime = 0;
+      actionVector_heading.waypointV2AssociateTrigger.actionIdAssociated = j;
+
       actionVector_gimbal.waypointV2ACtionActuatorType = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionActuatorTypeGimbal;
       // We are gonna rotate the gimbal somehow so we need to set this operation type
       actionVector_gimbal.waypointV2GimbalActuator.DJIWaypointV2ActionActuatorGimbalOperationType = dji_osdk_ros::WaypointV2GimbalActuator::DJIWaypointV2ActionActuatorGimbalOperationTypeRotateGimbal;
@@ -260,26 +283,6 @@ bool generateWaypointV2AllActions_(ros::NodeHandle &nh, uint16_t actionNum)
       
 
     }
-
-   /* for (uint16_t j = 1; j <= gpsList_global.size(); j++)
-    {
-      // Heading control
-      actionVector_heading.actionId  = id;//*2 + 1;
-      actionVector_heading.waypointV2ActionTriggerType  = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionTriggerTypeSampleReachPoint;
-      actionVector_heading.waypointV2SampleReachPointTrigger.waypointIndex = j;
-      actionVector_heading.waypointV2SampleReachPointTrigger.terminateNum = 0;
-      actionVector_heading.waypointV2ACtionActuatorType = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionActuatorTypeAircraftControl;
-      // Config of the aircraft control (our case yaw angles)
-      actionVector_heading.waypointV2AircraftControlActuator.actuatorIndex = 0;
-      actionVector_heading.waypointV2AircraftControlActuator.DJIWaypointV2ActionActuatorAircraftControlOperationType = dji_osdk_ros::WaypointV2AircraftControlActuator::DJIWaypointV2ActionActuatorAircraftControlOperationTypeRotateYaw;
-      actionVector_heading.waypointV2AircraftControlActuator.waypointV2AircraftControlActuatorRotateHeading.isRelative = 0;
-      actionVector_heading.waypointV2AircraftControlActuator.waypointV2AircraftControlActuatorRotateHeading.yaw = yaw_list_global.data[j-1]; // works with manual mode
-
-      ROS_INFO("Heading action created with ID: %d at wp: %d and angle %d ", actionVector_heading.actionId, actionVector_heading.waypointV2SampleReachPointTrigger.waypointIndex, actionVector_heading.waypointV2AircraftControlActuator.waypointV2AircraftControlActuatorRotateHeading.yaw); // add more info when advances come
-      id+=1;  
-      generateWaypointV2Action_.request.actions.push_back(actionVector_heading);
-
-    }*/
     
     waypointV2_generate_actions_client.call(generateWaypointV2Action_);
 
