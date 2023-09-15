@@ -235,11 +235,11 @@ bool generateWaypointV2AllActions_(ros::NodeHandle &nh, uint16_t actionNum)
       action->waypointV2AircraftControlActuator.waypointV2AircraftControlActuatorRotateHeading.isRelative = 0;
       action->waypointV2AircraftControlActuator.waypointV2AircraftControlActuatorRotateHeading.yaw = yaw_list_global.data[j-1]; // works with manual mode
 
-      ROS_INFO("Heading action created with ID: %d at wp: %d and angle %d ", actionVector_heading.actionId, actionVector_heading.waypointV2SampleReachPointTrigger.waypointIndex, actionVector_heading.waypointV2AircraftControlActuator.waypointV2AircraftControlActuatorRotateHeading.yaw); // add more info when advances come
+      ROS_INFO("Heading action created with ID: %d at wp: %d and angle %d ", action->actionId, action->waypointV2SampleReachPointTrigger.waypointIndex, action->waypointV2AircraftControlActuator.waypointV2AircraftControlActuatorRotateHeading.yaw); // add more info when advances come
       id+=1;  
       generateWaypointV2Action_.request.actions.push_back(*action);
       delete action;
-      *action = new dji_osdk_ros::WaypointV2Action;
+      action = new dji_osdk_ros::WaypointV2Action;
 
     }
     
@@ -276,13 +276,13 @@ bool generateWaypointV2AllActions_(ros::NodeHandle &nh, uint16_t actionNum)
       action->waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.absYawModeRef = 1; //0: relative to the aircraft, 1: relative to North
    
       // Gimbal Control speed
-      action->waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.duationTime = 5; // rotate time
+      action->waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.duationTime = 50; // rotate time
       id+=1;  
-      ROS_INFO("Gimbal action created with ID: %d at wp: %d and angle %d", actionVector_gimbal.actionId, actionVector_gimbal.waypointV2AssociateTrigger.actionIdAssociated, actionVector_gimbal.waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.y); // add more info when advances come
+      ROS_INFO("Gimbal action created with ID: %d at wp: %d and angle %d", action->actionId, action->waypointV2AssociateTrigger.actionIdAssociated, action->waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.y); // add more info when advances come
 
       generateWaypointV2Action_.request.actions.push_back(*action);
       delete action;
-      *action = new dji_osdk_ros::WaypointV2Action;
+      action = new dji_osdk_ros::WaypointV2Action;
       
 
     }
