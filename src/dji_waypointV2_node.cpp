@@ -239,6 +239,7 @@ bool generateWaypointV2AllActions_(ros::NodeHandle &nh, uint16_t actionNum)
       id+=1;  
       generateWaypointV2Action_.request.actions.push_back(*action);
       delete action;
+      *action = new dji_osdk_ros::WaypointV2Action;
 
     }
     
@@ -281,7 +282,7 @@ bool generateWaypointV2AllActions_(ros::NodeHandle &nh, uint16_t actionNum)
 
       generateWaypointV2Action_.request.actions.push_back(*action);
       delete action;
-
+      *action = new dji_osdk_ros::WaypointV2Action;
       
 
     }
