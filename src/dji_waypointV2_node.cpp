@@ -250,8 +250,8 @@ bool generateWaypointV2AllActions_(ros::NodeHandle &nh, uint16_t actionNum)
       action->actionId  = id;//+ actionNum + 1;
 
       action->waypointV2ActionTriggerType  = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionTriggerTypeActionAssociated;
-      action->waypointV2AssociateTrigger.actionAssociatedType = dji_osdk_ros::WaypointV2AssociateTrigger::DJIWaypointV2TriggerAssociatedTimingTypeSimultaneously;
-      action->waypointV2AssociateTrigger.waitingTime = 1;
+      action->waypointV2AssociateTrigger.actionAssociatedType = dji_osdk_ros::WaypointV2AssociateTrigger::DJIWaypointV2TriggerAssociatedTimingTypeAfterFinised;
+      action->waypointV2AssociateTrigger.waitingTime = 0;
       action->waypointV2AssociateTrigger.actionIdAssociated = i-1;
 
       action->waypointV2ACtionActuatorType = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionActuatorTypeGimbal;
@@ -276,9 +276,9 @@ bool generateWaypointV2AllActions_(ros::NodeHandle &nh, uint16_t actionNum)
       action->waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.absYawModeRef = 1; //0: relative to the aircraft, 1: relative to North
    
       // Gimbal Control speed
-      action->waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.duationTime = 50; // rotate time
+      action->waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.duationTime = 20; // rotate time
       id+=1;  
-      ROS_INFO("Gimbal action created with ID: %d at wp: %d and angle %d", action->actionId, action->waypointV2AssociateTrigger.actionIdAssociated, action->waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.y); // add more info when advances come
+      ROS_INFO("Gimbal action created with ID: %d associated to action: %d and with angle %d", action->actionId, action->waypointV2AssociateTrigger.actionIdAssociated, action->waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.y); // add more info when advances come
 
       generateWaypointV2Action_.request.actions.push_back(*action);
       delete action;
