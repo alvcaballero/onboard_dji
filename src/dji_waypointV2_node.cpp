@@ -299,7 +299,7 @@ bool generateWaypointV2AllActionsKylie(ros::NodeHandle &nh, uint16_t actionNum)
     auto *action = new dji_osdk_ros::WaypointV2Action;
     int id=0;
     
-    for (uint16_t i = 1; j <= gpsList_global.size(); j++)
+    for (uint16_t i = 1; i <= gpsList_global.size(); i++)
     {
       // Heading control
       action->actionId  = id;//*2 + 1;
@@ -330,7 +330,7 @@ bool generateWaypointV2AllActionsKylie(ros::NodeHandle &nh, uint16_t actionNum)
       action->waypointV2AssociateTrigger.waitingTime = 0;
       action->waypointV2AssociateTrigger.actionIdAssociated = id-1;
 
-      action->waypointV2ACtionActuatorType = dji_osdk_ros::WaypointV2Action::waypointV2ACtionActuatorType;
+      
       action->waypointV2ACtionActuatorType = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionActuatorTypeGimbal;
       // We are gonna rotate the gimbal somehow so we need to set this operation type
 
