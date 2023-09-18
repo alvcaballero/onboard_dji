@@ -317,8 +317,8 @@ bool generateWaypointV2AllActionsKylie(ros::NodeHandle &nh, uint16_t actionNum)
       ROS_INFO("Heading action created with ID: %d at wp: %d and angle %d ", action->actionId, action->waypointV2SampleReachPointTrigger.waypointIndex, action->waypointV2AircraftControlActuator.waypointV2AircraftControlActuatorRotateHeading.yaw); // add more info when advances come
       id+=1;  
       generateWaypointV2Action_.request.actions.push_back(*action);
-      delete action->waypointV2ActionTriggerType;
-      delete action->waypointV2ACtionActuatorType;
+      //delete action->waypointV2ActionTriggerType;
+      //delete action->waypointV2ACtionActuatorType;
 
       delete action;
       action = new dji_osdk_ros::WaypointV2Action;
@@ -359,9 +359,9 @@ bool generateWaypointV2AllActionsKylie(ros::NodeHandle &nh, uint16_t actionNum)
       ROS_INFO("Gimbal action created with ID: %d associated to action: %d and with angle %d", action->actionId, action->waypointV2AssociateTrigger.actionIdAssociated, action->waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.y); // add more info when advances come
 
       generateWaypointV2Action_.request.actions.push_back(*action);
-      delete action->waypointV2ActionTriggerType;
-      delete action->waypointV2ACtionActuatorType;
-      delete action->waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam;
+      //delete action->waypointV2ActionTriggerType;
+      //delete action->waypointV2ACtionActuatorType;
+      //delete action->waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam;
       delete action;
       action = new dji_osdk_ros::WaypointV2Action;
       
