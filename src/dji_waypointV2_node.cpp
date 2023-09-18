@@ -303,11 +303,11 @@ bool generateWaypointV2AllActionsKylie(ros::NodeHandle &nh, uint16_t actionNum)
     {
       // Heading control
       action->actionId  = id;//*2 + 1;
-      action->waypointV2ActionTriggerType  = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionTriggerTypeSampleReachPoint; // Good for now
+      action->waypointV2ActionTriggerType  = new dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionTriggerTypeSampleReachPoint; // Good for now
       action->waypointV2SampleReachPointTrigger.waypointIndex = i;
       action->waypointV2SampleReachPointTrigger.terminateNum = 0;
 
-      action->waypointV2ACtionActuatorType = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionActuatorTypeAircraftControl;
+      action->waypointV2ACtionActuatorType = new dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionActuatorTypeAircraftControl;
       // Config of the aircraft control (our case yaw angles)
       action->waypointV2AircraftControlActuator.actuatorIndex = 0;
       action->waypointV2AircraftControlActuator.DJIWaypointV2ActionActuatorAircraftControlOperationType = dji_osdk_ros::WaypointV2AircraftControlActuator::DJIWaypointV2ActionActuatorAircraftControlOperationTypeRotateYaw;
@@ -327,14 +327,14 @@ bool generateWaypointV2AllActionsKylie(ros::NodeHandle &nh, uint16_t actionNum)
       // Gimbal control, we need to use different IDs for the actions obviously
       action->actionId  = id;//+ actionNum + 1;
 
-      action->waypointV2ActionTriggerType  = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionTriggerTypeActionAssociated;
+      action->waypointV2ActionTriggerType  = new dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionTriggerTypeActionAssociated;
       action->waypointV2AssociateTrigger.actionAssociatedType = dji_osdk_ros::WaypointV2AssociateTrigger::DJIWaypointV2TriggerAssociatedTimingTypeAfterFinised;
       action->waypointV2AssociateTrigger.waitingTime = 0;
       action->waypointV2AssociateTrigger.actionIdAssociated = id-1;
 
-      action->waypointV2ACtionActuatorType = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionActuatorTypeGimbal;
+      action->waypointV2ACtionActuatorType = new dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionActuatorTypeGimbal;
       // We are gonna rotate the gimbal somehow so we need to set this operation type
-      action->waypointV2GimbalActuator.DJIWaypointV2ActionActuatorGimbalOperationType = dji_osdk_ros::WaypointV2GimbalActuator::DJIWaypointV2ActionActuatorGimbalOperationTypeRotateGimbal;
+      action->waypointV2GimbalActuator.DJIWaypointV2ActionActuatorGimbalOperationType = new dji_osdk_ros::WaypointV2GimbalActuator::DJIWaypointV2ActionActuatorGimbalOperationTypeRotateGimbal;
       action->waypointV2GimbalActuator.actuatorIndex = 0;
       // Gimbal Parameters
       // Gimbal roll angle
