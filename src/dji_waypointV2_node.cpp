@@ -39,6 +39,9 @@
 std::vector<sensor_msgs::NavSatFix> gpsList_global;
 std_msgs::Float64MultiArray yaw_list_global;
 std_msgs::Float64MultiArray gimbal_pitch_list_global;
+int velocity_range;
+int idle_velocity;
+int finish_action;
 int yaw_mode_global;
 
 // Configuration of the mission obtained from the .YAML file
@@ -53,6 +56,9 @@ bool config_mission(aerialcore_common::ConfigMission::Request  &req,
   yaw_list_global = req.yaw; // WORKS
   yaw_mode_global = req.yawMode; // TBD
   gimbal_pitch_list_global = req.gimbalPitch; // TEST:  to include gimbal pitch
+  velocity_range = req.maxVel;
+  idle_velocity = req.idleVel;
+  finish_action = req.finishAction;
   /*
   std_msgs::Float64MultiArray gimbal_pitch_list = req.gimbalPitch; //TEST:  to include gimbal pitch
   velocity_range = req.maxVel;
@@ -557,9 +563,9 @@ bool initWaypointV2Setting(ros::NodeHandle &nh)
 
     // Configure General Init Settings
     initWaypointV2Setting_.request.waypointV2InitSettings.repeatTimes = 1;
-    initWaypointV2Setting_.request.waypointV2InitSettings.finishedAction = initWaypointV2Setting_.request.waypointV2InitSettings.DJIWaypointV2MissionFinishedGoHome;
-    initWaypointV2Setting_.request.waypointV2InitSettings.maxFlightSpeed = 10;
-    initWaypointV2Setting_.request.waypointV2InitSettings.autoFlightSpeed = 2;
+    initWaypointV2Setting_.request.waypointV2InitSettings.finishedAction = finish_action;//initWaypointV2Setting_.request.waypointV2InitSettings.DJIWaypointV2MissionFinishedGoHome;
+    initWaypointV2Setting_.request.waypointV2InitSettings.maxFlightSpeed = velocity_range;//10;
+    initWaypointV2Setting_.request.waypointV2InitSettings.autoFlightSpeed = idle_velocity;
     initWaypointV2Setting_.request.waypointV2InitSettings.exitMissionOnRCSignalLost = 1;
     initWaypointV2Setting_.request.waypointV2InitSettings.gotoFirstWaypointMode = initWaypointV2Setting_.request.waypointV2InitSettings.DJIWaypointV2MissionGotoFirstWaypointModePointToPoint;
     //initWaypointV2Setting_.request.waypointV2InitSettings.mission = generatePolygonWaypoints(nh, initWaypointV2Setting_.request.radius, initWaypointV2Setting_.request.polygonNum);
