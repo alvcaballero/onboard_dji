@@ -310,11 +310,14 @@ bool generateWaypointV2AllActionsKylie(ros::NodeHandle &nh, uint16_t actionNum)
       // Heading control
       action->actionId  = id;//*2 + 1;
       action->waypointV2ActionTriggerType  = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionTriggerTypeSampleReachPoint; // Good for now
+      action->waypointV2SampleReachPointTrigger = new dji_osdk_ros::WaypointV2SampleReachPointTrigger;
       action->waypointV2SampleReachPointTrigger.waypointIndex = i;
       action->waypointV2SampleReachPointTrigger.terminateNum = 0;
 
+      //auto *trigger = new dji_osdk_ros::WaypointV2GimbalActuator;
       action->waypointV2ACtionActuatorType = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionActuatorTypeAircraftControl;
       // Config of the aircraft control (our case yaw angles)
+      action->waypointV2AircraftControlActuator = new dji_osdk_ros::WaypointV2AircraftControlActuator;
       action->waypointV2AircraftControlActuator.actuatorIndex = 0;
       action->waypointV2AircraftControlActuator.DJIWaypointV2ActionActuatorAircraftControlOperationType = dji_osdk_ros::WaypointV2AircraftControlActuator::DJIWaypointV2ActionActuatorAircraftControlOperationTypeRotateYaw;
       action->waypointV2AircraftControlActuator.waypointV2AircraftControlActuatorRotateHeading.isRelative = 0;
@@ -324,14 +327,23 @@ bool generateWaypointV2AllActionsKylie(ros::NodeHandle &nh, uint16_t actionNum)
       id+=1;  
       generateWaypointV2Action_.request.actions.push_back(*action);
       
+      // we need to delete the trigger, the actuator and finally the action
+      delete action->waypointV2SampleReachPointTrigger;
+      delete action->waypointV2AircraftControlActuator;
       delete action;
+    
+      
       action = new dji_osdk_ros::WaypointV2Action;
 
          
       // Gimbal control, we need to use different IDs for the actions obviously
       action->actionId  = id;//+ actionNum + 1;
 
+      //auto *trigger = new dji_osdk_ros::WaypointV2GimbalActuator;
+
       action->waypointV2ActionTriggerType  = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionTriggerTypeActionAssociated;
+      // this is gonna change in order to delete it like a pointer
+      action->waypointV2AssociateTrigger = new dji_osdk_ros::WaypointV2AssociateTrigger;
       action->waypointV2AssociateTrigger.actionAssociatedType = dji_osdk_ros::WaypointV2AssociateTrigger::DJIWaypointV2TriggerAssociatedTimingTypeAfterFinised;
       action->waypointV2AssociateTrigger.waitingTime = 0;
       action->waypointV2AssociateTrigger.actionIdAssociated = id-1;
@@ -339,6 +351,7 @@ bool generateWaypointV2AllActionsKylie(ros::NodeHandle &nh, uint16_t actionNum)
       
       action->waypointV2ACtionActuatorType = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionActuatorTypeGimbal;
       // We are gonna rotate the gimbal somehow so we need to set this operation type
+      action->waypointV2GimbalActuator = new dji_osdk_ros::WaypointV2GimbalActuator;
 
       action->waypointV2GimbalActuator.DJIWaypointV2ActionActuatorGimbalOperationType = dji_osdk_ros::WaypointV2GimbalActuator::DJIWaypointV2ActionActuatorGimbalOperationTypeRotateGimbal;
       action->waypointV2GimbalActuator.actuatorIndex = 0;
@@ -366,6 +379,8 @@ bool generateWaypointV2AllActionsKylie(ros::NodeHandle &nh, uint16_t actionNum)
 
       generateWaypointV2Action_.request.actions.push_back(*action);
       
+      delete action->waypointV2AssociateTrigger;
+      delete action->waypointV2GimbalActuator;
       delete action;
       action = new dji_osdk_ros::WaypointV2Action;
       
@@ -373,6 +388,7 @@ bool generateWaypointV2AllActionsKylie(ros::NodeHandle &nh, uint16_t actionNum)
     }
     
     waypointV2_generate_actions_client.call(generateWaypointV2Action_);
+    delete action;
 
     return generateWaypointV2Action_.response.result;
 }
