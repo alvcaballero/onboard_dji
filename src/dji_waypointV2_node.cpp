@@ -387,7 +387,7 @@ bool generateGimbalActions(ros::NodeHandle &nh, uint16_t actionNum)
     dji_osdk_ros::WaypointV2Action actionVector;
     int id=0;
     // array with 4 gimbal values
-    int array[9] = {-300, -800, -400, -200,0,0,0,0,0};
+    int array[9] = {300, 10, 400, 200,0,0,0,0,0};
     for (uint16_t i = 1; i <= gpsList_global.size(); i++)
     {
       actionVector.actionId  = id; // to be different than the camera actions 
