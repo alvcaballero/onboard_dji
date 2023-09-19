@@ -420,6 +420,7 @@ bool generateGimbalActions(ros::NodeHandle &nh, uint16_t actionNum)
       actionVector.waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.duationTime = 10; // rotate time
 
       generateWaypointV2Action_.request.actions.push_back(actionVector);
+      id++;
     }
 
     waypointV2_generate_actions_client.call(generateWaypointV2Action_);
