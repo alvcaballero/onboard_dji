@@ -386,6 +386,8 @@ bool generateGimbalActions(ros::NodeHandle &nh, uint16_t actionNum)
     waypointV2_generate_actions_client = nh.serviceClient<dji_osdk_ros::GenerateWaypointV2Action>("dji_osdk_ros/waypointV2_generateActions");
     dji_osdk_ros::WaypointV2Action actionVector;
     int id=0;
+    // array with 4 gimbal values
+    int array[9] = {-300, 0, -800, 0,0,0,0,0,0};
     for (uint16_t i = 1; i <= gpsList_global.size(); i++)
     {
       actionVector.actionId  = id; // to be different than the camera actions 
@@ -401,7 +403,7 @@ bool generateGimbalActions(ros::NodeHandle &nh, uint16_t actionNum)
       // Gimbal roll angle
       actionVector.waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.x = 0; 
       // Gimbal pitch angle
-      actionVector.waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.y = 10*gimbal_pitch_list_global.data[i]; // TBD: Change it acording to user needs -> gimbal_pitch_list_global.data[i];
+      actionVector.waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.y = array[i-1];//10*gimbal_pitch_list_global.data[i]; // TBD: Change it acording to user needs -> gimbal_pitch_list_global.data[i];
       // Gimbal yaw angle
       actionVector.waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.z = 0; //10*yaw_list_global.data[i]; 
 
