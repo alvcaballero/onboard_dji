@@ -559,8 +559,8 @@ bool initWaypointV2Setting(ros::NodeHandle &nh)
     //generateHeadingV2Actions(nh, initWaypointV2Setting_.request.actionNum);
 
     // We rock here
-    //generateWaypointV2AllActions_(nh, initWaypointV2Setting_.request.actionNum);
-    generateWaypointV2AllActionsKylie(nh, initWaypointV2Setting_.request.actionNum);
+    generateWaypointV2AllActions_(nh, initWaypointV2Setting_.request.actionNum);
+    //generateWaypointV2AllActionsKylie(nh, initWaypointV2Setting_.request.actionNum);
 
     // Configure General Init Settings
     initWaypointV2Setting_.request.waypointV2InitSettings.repeatTimes = 1;
