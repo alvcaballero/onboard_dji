@@ -385,11 +385,12 @@ bool generateGimbalActions(ros::NodeHandle &nh, uint16_t actionNum)
 {
     waypointV2_generate_actions_client = nh.serviceClient<dji_osdk_ros::GenerateWaypointV2Action>("dji_osdk_ros/waypointV2_generateActions");
     dji_osdk_ros::WaypointV2Action actionVector;
-    for (uint16_t i = 0; i <= actionNum; i++)
+    int id=0;
+    for (uint16_t i = 1; i <= gpsList_global.size(); i++)
     {
-      actionVector.actionId  = i + actionNum + 1; // to be different than the camera actions 
+      actionVector.actionId  = id; // to be different than the camera actions 
       actionVector.waypointV2ActionTriggerType  = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionTriggerTypeSampleReachPoint; // Good for now
-      actionVector.waypointV2SampleReachPointTrigger.waypointIndex = i+1;
+      actionVector.waypointV2SampleReachPointTrigger.waypointIndex = i;
       actionVector.waypointV2SampleReachPointTrigger.terminateNum = 0;
       actionVector.waypointV2ACtionActuatorType = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionActuatorTypeGimbal;
       
@@ -402,7 +403,7 @@ bool generateGimbalActions(ros::NodeHandle &nh, uint16_t actionNum)
       // Gimbal pitch angle
       actionVector.waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.y = 10*gimbal_pitch_list_global.data[i]; // TBD: Change it acording to user needs -> gimbal_pitch_list_global.data[i];
       // Gimbal yaw angle
-      actionVector.waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.z = 10*yaw_list_global.data[i]; 
+      actionVector.waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.z = 0; //10*yaw_list_global.data[i]; 
 
       // Gimbal Control mode
       actionVector.waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.ctrl_mode = 0; // 0: absolute angle, 1: relative angle
@@ -555,11 +556,11 @@ bool initWaypointV2Setting(ros::NodeHandle &nh)
 
     /*! Generate actions*/
     //generateWaypointV2Actions(nh, initWaypointV2Setting_.request.actionNum);
-    //generateGimbalActions(nh, initWaypointV2Setting_.request.actionNum);
+    generateGimbalActions(nh, initWaypointV2Setting_.request.actionNum);
     //generateHeadingV2Actions(nh, initWaypointV2Setting_.request.actionNum);
 
     // We rock here
-    generateWaypointV2AllActions_(nh, initWaypointV2Setting_.request.actionNum);
+    //generateWaypointV2AllActions_(nh, initWaypointV2Setting_.request.actionNum);
     //generateWaypointV2AllActionsKylie(nh, initWaypointV2Setting_.request.actionNum);
 
     // Configure General Init Settings
