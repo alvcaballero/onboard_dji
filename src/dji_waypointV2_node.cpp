@@ -59,22 +59,62 @@ bool config_mission(aerialcore_common::ConfigMission::Request  &req,
   velocity_range = req.maxVel;
   idle_velocity = req.idleVel;
   finish_action = req.finishAction;
-  /*
-  std_msgs::Float64MultiArray gimbal_pitch_list = req.gimbalPitch; //TEST:  to include gimbal pitch
-  velocity_range = req.maxVel;
-  idle_velocity = req.idleVel;
   
-  trace_mode = req.traceMode;
-  gimbal_pitch_mode = req.gimbalPitchMode; // See if it's needed
-  finish_action = req.finishAction;
-  ROS_WARN("Finish action: %d",finish_action);
-  ROS_WARN("Gimbal Pitch Mode: %d",gimbal_pitch_mode);
-*/
   // actions functionality
-  std_msgs::Float64MultiArray acommandList = req.commandList; //TBD
+  std_msgs::Float64MultiArray acommandList = req.commandList; //TBD 
   std_msgs::Float64MultiArray acommandParameter = req.commandParameter; //TBD
-  	
 
+  /*
+   *WP_ACTION_STAY                 = 0,  /*!< no action.uint of action parameter:ms
+  WP_ACTION_SIMPLE_SHOT          = 1,  /*!< take picture action.action parameters Action parameter have no effect.limit time:6s
+  WP_ACTION_VIDEO_START          = 2,  /*!< start take video action.action parameters Action parameter have no effect.limit time:6s
+  WP_ACTION_VIDEO_STOP           = 3,  /*!< stop video action.action parameters Action parameter have no effect.limit time:6s
+  WP_ACTION_CRAFT_YAW            = 4,  /*!< craft control yaw action.uint of action parameter:degree. range:-180 ~ 180
+  WP_ACTION_GIMBAL_PITCH         = 5,  
+   * 
+  */
+  // We need to create a vector of actions
+  if (acommandList.data.size() != acommandParameter.data.size()){
+    ROS_ERROR("The number of actions and parameters is not the same");
+    return false;
+  }
+  // We need to be sure that exists actions
+  if (acommandList.data.size() >= 0){
+    for (int i = 0; i < gpsList.size(); i++){
+      for (int j = 0; j < 10; j++)
+      {
+        // counting the number of actions
+
+        switch (acommandList.data[i*10+j])
+        {
+        case 1:// take a photo
+          // TBD
+          break;
+        case 2:// start recording
+          // TBD
+          break;
+        case 3:// stop recording
+          // TBD
+          break;
+        case 4:// craft control yaw
+          yaw_list_global.data[i] = acommandParameter.data[i*10+j];
+          break;
+        case 5:// gimbal pitch 
+          gimbal_pitch_list_global.data[i] = acommandParameter.data[i*10+j];
+          break;
+        default:
+          break;
+        }
+        ;
+        
+
+      }
+    }
+  }
+  
+  ROS_WARN("Total number of actions: %d", actionNumber);
+  	
+  ROS_WARN("Finish action: %d",finish_action);
   // if everything goes right we run the whole thing
   res.success = runWaypointV2Mission(nodehandler);
   return true;
@@ -170,9 +210,9 @@ bool generateWaypointV2AllActions(ros::NodeHandle &nh, uint16_t actionNum)
       // Gimbal Control mode
       actionVector_gimbal.waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.ctrl_mode = 0; // 0: absolute angle, 1: relative angle
 
-      actionVector_gimbal.waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.rollCmdIgnore = 0;
+      actionVector_gimbal.waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.rollCmdIgnore = 1;
       actionVector_gimbal.waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.pitchCmdIgnore = 0;
-      actionVector_gimbal.waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.yawCmdIgnore = 0;
+      actionVector_gimbal.waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.yawCmdIgnore = 1;
 
       actionVector_gimbal.waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.absYawModeRef = 1; //0: relative to the aircraft, 1: relative to North
    
@@ -226,6 +266,15 @@ bool generateWaypointV2AllActions_(ros::NodeHandle &nh, uint16_t actionNum)
     auto *action = new dji_osdk_ros::WaypointV2Action;
     int id=0;
     
+    actionVector_camera.actionId  = id;
+    actionVector_camera.waypointV2ActionTriggerType  = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionTriggerTypeSampleReachPoint;
+    actionVector_camera.waypointV2SampleReachPointTrigger.waypointIndex = 1;
+    actionVector_camera.waypointV2SampleReachPointTrigger.terminateNum = 0;
+    actionVector_camera.waypointV2ACtionActuatorType = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionActuatorTypeCamera;
+    actionVector_camera.waypointV2CameraActuator.actuatorIndex = 0;
+    actionVector_camera.waypointV2CameraActuator.DJIWaypointV2ActionActuatorCameraOperationType = dji_osdk_ros::WaypointV2CameraActuator::DJIWaypointV2ActionActuatorCameraOperationTypeStartRecordVideo;
+    generateWaypointV2Action_.request.actions.push_back(actionVector_camera);
+
     for (uint16_t j = 1; j <= gpsList_global.size(); j++)
     {
       // Heading control
@@ -275,9 +324,9 @@ bool generateWaypointV2AllActions_(ros::NodeHandle &nh, uint16_t actionNum)
       // Gimbal Control mode
       action->waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.ctrl_mode = 0; // 0: absolute angle, 1: relative angle
 
-      action->waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.rollCmdIgnore = 0;
+      action->waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.rollCmdIgnore = 1;
       action->waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.pitchCmdIgnore = 0;
-      action->waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.yawCmdIgnore = 0;
+      action->waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.yawCmdIgnore = 1;
 
       action->waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.absYawModeRef = 1; //0: relative to the aircraft, 1: relative to North
    
@@ -292,7 +341,16 @@ bool generateWaypointV2AllActions_(ros::NodeHandle &nh, uint16_t actionNum)
       
 
     }
-    
+    //Stop recording video
+    actionVector_camera.actionId  = id;
+    actionVector_camera.waypointV2ActionTriggerType  = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionTriggerTypeSampleReachPoint;
+    actionVector_camera.waypointV2SampleReachPointTrigger.waypointIndex = 1;
+    actionVector_camera.waypointV2SampleReachPointTrigger.terminateNum = 0;
+    actionVector_camera.waypointV2ACtionActuatorType = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionActuatorTypeCamera;
+    actionVector_camera.waypointV2CameraActuator.actuatorIndex = 0;
+    actionVector_camera.waypointV2CameraActuator.DJIWaypointV2ActionActuatorCameraOperationType = dji_osdk_ros::WaypointV2CameraActuator::DJIWaypointV2ActionActuatorCameraOperationTypeStopRecordVideo;
+    generateWaypointV2Action_.request.actions.push_back(actionVector_camera);
+
     waypointV2_generate_actions_client.call(generateWaypointV2Action_);
 
     return generateWaypointV2Action_.response.result;
@@ -354,9 +412,9 @@ bool generateWaypointV2AllActionsKylie(ros::NodeHandle &nh, uint16_t actionNum)
       // Gimbal Control mode
       gimbalAction->waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.ctrl_mode = 0; // 0: absolute angle, 1: relative angle
 
-      gimbalAction->waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.rollCmdIgnore = 0;
+      gimbalAction->waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.rollCmdIgnore = 1;
       gimbalAction->waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.pitchCmdIgnore = 0;
-      gimbalAction->waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.yawCmdIgnore = 0;
+      gimbalAction->waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.yawCmdIgnore = 1;
 
       gimbalAction->waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.absYawModeRef = 1; //0: relative to the aircraft, 1: relative to North
    
@@ -559,11 +617,11 @@ bool initWaypointV2Setting(ros::NodeHandle &nh)
 
     /*! Generate actions*/
     //generateWaypointV2Actions(nh, initWaypointV2Setting_.request.actionNum);
-    generateGimbalActions(nh, initWaypointV2Setting_.request.actionNum);
+    //generateGimbalActions(nh, initWaypointV2Setting_.request.actionNum);
     //generateHeadingV2Actions(nh, initWaypointV2Setting_.request.actionNum);
 
     // We rock here
-    //generateWaypointV2AllActions_(nh, initWaypointV2Setting_.request.actionNum);
+    generateWaypointV2AllActions_(nh, initWaypointV2Setting_.request.actionNum);
     //generateWaypointV2AllActionsKylie(nh, initWaypointV2Setting_.request.actionNum);
 
     // Configure General Init Settings
