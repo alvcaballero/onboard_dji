@@ -85,7 +85,7 @@ bool config_mission(aerialcore_common::ConfigMission::Request  &req,
       {
         // counting the number of actions
         if (acommandList.data[i*10+j]) actionNumber++;
-        switch (acommandList.data[i*10+j])
+        switch (int(acommandList.data[i*10+j]))
         {
         case 1:// take a photo
           // TBD
