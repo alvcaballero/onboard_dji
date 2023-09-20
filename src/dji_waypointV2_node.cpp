@@ -63,7 +63,7 @@ bool config_mission(aerialcore_common::ConfigMission::Request  &req,
   // actions functionality
   std_msgs::Float64MultiArray acommandList = req.commandList; //TBD 
   std_msgs::Float64MultiArray acommandParameter = req.commandParameter; //TBD
-
+  int actionNumber=0;
   /*
    *WP_ACTION_STAY                 = 0,  /*!< no action.uint of action parameter:ms
   WP_ACTION_SIMPLE_SHOT          = 1,  /*!< take picture action.action parameters Action parameter have no effect.limit time:6s
@@ -80,11 +80,11 @@ bool config_mission(aerialcore_common::ConfigMission::Request  &req,
   }
   // We need to be sure that exists actions
   if (acommandList.data.size() >= 0){
-    for (int i = 0; i < gpsList.size(); i++){
+    for (int i = 0; i < .size(); i++){
       for (int j = 0; j < 10; j++)
       {
         // counting the number of actions
-
+        if (acommandList.data[i*10+j]) actionNumber++;
         switch (acommandList.data[i*10+j])
         {
         case 1:// take a photo
