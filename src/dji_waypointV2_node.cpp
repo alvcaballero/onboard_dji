@@ -128,11 +128,11 @@ std::vector<dji_osdk_ros::WaypointV2> createWaypoints(ros::NodeHandle &nh,std::v
   dji_osdk_ros::WaypointV2 startPoint;
   dji_osdk_ros::WaypointV2 waypointV2;
   
-  startPoint.latitude  = gps_position_.latitude * C_PI / 180.0;
+  /*startPoint.latitude  = gps_position_.latitude * C_PI / 180.0;
   startPoint.longitude = gps_position_.longitude * C_PI / 180.0;
   startPoint.relativeHeight = gpsList[0].altitude;
   setWaypointV2Defaults(startPoint);
-  waypointList.push_back(startPoint);
+  waypointList.push_back(startPoint);*/
 
   // Iterative algorithm
   for (int i = 0; i < gpsList.size(); i++) {
@@ -154,7 +154,7 @@ std::vector<dji_osdk_ros::WaypointV2> createWaypoints(ros::NodeHandle &nh,std::v
     ROS_INFO("Waypoint created at (LLA): %f \t%f \t%f ", waypointV2.latitude, waypointV2.longitude, waypointV2.relativeHeight); // add more info when advances come
 
   }
-  waypointList.push_back(startPoint); // starts and end at the same point
+  //waypointList.push_back(startPoint); // starts and end at the same point
 
   return waypointList;
 }
@@ -178,7 +178,7 @@ bool generateWaypointV2AllActions(ros::NodeHandle &nh, uint16_t actionNum)
     generateWaypointV2Action_.request.actions.push_back(actionVector_camera);
     
     id+=1;
-    for (uint16_t i = 1; i <= gpsList_global.size(); i++)
+    for (uint16_t i = 0; i <= gpsList_global.size(); i++)
     {
       // If it is not the first wp, we start doing photos
       /*actionVector.actionId  = i;
@@ -203,7 +203,7 @@ bool generateWaypointV2AllActions(ros::NodeHandle &nh, uint16_t actionNum)
       // Gimbal roll angle
       actionVector_gimbal.waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.x = 0; 
       // Gimbal pitch angle
-      actionVector_gimbal.waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.y = 10*gimbal_pitch_list_global.data[i-1]; // TBD: Change it acording to user needs -> gimbal_pitch_list_global.data[i];
+      actionVector_gimbal.waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.y = 10*gimbal_pitch_list_global.data[i]; // TBD: Change it acording to user needs -> gimbal_pitch_list_global.data[i];
       // Gimbal yaw angle
       actionVector_gimbal.waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.z = 0;//10*yaw_list_global.data[i]; 
 
@@ -234,7 +234,7 @@ bool generateWaypointV2AllActions(ros::NodeHandle &nh, uint16_t actionNum)
       actionVector_heading.waypointV2AircraftControlActuator.actuatorIndex = 0;
       actionVector_heading.waypointV2AircraftControlActuator.DJIWaypointV2ActionActuatorAircraftControlOperationType = dji_osdk_ros::WaypointV2AircraftControlActuator::DJIWaypointV2ActionActuatorAircraftControlOperationTypeRotateYaw;
       actionVector_heading.waypointV2AircraftControlActuator.waypointV2AircraftControlActuatorRotateHeading.isRelative = 0;
-      actionVector_heading.waypointV2AircraftControlActuator.waypointV2AircraftControlActuatorRotateHeading.yaw = yaw_list_global.data[i-1]; // works with manual mode
+      actionVector_heading.waypointV2AircraftControlActuator.waypointV2AircraftControlActuatorRotateHeading.yaw = yaw_list_global.data[i]; // works with manual mode
 
       ROS_INFO("Heading action created with ID: %d at wp: %d and angle %d ", actionVector_heading.actionId, actionVector_heading.waypointV2SampleReachPointTrigger.waypointIndex, actionVector_heading.waypointV2AircraftControlActuator.waypointV2AircraftControlActuatorRotateHeading.yaw); // add more info when advances come
       id+=1;  
@@ -275,7 +275,7 @@ bool generateWaypointV2AllActions_(ros::NodeHandle &nh, uint16_t actionNum)
     actionVector_camera.waypointV2CameraActuator.DJIWaypointV2ActionActuatorCameraOperationType = dji_osdk_ros::WaypointV2CameraActuator::DJIWaypointV2ActionActuatorCameraOperationTypeStartRecordVideo;
     generateWaypointV2Action_.request.actions.push_back(actionVector_camera);
 
-    for (uint16_t j = 1; j <= gpsList_global.size(); j++)
+    for (uint16_t j = 0; j <= gpsList_global.size(); j++)
     {
       // Heading control
       action->actionId  = id;//*2 + 1;
@@ -298,7 +298,7 @@ bool generateWaypointV2AllActions_(ros::NodeHandle &nh, uint16_t actionNum)
 
     }
     
-    for (uint16_t i = 1; i <= gpsList_global.size(); i++)
+    for (uint16_t i = 0; i <= gpsList_global.size(); i++)
     {
       
       // Gimbal control, we need to use different IDs for the actions obviously
@@ -307,7 +307,7 @@ bool generateWaypointV2AllActions_(ros::NodeHandle &nh, uint16_t actionNum)
       action->waypointV2ActionTriggerType  = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionTriggerTypeActionAssociated;
       action->waypointV2AssociateTrigger.actionAssociatedType = dji_osdk_ros::WaypointV2AssociateTrigger::DJIWaypointV2TriggerAssociatedTimingTypeAfterFinised;
       action->waypointV2AssociateTrigger.waitingTime = 0;
-      action->waypointV2AssociateTrigger.actionIdAssociated = i-1;
+      action->waypointV2AssociateTrigger.actionIdAssociated = i;
 
       action->waypointV2ACtionActuatorType = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionActuatorTypeGimbal;
       // We are gonna rotate the gimbal somehow so we need to set this operation type
@@ -317,7 +317,7 @@ bool generateWaypointV2AllActions_(ros::NodeHandle &nh, uint16_t actionNum)
       // Gimbal roll angle
       action->waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.x = 0; 
       // Gimbal pitch angle
-      action->waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.y = 10*gimbal_pitch_list_global.data[i-1]; // TBD: Change it acording to user needs -> gimbal_pitch_list_global.data[i];
+      action->waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.y = 10*gimbal_pitch_list_global.data[i]; // TBD: Change it acording to user needs -> gimbal_pitch_list_global.data[i];
       // Gimbal yaw angle
       action->waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.z = 0;//10*yaw_list_global.data[i]; 
 
@@ -364,7 +364,7 @@ bool generateWaypointV2AllActionsKylie(ros::NodeHandle &nh, uint16_t actionNum)
     auto *gimbalAction = new dji_osdk_ros::WaypointV2Action;
     int id=0;
     
-    for (uint16_t i = 1; i <= gpsList_global.size(); i++)
+    for (uint16_t i = 0; i <= gpsList_global.size(); i++)
     {
       // Heading control
       action->actionId  = id;//*2 + 1;
@@ -377,7 +377,7 @@ bool generateWaypointV2AllActionsKylie(ros::NodeHandle &nh, uint16_t actionNum)
       action->waypointV2AircraftControlActuator.actuatorIndex = 0;
       action->waypointV2AircraftControlActuator.DJIWaypointV2ActionActuatorAircraftControlOperationType = dji_osdk_ros::WaypointV2AircraftControlActuator::DJIWaypointV2ActionActuatorAircraftControlOperationTypeRotateYaw;
       action->waypointV2AircraftControlActuator.waypointV2AircraftControlActuatorRotateHeading.isRelative = 0;
-      action->waypointV2AircraftControlActuator.waypointV2AircraftControlActuatorRotateHeading.yaw = yaw_list_global.data[i-1]; // works with manual mode
+      action->waypointV2AircraftControlActuator.waypointV2AircraftControlActuatorRotateHeading.yaw = yaw_list_global.data[i]; // works with manual mode
 
       ROS_INFO("Heading action created with ID: %d at wp: %d and angle %d ", action->actionId, action->waypointV2SampleReachPointTrigger.waypointIndex, action->waypointV2AircraftControlActuator.waypointV2AircraftControlActuatorRotateHeading.yaw); // add more info when advances come
       id+=1;  
@@ -405,7 +405,7 @@ bool generateWaypointV2AllActionsKylie(ros::NodeHandle &nh, uint16_t actionNum)
       // Gimbal roll angle
       gimbalAction->waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.x = 0; 
       // Gimbal pitch angle
-      gimbalAction->waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.y = 10*gimbal_pitch_list_global.data[i-1]; // TBD: Change it acording to user needs -> gimbal_pitch_list_global.data[i];
+      gimbalAction->waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.y = 10*gimbal_pitch_list_global.data[i]; // TBD: Change it acording to user needs -> gimbal_pitch_list_global.data[i];
       // Gimbal yaw angle
       gimbalAction->waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.z = 0;//10*yaw_list_global.data[i]; 
 
@@ -446,7 +446,7 @@ bool generateGimbalActions(ros::NodeHandle &nh, uint16_t actionNum)
     int id=0;
     // array with 4 gimbal values
     int array[9] = {-300, 10, -400, -100,0,0,0,0,0};
-    for (uint16_t i = 1; i <= gpsList_global.size(); i++)
+    for (uint16_t i = 0; i <= gpsList_global.size(); i++)
     {
       actionVector.actionId  = id; // to be different than the camera actions 
       actionVector.waypointV2ActionTriggerType  = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionTriggerTypeSampleReachPoint; // Good for now
@@ -461,7 +461,7 @@ bool generateGimbalActions(ros::NodeHandle &nh, uint16_t actionNum)
       // Gimbal roll angle
       actionVector.waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.x = 0; 
       // Gimbal pitch angle
-      actionVector.waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.y = array[i-1];//10*gimbal_pitch_list_global.data[i]; // TBD: Change it acording to user needs -> gimbal_pitch_list_global.data[i];
+      actionVector.waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.y = array[i];//10*gimbal_pitch_list_global.data[i]; // TBD: Change it acording to user needs -> gimbal_pitch_list_global.data[i];
       // Gimbal yaw angle
       actionVector.waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.z = 0; //10*yaw_list_global.data[i]; 
 
