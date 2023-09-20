@@ -80,7 +80,7 @@ bool config_mission(aerialcore_common::ConfigMission::Request  &req,
   }
   // We need to be sure that exists actions
   if (acommandList.data.size() >= 0){
-    for (int i = 0; i < .size(); i++){
+    for (int i = 0; i < gpsList_global.size(); i++){
       for (int j = 0; j < 10; j++)
       {
         // counting the number of actions
