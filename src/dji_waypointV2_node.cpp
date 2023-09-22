@@ -43,6 +43,7 @@ int velocity_range;
 int idle_velocity;
 int finish_action;
 int yaw_mode_global;
+int actionNumber;
 
 // Configuration of the mission obtained from the .YAML file
 bool config_mission(aerialcore_common::ConfigMission::Request  &req,
@@ -63,7 +64,7 @@ bool config_mission(aerialcore_common::ConfigMission::Request  &req,
   // actions functionality
   std_msgs::Float64MultiArray acommandList = req.commandList; //TBD 
   std_msgs::Float64MultiArray acommandParameter = req.commandParameter; //TBD
-  int actionNumber=0;
+  actionNumber=0;
   /*
    *WP_ACTION_STAY                 = 0,  /*!< no action.uint of action parameter:ms
   WP_ACTION_SIMPLE_SHOT          = 1,  /*!< take picture action.action parameters Action parameter have no effect.limit time:6s
@@ -275,7 +276,7 @@ bool generateWaypointV2AllActions_(ros::NodeHandle &nh, uint16_t actionNum)
     actionVector_camera.waypointV2CameraActuator.DJIWaypointV2ActionActuatorCameraOperationType = dji_osdk_ros::WaypointV2CameraActuator::DJIWaypointV2ActionActuatorCameraOperationTypeStartRecordVideo;
     generateWaypointV2Action_.request.actions.push_back(actionVector_camera);
 
-    for (uint16_t j = 0; j <= gpsList_global.size(); j++)
+    for (uint16_t j = 0; j < gpsList_global.size(); j++)
     {
       // Heading control
       action->actionId  = id;//*2 + 1;
@@ -298,7 +299,7 @@ bool generateWaypointV2AllActions_(ros::NodeHandle &nh, uint16_t actionNum)
 
     }
     
-    for (uint16_t i = 0; i <= gpsList_global.size(); i++)
+    for (uint16_t i = 0; i < gpsList_global.size(); i++)
     {
       
       // Gimbal control, we need to use different IDs for the actions obviously
@@ -613,7 +614,7 @@ bool initWaypointV2Setting(ros::NodeHandle &nh)
     waypointV2_init_setting_client = nh.serviceClient<dji_osdk_ros::InitWaypointV2Setting>("dji_osdk_ros/waypointV2_initSetting");
     initWaypointV2Setting_.request.polygonNum = 6;
     initWaypointV2Setting_.request.radius = 6;
-    initWaypointV2Setting_.request.actionNum = 2*gpsList_global.size();//TBD: Change it acording to the number of actions given by the user
+    initWaypointV2Setting_.request.actionNum = actionNumber;//2*gpsList_global.size();//TBD: Change it acording to the number of actions given by the user
 
     /*! Generate actions*/
     //generateWaypointV2Actions(nh, initWaypointV2Setting_.request.actionNum);
