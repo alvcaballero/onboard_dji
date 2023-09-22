@@ -275,6 +275,7 @@ bool generateWaypointV2AllActions_(ros::NodeHandle &nh, uint16_t actionNum)
     actionVector_camera.waypointV2CameraActuator.actuatorIndex = 0;
     actionVector_camera.waypointV2CameraActuator.DJIWaypointV2ActionActuatorCameraOperationType = dji_osdk_ros::WaypointV2CameraActuator::DJIWaypointV2ActionActuatorCameraOperationTypeStartRecordVideo;
     generateWaypointV2Action_.request.actions.push_back(actionVector_camera);
+    id++;
 
     for (uint16_t j = 0; j < gpsList_global.size(); j++)
     {
