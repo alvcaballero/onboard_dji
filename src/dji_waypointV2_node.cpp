@@ -139,10 +139,10 @@ std::vector<dji_osdk_ros::WaypointV2> createWaypoints(ros::NodeHandle &nh,std::v
   for (int i = 0; i < gpsList.size(); i++) {
     
     setWaypointV2Defaults(waypointV2);
-    waypointV2.maxFlightSpeed= velocity_range;
+    waypointV2.maxFlightSpeed= 10;//TBD: velocity_range;
     // Simple TEST for varying the velocity between waypoints
     if (i !=0 && i!= (gpsList.size()- 1))waypointV2.autoFlightSpeed = idle_velocity;
-    else waypointV2.autoFlightSpeed = velocity_range;
+    else waypointV2.autoFlightSpeed = 10;
     waypointV2.latitude       = gpsList[i].latitude * C_PI / 180.0;
     waypointV2.longitude      = gpsList[i].longitude * C_PI / 180.0;
     waypointV2.relativeHeight = gpsList[i].altitude;
@@ -604,7 +604,7 @@ void setWaypointV2Defaults(dji_osdk_ros::WaypointV2& waypointV2)
   waypointV2.positionX = 0;
   waypointV2.positionY = 0;
   waypointV2.positionZ = 0;
-  waypointV2.maxFlightSpeed= 9;
+  waypointV2.maxFlightSpeed= 10;
   waypointV2.autoFlightSpeed = 2;
 }
 
