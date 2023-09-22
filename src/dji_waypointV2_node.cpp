@@ -291,7 +291,7 @@ bool generateWaypointV2AllActions_(ros::NodeHandle &nh, uint16_t actionNum)
       action->waypointV2AircraftControlActuator.waypointV2AircraftControlActuatorRotateHeading.isRelative = 0;
       action->waypointV2AircraftControlActuator.waypointV2AircraftControlActuatorRotateHeading.yaw = yaw_list_global.data[j]; // works with manual mode
 
-      ROS_INFO("Heading action created with ID: %d at wp: %d and angle %d ", action->actionId, action->waypointV2SampleReachPointTrigger.waypointIndex, action->waypointV2AircraftControlActuator.waypointV2AircraftControlActuatorRotateHeading.yaw); // add more info when advances come
+      ROS_INFO("Heading action created with ID: %d at wp: %d and angle %f ", action->actionId, action->waypointV2SampleReachPointTrigger.waypointIndex, yaw_list_global.data[j]);//action->waypointV2AircraftControlActuator.waypointV2AircraftControlActuatorRotateHeading.yaw); // add more info when advances come
       id+=1;  
       generateWaypointV2Action_.request.actions.push_back(*action);
       delete action;
