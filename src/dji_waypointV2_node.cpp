@@ -908,7 +908,7 @@ bool runWaypointV2Mission(ros::NodeHandle &nh)
   }
   sleep(timeout);
   std::vector<dji_osdk_ros::WaypointV2> resetMission;
-  resetMission = resetWaypoints(nh, std::vector<dji_osdk_ros::WaypointV2> mission);
+  resetMission = resetWaypoints(nh, gpsList_global);
 
   /*! start mission 
   result = startWaypointV2Mission(nh);
