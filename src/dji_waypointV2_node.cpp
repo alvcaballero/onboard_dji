@@ -139,6 +139,8 @@ std::vector<dji_osdk_ros::WaypointV2> createWaypoints(ros::NodeHandle &nh,std::v
   for (int i = 0; i < gpsList.size(); i++) {
     
     setWaypointV2Defaults(waypointV2);
+    waypointV2.config.useLocalCruiseVel = 1;
+    waypointV2.config.useLocalMaxVel = 1;
     waypointV2.maxFlightSpeed= 10;//TBD: velocity_range;
     // Simple TEST for varying the velocity between waypoints
     if (i !=0 && i!= (gpsList.size()- 1))waypointV2.autoFlightSpeed = idle_velocity;
