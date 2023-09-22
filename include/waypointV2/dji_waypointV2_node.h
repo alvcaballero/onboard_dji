@@ -98,6 +98,8 @@ bool runWaypointV2Mission(ros::NodeHandle &nh);
 
 // Our functiona
 std::vector<dji_osdk_ros::WaypointV2> createWaypoints(ros::NodeHandle &nh,std::vector<sensor_msgs::NavSatFix> gpsList);
+std::vector<dji_osdk_ros::WaypointV2> resetWaypoints(ros::NodeHandle &nh,std::vector<sensor_msgs::NavSatFix> gpsList);
+
 //bool config_mission(aerialcore_common::ConfigMission::Request  &req, aerialcore_common::ConfigMission::Response &res);
 
 #endif // WAYPOINTV2_NODE_H

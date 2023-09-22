@@ -139,6 +139,10 @@ std::vector<dji_osdk_ros::WaypointV2> createWaypoints(ros::NodeHandle &nh,std::v
   for (int i = 0; i < gpsList.size(); i++) {
     
     setWaypointV2Defaults(waypointV2);
+    waypointV2.maxFlightSpeed= velocity_range;
+    // Simple TEST for varying the velocity between waypoints
+    if (i !=0 && i!= (gpsList.size()- 1))waypointV2.autoFlightSpeed = idle_velocity;
+    else waypointV2.autoFlightSpeed = velocity_range;
     waypointV2.latitude       = gpsList[i].latitude * C_PI / 180.0;
     waypointV2.longitude      = gpsList[i].longitude * C_PI / 180.0;
     waypointV2.relativeHeight = gpsList[i].altitude;
@@ -159,6 +163,29 @@ std::vector<dji_osdk_ros::WaypointV2> createWaypoints(ros::NodeHandle &nh,std::v
 
   return waypointList;
 }
+
+// Creation of the waypoints depending on what the user wants
+std::vector<dji_osdk_ros::WaypointV2> resetWaypoints(ros::NodeHandle &nh,std::vector<sensor_msgs::NavSatFix> gpsList)
+{
+  // Let's create a vector to store our waypoints in.
+  std::vector<dji_osdk_ros::WaypointV2> waypointList;
+  
+  dji_osdk_ros::WaypointV2 waypointV2;
+  
+  
+
+  // Iterative algorithm
+  for (int i = 0; i < gpsList.size(); i++) {
+    
+    setWaypointV2Defaults(waypointV2);
+    
+
+  }
+  //waypointList.push_back(startPoint); // starts and end at the same point
+
+  return waypointList;
+}
+
 // Three kind of actions: Camera, Gimbal and Heading
 bool generateWaypointV2AllActions(ros::NodeHandle &nh, uint16_t actionNum)
 {
@@ -880,6 +907,8 @@ bool runWaypointV2Mission(ros::NodeHandle &nh)
     return false;
   }
   sleep(timeout);
+  std::vector<dji_osdk_ros::WaypointV2> resetMission;
+  resetMission = resetWaypoints(nh, std::vector<dji_osdk_ros::WaypointV2> mission);
 
   /*! start mission 
   result = startWaypointV2Mission(nh);
