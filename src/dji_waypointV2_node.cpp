@@ -39,7 +39,7 @@
 std::vector<sensor_msgs::NavSatFix> gpsList_global;
 std_msgs::Float64MultiArray yaw_list_global;
 std_msgs::Float64MultiArray gimbal_pitch_list_global;
-sts_msgs::Float64MultiArray speed_global;
+std_msgs::Float64MultiArray speed_global;
 int velocity_range;
 int idle_velocity;
 int finish_action;
