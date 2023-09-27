@@ -39,6 +39,7 @@
 std::vector<sensor_msgs::NavSatFix> gpsList_global;
 std_msgs::Float64MultiArray yaw_list_global;
 std_msgs::Float64MultiArray gimbal_pitch_list_global;
+sts_msgs::Float64MultiArray speed_global;
 int velocity_range;
 int idle_velocity;
 int finish_action;
@@ -60,7 +61,10 @@ bool config_mission(aerialcore_common::ConfigMission::Request  &req,
   velocity_range = req.maxVel;
   idle_velocity = req.idleVel;
   finish_action = req.finishAction;
-  
+
+  //varying velocity
+  speed_global = req.speed;
+
   // actions functionality
   std_msgs::Float64MultiArray acommandList = req.commandList; //TBD 
   std_msgs::Float64MultiArray acommandParameter = req.commandParameter; //TBD
@@ -141,10 +145,9 @@ std::vector<dji_osdk_ros::WaypointV2> createWaypoints(ros::NodeHandle &nh,std::v
     setWaypointV2Defaults(waypointV2);
     waypointV2.config.useLocalCruiseVel = 1;
     waypointV2.config.useLocalMaxVel = 1;
-    waypointV2.maxFlightSpeed= 10;//TBD: velocity_range;
+    waypointV2.maxFlightSpeed= velocity_range;//TBD: velocity_range;
     // Simple TEST for varying the velocity between waypoints
-    if (i !=0 && i!= (gpsList.size()- 1))waypointV2.autoFlightSpeed = idle_velocity;
-    else waypointV2.autoFlightSpeed = 10;
+    waypointV2.autoFlightSpeed = speed_global.data[i];
     waypointV2.latitude       = gpsList[i].latitude * C_PI / 180.0;
     waypointV2.longitude      = gpsList[i].longitude * C_PI / 180.0;
     waypointV2.relativeHeight = gpsList[i].altitude;
