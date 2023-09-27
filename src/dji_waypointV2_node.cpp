@@ -143,6 +143,16 @@ std::vector<dji_osdk_ros::WaypointV2> createWaypoints(ros::NodeHandle &nh,std::v
   for (int i = 0; i < gpsList.size(); i++) {
     
     setWaypointV2Defaults(waypointV2);
+    //TEST to try different flightpaths
+    if(i<=3){
+      waypointV2.waypointType = dji_osdk_ros::DJIWaypointV2FlightPathModeGoToPointAlongACurve;
+    }
+    
+    if(i>(gpsList.size()-2)){
+      waypointV2.waypointType = dji_osdk_ros::DJIWaypointV2FlightPathModeGoToPointAlongACurveAndStop;
+    }
+    
+
     waypointV2.config.useLocalCruiseVel = 1;
     waypointV2.config.useLocalMaxVel = 1;
     waypointV2.maxFlightSpeed= velocity_range;//TBD: velocity_range;
