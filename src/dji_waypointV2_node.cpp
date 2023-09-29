@@ -62,7 +62,7 @@ class WaypointV2Node{
     obtain_ctrl_authority_client.call(obtainCtrlAuthority);
 
     // Our changes goes from here:
-    ros::ServiceServer service_config_mission = nh.advertiseService("dji_control/configure_mission", config_mission);
+    ros::ServiceServer service_config_mission = nh.advertiseService("dji_control/configure_mission", &WaypointV2Node::configMission,this);
     //ros::ServiceServer service_run_mission = nh.advertiseService("dji_control/start_mission", run_mission);
     //ros::ServiceServer service_send_bags = nh.advertiseService("dji_control/send_bags", sendFiles);
 
@@ -77,7 +77,7 @@ class WaypointV2Node{
     int actionIDCounter;
 
     // Configuration of the mission obtained from the .YAML file
-    bool config_mission(aerialcore_common::ConfigMission::Request  &req,
+    bool configMission(aerialcore_common::ConfigMission::Request  &req,
             aerialcore_common::ConfigMission::Response &res){
       ROS_WARN("Received mission");
 
@@ -159,7 +159,7 @@ class WaypointV2Node{
     
 
 
-}
+};
 
 
 
