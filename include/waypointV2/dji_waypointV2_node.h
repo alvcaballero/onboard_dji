@@ -82,7 +82,7 @@ void waypointV2MissionEventSubCallback(const dji_osdk_ros::WaypointV2MissionEven
 
 void setWaypointV2Defaults(dji_osdk_ros::WaypointV2& waypointV2);
 std::vector<dji_osdk_ros::WaypointV2> generatePolygonWaypoints(const ros::NodeHandle &nh, float32_t radius, uint16_t polygonNum);
-bool initWaypointV2Setting(ros::NodeHandle &nh);
+bool initWaypointV2Setting(ros::NodeHandle &nh, int &actionIDCounter);
 bool uploadWaypointV2Mission(ros::NodeHandle &nh);
 bool uploadWaypointV2Action(ros::NodeHandle &nh);
 bool downloadWaypointV2Mission(ros::NodeHandle &nh, std::vector<dji_osdk_ros::WaypointV2> &mission);
