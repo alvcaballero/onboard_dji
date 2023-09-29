@@ -221,7 +221,7 @@ bool generateWaypointV2AllActions(ros::NodeHandle &nh, uint16_t actionNum)
     return generateWaypointV2Action_.response.result;
 }
 
-bool generateWaypointV2AllActions_(ros::NodeHandle &nh, uint16_t actionNum, uint16_t &lastActionID)
+bool generateWaypointV2AllActions_(ros::NodeHandle &nh, uint16_t actionNum, int &lastActionID)
 {
     waypointV2_generate_actions_client = nh.serviceClient<dji_osdk_ros::GenerateWaypointV2Action>("dji_osdk_ros/waypointV2_generateActions");
     dji_osdk_ros::WaypointV2Action actionVector_camera;
