@@ -348,7 +348,7 @@ class WaypointV2Node{
     spinner.start();
 
     };
-    ~WaypointV2Node();
+    //~WaypointV2Node();
   private:
     ros::NodeHandle nh;
     int actionIDCounter;
