@@ -46,123 +46,6 @@ int finish_action;
 int yaw_mode_global;
 int actionNumber;
 
-
-// A class to improve the quality of the code:
-class WaypointV2Node{
-  public:
-    WaypointV2Node(): nh("~"),actionIDCounter(0){
-      
-    ros::Subscriber gpsPositionSub = nh.subscribe("dji_osdk_ros/gps_position", 10, &gpsPositionSubCallback);
-    auto obtain_ctrl_authority_client = nh.serviceClient<dji_osdk_ros::ObtainControlAuthority>(
-      "obtain_release_control_authority");
-    
-    //if you want to fly without rc ,you need to obtain ctrl authority.Or it will enter rc lost.
-    dji_osdk_ros::ObtainControlAuthority obtainCtrlAuthority;
-    obtainCtrlAuthority.request.enable_obtain = true;
-    obtain_ctrl_authority_client.call(obtainCtrlAuthority);
-
-    // Our changes goes from here:
-    ros::ServiceServer service_config_mission = nh.advertiseService("dji_control/configure_mission", &WaypointV2Node::configMission,this);
-    //ros::ServiceServer service_run_mission = nh.advertiseService("dji_control/start_mission", run_mission);
-    //ros::ServiceServer service_send_bags = nh.advertiseService("dji_control/send_bags", sendFiles);
-
-    ros::Duration(1).sleep();
-    ros::AsyncSpinner spinner(1);
-    spinner.start();
-
-    };
-    ~WaypointV2Node();
-  private:
-    ros::NodeHandle nh;
-    int actionIDCounter;
-
-    // Configuration of the mission obtained from the .YAML file
-    bool configMission(aerialcore_common::ConfigMission::Request  &req,
-            aerialcore_common::ConfigMission::Response &res){
-      ROS_WARN("Received mission");
-
-      ros::NodeHandle nodehandler;
-
-      
-      gpsList_global = req.waypoint; // WORKS
-      yaw_list_global = req.yaw; // WORKS
-      yaw_mode_global = req.yawMode; // TBD
-      gimbal_pitch_list_global = req.gimbalPitch; // TEST:  to include gimbal pitch
-      velocity_range = req.maxVel;
-      idle_velocity = req.idleVel;
-      finish_action = req.finishAction;
-
-      //varying velocity
-      speed_global = req.speed;
-
-      // actions functionality
-      std_msgs::Float64MultiArray acommandList = req.commandList; //TBD 
-      std_msgs::Float64MultiArray acommandParameter = req.commandParameter; //TBD
-      actionNumber=0;
-      /*
-      *WP_ACTION_STAY                 = 0,  /*!< no action.uint of action parameter:ms
-      WP_ACTION_SIMPLE_SHOT          = 1,  /*!< take picture action.action parameters Action parameter have no effect.limit time:6s
-      WP_ACTION_VIDEO_START          = 2,  /*!< start take video action.action parameters Action parameter have no effect.limit time:6s
-      WP_ACTION_VIDEO_STOP           = 3,  /*!< stop video action.action parameters Action parameter have no effect.limit time:6s
-      WP_ACTION_CRAFT_YAW            = 4,  /*!< craft control yaw action.uint of action parameter:degree. range:-180 ~ 180
-      WP_ACTION_GIMBAL_PITCH         = 5,  
-      * 
-      */
-      // We need to create a vector of actions
-      if (acommandList.data.size() != acommandParameter.data.size()){
-        ROS_ERROR("The number of actions and parameters is not the same");
-        return false;
-      }
-      // We need to be sure that exists actions
-      if (acommandList.data.size() >= 0){
-        for (int i = 0; i < gpsList_global.size(); i++){
-          for (int j = 0; j < 10; j++)
-          {
-            // counting the number of actions
-            if (acommandList.data[i*10+j]) actionNumber++;
-            switch (int(acommandList.data[i*10+j]))
-            {
-            case 1:// take a photo
-              // TBD
-              break;
-            case 2:// start recording
-              // TBD
-              break;
-            case 3:// stop recording
-              // TBD
-              break;
-            case 4:// craft control yaw
-              yaw_list_global.data[i] = acommandParameter.data[i*10+j];
-              break;
-            case 5:// gimbal pitch 
-              gimbal_pitch_list_global.data[i] = acommandParameter.data[i*10+j];
-              break;
-            default:
-              break;
-            }
-            ;
-            
-
-          }
-        }
-      }
-      
-      ROS_WARN("Total number of actions: %d", actionNumber);
-        
-      ROS_WARN("Last ActionID: %d",this->actionIDCounter);
-      ROS_WARN("Finish action: %d",finish_action);
-
-      // if everything goes right we run the whole thing
-      res.success = runWaypointV2Mission(nodehandler,this->actionIDCounter);
-      return true;
-    }
-    
-
-
-};
-
-
-
 // Creation of the waypoints depending on what the user wants
 std::vector<dji_osdk_ros::WaypointV2> createWaypoints(ros::NodeHandle &nh,std::vector<sensor_msgs::NavSatFix> gpsList)
 {
@@ -441,7 +324,231 @@ bool generateWaypointV2AllActions_(ros::NodeHandle &nh, uint16_t actionNum, uint
     return generateWaypointV2Action_.response.result;
 }
 
+// A class to improve the quality of the code:
+class WaypointV2Node{
+  public:
+    WaypointV2Node(): nh("~"),actionIDCounter(0){
+      
+    ros::Subscriber gpsPositionSub = nh.subscribe("dji_osdk_ros/gps_position", 10, &gpsPositionSubCallback);
+    auto obtain_ctrl_authority_client = nh.serviceClient<dji_osdk_ros::ObtainControlAuthority>(
+      "obtain_release_control_authority");
+    
+    //if you want to fly without rc ,you need to obtain ctrl authority.Or it will enter rc lost.
+    dji_osdk_ros::ObtainControlAuthority obtainCtrlAuthority;
+    obtainCtrlAuthority.request.enable_obtain = true;
+    obtain_ctrl_authority_client.call(obtainCtrlAuthority);
 
+    // Our changes goes from here:
+    ros::ServiceServer service_config_mission = nh.advertiseService("dji_control/configure_mission", &WaypointV2Node::configMission,this);
+    //ros::ServiceServer service_run_mission = nh.advertiseService("dji_control/start_mission", run_mission);
+    //ros::ServiceServer service_send_bags = nh.advertiseService("dji_control/send_bags", sendFiles);
+
+    ros::Duration(1).sleep();
+    ros::AsyncSpinner spinner(1);
+    spinner.start();
+
+    };
+    ~WaypointV2Node();
+  private:
+    ros::NodeHandle nh;
+    int actionIDCounter;
+
+    // Configuration of the mission obtained from the .YAML file
+    bool configMission(aerialcore_common::ConfigMission::Request  &req,
+            aerialcore_common::ConfigMission::Response &res){
+      ROS_WARN("Received mission");
+
+      ros::NodeHandle nodehandler;
+
+      
+      gpsList_global = req.waypoint; // WORKS
+      yaw_list_global = req.yaw; // WORKS
+      yaw_mode_global = req.yawMode; // TBD
+      gimbal_pitch_list_global = req.gimbalPitch; // TEST:  to include gimbal pitch
+      velocity_range = req.maxVel;
+      idle_velocity = req.idleVel;
+      finish_action = req.finishAction;
+
+      //varying velocity
+      speed_global = req.speed;
+
+      // actions functionality
+      std_msgs::Float64MultiArray acommandList = req.commandList; //TBD 
+      std_msgs::Float64MultiArray acommandParameter = req.commandParameter; //TBD
+      actionNumber=0;
+      /*
+      *WP_ACTION_STAY                 = 0,  /*!< no action.uint of action parameter:ms
+      WP_ACTION_SIMPLE_SHOT          = 1,  /*!< take picture action.action parameters Action parameter have no effect.limit time:6s
+      WP_ACTION_VIDEO_START          = 2,  /*!< start take video action.action parameters Action parameter have no effect.limit time:6s
+      WP_ACTION_VIDEO_STOP           = 3,  /*!< stop video action.action parameters Action parameter have no effect.limit time:6s
+      WP_ACTION_CRAFT_YAW            = 4,  /*!< craft control yaw action.uint of action parameter:degree. range:-180 ~ 180
+      WP_ACTION_GIMBAL_PITCH         = 5,  
+      * 
+      */
+      // We need to create a vector of actions
+      if (acommandList.data.size() != acommandParameter.data.size()){
+        ROS_ERROR("The number of actions and parameters is not the same");
+        return false;
+      }
+      // We need to be sure that exists actions
+      if (acommandList.data.size() >= 0){
+        for (int i = 0; i < gpsList_global.size(); i++){
+          for (int j = 0; j < 10; j++)
+          {
+            // counting the number of actions
+            if (acommandList.data[i*10+j]) actionNumber++;
+            switch (int(acommandList.data[i*10+j]))
+            {
+            case 1:// take a photo
+              // TBD
+              break;
+            case 2:// start recording
+              // TBD
+              break;
+            case 3:// stop recording
+              // TBD
+              break;
+            case 4:// craft control yaw
+              yaw_list_global.data[i] = acommandParameter.data[i*10+j];
+              break;
+            case 5:// gimbal pitch 
+              gimbal_pitch_list_global.data[i] = acommandParameter.data[i*10+j];
+              break;
+            default:
+              break;
+            }
+            ;
+            
+
+          }
+        }
+      }
+      
+      ROS_WARN("Total number of actions: %d", actionNumber);
+        
+      ROS_WARN("Last ActionID: %d",this->actionIDCounter);
+      ROS_WARN("Finish action: %d",finish_action);
+
+      // if everything goes right we run the whole thing
+      res.success = runWaypointV2Mission(nodehandler,this->actionIDCounter);
+      return true;
+    }
+    
+
+
+};// A class to improve the quality of the code:
+class WaypointV2Node{
+  public:
+    WaypointV2Node(): nh("~"),actionIDCounter(0){
+      
+    ros::Subscriber gpsPositionSub = nh.subscribe("dji_osdk_ros/gps_position", 10, &gpsPositionSubCallback);
+    auto obtain_ctrl_authority_client = nh.serviceClient<dji_osdk_ros::ObtainControlAuthority>(
+      "obtain_release_control_authority");
+    
+    //if you want to fly without rc ,you need to obtain ctrl authority.Or it will enter rc lost.
+    dji_osdk_ros::ObtainControlAuthority obtainCtrlAuthority;
+    obtainCtrlAuthority.request.enable_obtain = true;
+    obtain_ctrl_authority_client.call(obtainCtrlAuthority);
+
+    // Our changes goes from here:
+    ros::ServiceServer service_config_mission = nh.advertiseService("dji_control/configure_mission", &WaypointV2Node::configMission,this);
+    //ros::ServiceServer service_run_mission = nh.advertiseService("dji_control/start_mission", run_mission);
+    //ros::ServiceServer service_send_bags = nh.advertiseService("dji_control/send_bags", sendFiles);
+
+    ros::Duration(1).sleep();
+    ros::AsyncSpinner spinner(1);
+    spinner.start();
+
+    };
+    ~WaypointV2Node();
+  private:
+    ros::NodeHandle nh;
+    int actionIDCounter;
+
+    // Configuration of the mission obtained from the .YAML file
+    bool configMission(aerialcore_common::ConfigMission::Request  &req,
+            aerialcore_common::ConfigMission::Response &res){
+      ROS_WARN("Received mission");
+
+      ros::NodeHandle nodehandler;
+
+      
+      gpsList_global = req.waypoint; // WORKS
+      yaw_list_global = req.yaw; // WORKS
+      yaw_mode_global = req.yawMode; // TBD
+      gimbal_pitch_list_global = req.gimbalPitch; // TEST:  to include gimbal pitch
+      velocity_range = req.maxVel;
+      idle_velocity = req.idleVel;
+      finish_action = req.finishAction;
+
+      //varying velocity
+      speed_global = req.speed;
+
+      // actions functionality
+      std_msgs::Float64MultiArray acommandList = req.commandList; //TBD 
+      std_msgs::Float64MultiArray acommandParameter = req.commandParameter; //TBD
+      actionNumber=0;
+      /*
+      *WP_ACTION_STAY                 = 0,  /*!< no action.uint of action parameter:ms
+      WP_ACTION_SIMPLE_SHOT          = 1,  /*!< take picture action.action parameters Action parameter have no effect.limit time:6s
+      WP_ACTION_VIDEO_START          = 2,  /*!< start take video action.action parameters Action parameter have no effect.limit time:6s
+      WP_ACTION_VIDEO_STOP           = 3,  /*!< stop video action.action parameters Action parameter have no effect.limit time:6s
+      WP_ACTION_CRAFT_YAW            = 4,  /*!< craft control yaw action.uint of action parameter:degree. range:-180 ~ 180
+      WP_ACTION_GIMBAL_PITCH         = 5,  
+      * 
+      */
+      // We need to create a vector of actions
+      if (acommandList.data.size() != acommandParameter.data.size()){
+        ROS_ERROR("The number of actions and parameters is not the same");
+        return false;
+      }
+      // We need to be sure that exists actions
+      if (acommandList.data.size() >= 0){
+        for (int i = 0; i < gpsList_global.size(); i++){
+          for (int j = 0; j < 10; j++)
+          {
+            // counting the number of actions
+            if (acommandList.data[i*10+j]) actionNumber++;
+            switch (int(acommandList.data[i*10+j]))
+            {
+            case 1:// take a photo
+              // TBD
+              break;
+            case 2:// start recording
+              // TBD
+              break;
+            case 3:// stop recording
+              // TBD
+              break;
+            case 4:// craft control yaw
+              yaw_list_global.data[i] = acommandParameter.data[i*10+j];
+              break;
+            case 5:// gimbal pitch 
+              gimbal_pitch_list_global.data[i] = acommandParameter.data[i*10+j];
+              break;
+            default:
+              break;
+            }
+            ;
+            
+
+          }
+        }
+      }
+      
+      ROS_WARN("Total number of actions: %d", actionNumber);
+        
+      ROS_WARN("Last ActionID: %d",this->actionIDCounter);
+      ROS_WARN("Finish action: %d",finish_action);
+
+      // if everything goes right we run the whole thing
+      res.success = runWaypointV2Mission(nodehandler,this->actionIDCounter);
+      return true;
+    }
+    
+
+
+};
 // Gimbal control management
 bool generateGimbalActions(ros::NodeHandle &nh, uint16_t actionNum)
 {
