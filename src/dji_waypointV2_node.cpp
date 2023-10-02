@@ -324,33 +324,45 @@ bool generateWaypointV2AllActions_(ros::NodeHandle &nh, uint16_t actionNum, int 
     return generateWaypointV2Action_.response.result;
 }
 
+void gpsPositionSubCallback(const sensor_msgs::NavSatFix::ConstPtr& gpsPosition)
+{
+  gps_position_ = *gpsPosition;
+}
+
+
 // A class to improve the quality of the code:
 class WaypointV2Node{
   public:
-    WaypointV2Node(): nh("~"),actionIDCounter(0){
-      
-    ros::Subscriber gpsPositionSub = nh.subscribe("dji_osdk_ros/gps_position", 10, &gpsPositionSubCallback);
-    auto obtain_ctrl_authority_client = nh.serviceClient<dji_osdk_ros::ObtainControlAuthority>(
+    WaypointV2Node() {
+	
+    actionIDCounter=0; 
+     // Our changes goes from here:
+    service_config_mission = nh.advertiseService("dji_control/configure_mission", &WaypointV2Node::configMission,this);
+    gpsPositionSub = nh.subscribe<sensor_msgs::NavSatFix>("dji_osdk_ros/gps_position", 10, &gpsPositionSubCallback);
+    obtain_ctrl_authority_client = nh.serviceClient<dji_osdk_ros::ObtainControlAuthority>(
       "obtain_release_control_authority");
-    
+
     //if you want to fly without rc ,you need to obtain ctrl authority.Or it will enter rc lost.
-    dji_osdk_ros::ObtainControlAuthority obtainCtrlAuthority;
     obtainCtrlAuthority.request.enable_obtain = true;
     obtain_ctrl_authority_client.call(obtainCtrlAuthority);
 
-    // Our changes goes from here:
-    ros::ServiceServer service_config_mission = nh.advertiseService("dji_control/configure_mission", &WaypointV2Node::configMission,this);
+   
+    ROS_WARN("WaypointV2Node started");
     //ros::ServiceServer service_run_mission = nh.advertiseService("dji_control/start_mission", run_mission);
     //ros::ServiceServer service_send_bags = nh.advertiseService("dji_control/send_bags", sendFiles);
 
-    ros::Duration(1).sleep();
-    ros::AsyncSpinner spinner(1);
-    spinner.start();
 
     };
-    ~WaypointV2Node(){}
+    ~WaypointV2Node(){};
   private:
+    // ROS stuff
     ros::NodeHandle nh;
+    ros::ServiceServer service_config_mission;
+    ros::Subscriber gpsPositionSub;
+   
+    ros::ServiceClient obtain_ctrl_authority_client;
+    dji_osdk_ros::ObtainControlAuthority obtainCtrlAuthority;
+    // WaypointV2  variables
     int actionIDCounter;
 
     // Configuration of the mission obtained from the .YAML file
@@ -358,7 +370,7 @@ class WaypointV2Node{
             aerialcore_common::ConfigMission::Response &res){
       ROS_WARN("Received mission");
 
-      ros::NodeHandle nodehandler;
+      //ros::NodeHandle nodehandler;
 
       
       gpsList_global = req.waypoint; // WORKS
@@ -430,7 +442,7 @@ class WaypointV2Node{
       ROS_WARN("Finish action: %d",finish_action);
 
       // if everything goes right we run the whole thing
-      res.success = runWaypointV2Mission(nodehandler,this->actionIDCounter);
+      res.success = runWaypointV2Mission(this->nh,this->actionIDCounter);
       return true;
     }
     
@@ -509,12 +521,6 @@ bool generateHeadingV2Actions(ros::NodeHandle &nh, uint16_t actionNum)
 
     return generateWaypointV2Action_.response.result;
 }
-
-void gpsPositionSubCallback(const sensor_msgs::NavSatFix::ConstPtr& gpsPosition)
-{
-  gps_position_ = *gpsPosition;
-}
-
 
 
 
@@ -929,7 +935,8 @@ int main(int argc, char** argv)
 {
   ros::init(argc, argv, "waypointV2_node");
   WaypointV2Node node;
-  //runWaypointV2Mission(nh);
-
-  ros::waitForShutdown();
+ 
+  
+  ros::spin();
+  return 0;
 }
