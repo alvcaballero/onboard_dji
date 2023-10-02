@@ -228,7 +228,7 @@ bool generateWaypointV2AllActions_(ros::NodeHandle &nh, uint16_t actionNum, int 
     //dji_osdk_ros::WaypointV2Action actionVector_gimbal;
     //dji_osdk_ros::WaypointV2Action actionVector_heading;
     auto *action = new dji_osdk_ros::WaypointV2Action;
-    int id=lastActionID; // counter of actions for do actions right
+    int id=0;//lastActionID; // counter of actions for do actions right
     
     actionVector_camera.actionId  = id;
     actionVector_camera.waypointV2ActionTriggerType  = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionTriggerTypeSampleReachPoint;
@@ -323,7 +323,7 @@ bool generateWaypointV2AllActions_(ros::NodeHandle &nh, uint16_t actionNum, int 
 
     // after the call we need to reset the action vector
     generateWaypointV2Action_.request.actions.clear();
-    
+
     return generateWaypointV2Action_.response.result;
 }
 
