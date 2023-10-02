@@ -321,6 +321,9 @@ bool generateWaypointV2AllActions_(ros::NodeHandle &nh, uint16_t actionNum, int 
     lastActionID++;
     waypointV2_generate_actions_client.call(generateWaypointV2Action_);
 
+    // after the call we need to reset the action vector
+    generateWaypointV2Action_.request.actions.clear();
+    
     return generateWaypointV2Action_.response.result;
 }
 
