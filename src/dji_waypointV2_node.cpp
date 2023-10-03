@@ -34,6 +34,9 @@
 #include <string>
 #include <time.h>
 
+using namespace DJI::OSDK;
+using namespace DJI::OSDK::Telemetry;
+
 // Our changes goes from here:
 //Global Variables:
 std::vector<sensor_msgs::NavSatFix> gpsList_global;
@@ -122,104 +125,7 @@ std::vector<dji_osdk_ros::WaypointV2> resetWaypoints(ros::NodeHandle &nh,std::ve
   return waypointList;
 }
 
-// Three kind of actions: Camera, Gimbal and Heading
-bool generateWaypointV2AllActions(ros::NodeHandle &nh, uint16_t actionNum)
-{
-    waypointV2_generate_actions_client = nh.serviceClient<dji_osdk_ros::GenerateWaypointV2Action>("dji_osdk_ros/waypointV2_generateActions");
-    dji_osdk_ros::WaypointV2Action actionVector_camera;
-    dji_osdk_ros::WaypointV2Action actionVector_gimbal;
-    dji_osdk_ros::WaypointV2Action actionVector_heading;
-    int id=0; // counter of actions for do actions right
-    // First of all we start with the camera actions, in our case we need to start recording in the first waypoint, 
-    // could be interesting testing if we can do photos at the same time
-    actionVector_camera.actionId  = id;
-    actionVector_camera.waypointV2ActionTriggerType  = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionTriggerTypeSampleReachPoint;
-    actionVector_camera.waypointV2SampleReachPointTrigger.waypointIndex = 0;
-    actionVector_camera.waypointV2SampleReachPointTrigger.terminateNum = 0;
-    actionVector_camera.waypointV2ACtionActuatorType = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionActuatorTypeCamera;
-    actionVector_camera.waypointV2CameraActuator.actuatorIndex = 0;
-    actionVector_camera.waypointV2CameraActuator.DJIWaypointV2ActionActuatorCameraOperationType = dji_osdk_ros::WaypointV2CameraActuator::DJIWaypointV2ActionActuatorCameraOperationTypeStartRecordVideo;
-    generateWaypointV2Action_.request.actions.push_back(actionVector_camera);
-    
-    id+=1;
-    for (uint16_t i = 0; i <= gpsList_global.size(); i++)
-    {
-      // If it is not the first wp, we start doing photos
-      /*actionVector.actionId  = i;
-      actionVector.waypointV2ActionTriggerType  = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionTriggerTypeSampleReachPoint;
-      actionVector.waypointV2SampleReachPointTrigger.waypointIndex = i;
-      actionVector.waypointV2SampleReachPointTrigger.terminateNum = 0;
-      actionVector.waypointV2ACtionActuatorType = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionActuatorTypeCamera;
-      actionVector.waypointV2CameraActuator.actuatorIndex = 0;
-      actionVector.waypointV2CameraActuator.DJIWaypointV2ActionActuatorCameraOperationType = dji_osdk_ros::WaypointV2CameraActuator::DJIWaypointV2ActionActuatorCameraOperationTypeTakePhoto;
-      generateWaypointV2Action_.request.actions.push_back(actionVector);
-      */
-      // Gimbal control, we need to use different IDs for the actions obviously
-      actionVector_gimbal.actionId  = id;//+ actionNum + 1;
-      actionVector_gimbal.waypointV2ActionTriggerType  = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionTriggerTypeSampleReachPoint; // Good for now
-      actionVector_gimbal.waypointV2SampleReachPointTrigger.waypointIndex = i;
-      actionVector_gimbal.waypointV2SampleReachPointTrigger.terminateNum = 0;
-      actionVector_gimbal.waypointV2ACtionActuatorType = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionActuatorTypeGimbal;
-      // We are gonna rotate the gimbal somehow so we need to set this operation type
-      actionVector_gimbal.waypointV2GimbalActuator.DJIWaypointV2ActionActuatorGimbalOperationType = dji_osdk_ros::WaypointV2GimbalActuator::DJIWaypointV2ActionActuatorGimbalOperationTypeRotateGimbal;
-      actionVector_gimbal.waypointV2GimbalActuator.actuatorIndex = 0;
-      // Gimbal Parameters
-      // Gimbal roll angle
-      actionVector_gimbal.waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.x = 0; 
-      // Gimbal pitch angle
-      actionVector_gimbal.waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.y = 10*gimbal_pitch_list_global.data[i]; // TBD: Change it acording to user needs -> gimbal_pitch_list_global.data[i];
-      // Gimbal yaw angle
-      actionVector_gimbal.waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.z = 0;//10*yaw_list_global.data[i]; 
 
-      // Gimbal Control mode
-      actionVector_gimbal.waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.ctrl_mode = 0; // 0: absolute angle, 1: relative angle
-
-      actionVector_gimbal.waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.rollCmdIgnore = 1;
-      actionVector_gimbal.waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.pitchCmdIgnore = 0;
-      actionVector_gimbal.waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.yawCmdIgnore = 1;
-
-      actionVector_gimbal.waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.absYawModeRef = 1; //0: relative to the aircraft, 1: relative to North
-   
-      // Gimbal Control speed
-      actionVector_gimbal.waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.duationTime = 10; // rotate time
-      id+=1;  
-      ROS_INFO("Gimbal action created with ID: %d at wp: %d and angle %d", actionVector_gimbal.actionId, actionVector_gimbal.waypointV2SampleReachPointTrigger.waypointIndex, actionVector_gimbal.waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.y); // add more info when advances come
-
-      generateWaypointV2Action_.request.actions.push_back(actionVector_gimbal);
-
-
-      // Heading control
-      actionVector_heading.actionId  = id;//*2 + 1;
-      actionVector_heading.waypointV2ActionTriggerType  = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionTriggerTypeSampleReachPoint;
-      actionVector_heading.waypointV2SampleReachPointTrigger.waypointIndex = i;
-      actionVector_heading.waypointV2SampleReachPointTrigger.terminateNum = 0;
-      actionVector_heading.waypointV2ACtionActuatorType = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionActuatorTypeAircraftControl;
-      // Config of the aircraft control (our case yaw angles)
-      actionVector_heading.waypointV2AircraftControlActuator.actuatorIndex = 0;
-      actionVector_heading.waypointV2AircraftControlActuator.DJIWaypointV2ActionActuatorAircraftControlOperationType = dji_osdk_ros::WaypointV2AircraftControlActuator::DJIWaypointV2ActionActuatorAircraftControlOperationTypeRotateYaw;
-      actionVector_heading.waypointV2AircraftControlActuator.waypointV2AircraftControlActuatorRotateHeading.isRelative = 0;
-      actionVector_heading.waypointV2AircraftControlActuator.waypointV2AircraftControlActuatorRotateHeading.yaw = yaw_list_global.data[i]; // works with manual mode
-
-      ROS_INFO("Heading action created with ID: %d at wp: %d and angle %d ", actionVector_heading.actionId, actionVector_heading.waypointV2SampleReachPointTrigger.waypointIndex, actionVector_heading.waypointV2AircraftControlActuator.waypointV2AircraftControlActuatorRotateHeading.yaw); // add more info when advances come
-      id+=1;  
-      generateWaypointV2Action_.request.actions.push_back(actionVector_heading);
-
-
-    }
-    // Stop recording the video
-    actionVector_camera.actionId  = id;
-    actionVector_camera.waypointV2ActionTriggerType  = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionTriggerTypeSampleReachPoint;
-    actionVector_camera.waypointV2SampleReachPointTrigger.waypointIndex = actionNum;
-    actionVector_camera.waypointV2SampleReachPointTrigger.terminateNum = 0;
-    actionVector_camera.waypointV2ACtionActuatorType = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionActuatorTypeCamera;
-    actionVector_camera.waypointV2CameraActuator.actuatorIndex = 0;
-    actionVector_camera.waypointV2CameraActuator.DJIWaypointV2ActionActuatorCameraOperationType = dji_osdk_ros::WaypointV2CameraActuator::DJIWaypointV2ActionActuatorCameraOperationTypeStopRecordVideo;
-    generateWaypointV2Action_.request.actions.push_back(actionVector_camera);
-    id+=1;
-    waypointV2_generate_actions_client.call(generateWaypointV2Action_);
-
-    return generateWaypointV2Action_.response.result;
-}
 
 bool generateWaypointV2AllActions_(ros::NodeHandle &nh, uint16_t actionNum, int &lastActionID)
 {
@@ -341,6 +247,8 @@ class WaypointV2Node{
     actionIDCounter=0; 
      // Our changes goes from here:
     service_config_mission = nh.advertiseService("dji_control/configure_mission", &WaypointV2Node::configMission,this);
+    ls_filelist_server_ = nh_.advertiseService("dji_media/ls_filelist", &downloadCameraFilelistCB, this);
+    download_camera_files_server_ = nh_.advertiseService("dji_media/download_camera_files", &downloadCameraFilesCallback, this);
     gpsPositionSub = nh.subscribe<sensor_msgs::NavSatFix>("dji_osdk_ros/gps_position", 10, &gpsPositionSubCallback);
     obtain_ctrl_authority_client = nh.serviceClient<dji_osdk_ros::ObtainControlAuthority>(
       "obtain_release_control_authority");
@@ -452,80 +360,96 @@ class WaypointV2Node{
 
 
 };
-// Gimbal control management
-bool generateGimbalActions(ros::NodeHandle &nh, uint16_t actionNum)
-{
-    waypointV2_generate_actions_client = nh.serviceClient<dji_osdk_ros::GenerateWaypointV2Action>("dji_osdk_ros/waypointV2_generateActions");
-    dji_osdk_ros::WaypointV2Action actionVector;
-    int id=0;
-    // array with 4 gimbal values
-    int array[9] = {-300, 10, -400, -100,0,0,0,0,0};
-    for (uint16_t i = 0; i <= gpsList_global.size(); i++)
-    {
-      actionVector.actionId  = id; // to be different than the camera actions 
-      actionVector.waypointV2ActionTriggerType  = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionTriggerTypeSampleReachPoint; // Good for now
-      actionVector.waypointV2SampleReachPointTrigger.waypointIndex = i;
-      actionVector.waypointV2SampleReachPointTrigger.terminateNum = 0;
-      actionVector.waypointV2ACtionActuatorType = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionActuatorTypeGimbal;
-      
-      // We are gonna rotate the gimbal somehow so we need to set this operation type
-      actionVector.waypointV2GimbalActuator.DJIWaypointV2ActionActuatorGimbalOperationType = dji_osdk_ros::WaypointV2GimbalActuator::DJIWaypointV2ActionActuatorGimbalOperationTypeRotateGimbal;
-      actionVector.waypointV2GimbalActuator.actuatorIndex = 0;
-      // Gimbal Parameters
-      // Gimbal roll angle
-      actionVector.waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.x = 0; 
-      // Gimbal pitch angle
-      actionVector.waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.y = array[i];//10*gimbal_pitch_list_global.data[i]; // TBD: Change it acording to user needs -> gimbal_pitch_list_global.data[i];
-      // Gimbal yaw angle
-      actionVector.waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.z = 0; //10*yaw_list_global.data[i]; 
 
-      // Gimbal Control mode
-      actionVector.waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.ctrl_mode = 1; // 0: absolute angle, 1: relative angle
 
-      actionVector.waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.rollCmdIgnore = 0;
-      actionVector.waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.pitchCmdIgnore = 0;
-      actionVector.waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.yawCmdIgnore = 0;
+/*Attempt to download media
 
-      actionVector.waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.absYawModeRef = 1; //0: relative to the aircraft, 1: relative to North
-   
-      // Gimbal Control speed
-      actionVector.waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.duationTime = 10; // rotate time
-
-      generateWaypointV2Action_.request.actions.push_back(actionVector);
-      id++;
+  Adaptation of the code from the OSDK: download_sample.cpp
+*/
+FilePackage cur_file_list;
+void fileListReqCB(E_OsdkStat ret_code, const FilePackage file_list, void* udata) {
+  //ROS_INFO("\033[1;32;40m##[%s] : ret = %d \033[0m", udata, ret_code);
+  if (ret_code == OSDK_STAT_OK) {
+    cur_file_list = file_list;
+    ROS_INFO("file_list.type = %d", file_list.type);
+    ROS_INFO("file_list.media.size() = %d", file_list.media.size());
+    for (auto &file : file_list.media) {
+      if ((file.fileSize > 0) && (file.valid))
+      printMediaFileMsg(file);
     }
-
-    waypointV2_generate_actions_client.call(generateWaypointV2Action_);
-
-    return generateWaypointV2Action_.response.result;
+  }
 }
 
-bool generateHeadingV2Actions(ros::NodeHandle &nh, uint16_t actionNum)
-{
-    waypointV2_generate_actions_client = nh.serviceClient<dji_osdk_ros::GenerateWaypointV2Action>("dji_osdk_ros/waypointV2_generateActions");
-    dji_osdk_ros::WaypointV2Action actionVector;
-    for (uint16_t i = 0; i <= actionNum; i++)
-    {
-      actionVector.actionId  = i+actionNum*2+1;
-      actionVector.waypointV2ActionTriggerType  = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionTriggerTypeSampleReachPoint;
-      actionVector.waypointV2SampleReachPointTrigger.waypointIndex = i+1;
-      actionVector.waypointV2SampleReachPointTrigger.terminateNum = 0;
-      actionVector.waypointV2ACtionActuatorType = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionActuatorTypeAircraftControl;
-      // Config of the aircraft control (our case yaw angles)
-      actionVector.waypointV2AircraftControlActuator.actuatorIndex = 0;
-      actionVector.waypointV2AircraftControlActuator.DJIWaypointV2ActionActuatorAircraftControlOperationType = dji_osdk_ros::WaypointV2AircraftControlActuator::DJIWaypointV2ActionActuatorAircraftControlOperationTypeRotateYaw;
-      actionVector.waypointV2AircraftControlActuator.waypointV2AircraftControlActuatorRotateHeading.isRelative = 0;
-      actionVector.waypointV2AircraftControlActuator.waypointV2AircraftControlActuatorRotateHeading.yaw = yaw_list_global.data[i]; // works with manual mode
-
-      generateWaypointV2Action_.request.actions.push_back(actionVector);
-    }
-
-    waypointV2_generate_actions_client.call(generateWaypointV2Action_);
-
-    return generateWaypointV2Action_.response.result;
+bool fileDataDownloadFinished = false;
+void fileDataReqCB(E_OsdkStat ret_code, void *udata) {
+  if (ret_code == OSDK_STAT_OK) {
+    ROS_INFO("\033[1;32;40m##Download file [%s] successfully. \033[0m", udata);
+  } else {
+    ROS_ERROR("\033[1;31;40m##Download file data failed. \033[0m");
+  }
+  fileDataDownloadFinished = true;
 }
 
 
+
+
+// In order to download the filelist, it must be necessary to include this in functions
+bool downloadCameraFilelistCB(onboard_dji::FileList&  request, onboard_dji::FileList& response){
+  ErrorCode::ErrorCodeType ret;
+  ROS_INFO("Play back mode setting......");
+  vehicle->cameraManager->setModeSync(PAYLOAD_INDEX_0,
+                                      CameraModule::WorkMode::PLAYBACK,
+                                      2);
+  ROS_INFO("Get liveview right......");
+    ret = vehicle->cameraManager->obtainDownloadRightSync(PAYLOAD_INDEX_0,
+                                                      true, 2);
+  ErrorCode::printErrorCodeMsg(ret);
+  ROS_INFO("Try to download file list  .......");
+  ret = vehicle->cameraManager->startReqFileList(
+    PAYLOAD_INDEX_0,
+    fileListReqCB,
+    (void*)("Download main camera file list"));
+  ErrorCode::printErrorCodeMsg(ret);
+}
+// In order to download the raw files from the main camera
+bool downloadCameraFilesCallback(onboard_dji::DownloadMedia&  request, onboard_dji::DownloadMedia& response){
+  ErrorCode::ErrorCodeType ret;
+  ROS_INFO("Download file number : %d", cur_file_list.media.size());
+  uint32_t downloadCnt = cur_file_list.media.size();
+  if (downloadCnt > request.downloadCnt) downloadCnt = request.downloadCnt; //TBD: change this parameter, include that in the request of the service
+  ROS_INFO("Now try to download %d media files from main camera.", downloadCnt);
+  for (uint32_t i = 0; i < downloadCnt; i++) {
+    fileDataDownloadFinished = false;
+    ROS_INFO("playback mode......");
+    vehicle->cameraManager->setModeSync(PAYLOAD_INDEX_0,
+                                        CameraModule::WorkMode::PLAYBACK,
+                                        2);
+    ROS_INFO("Get liveview right......");
+    ret = vehicle->cameraManager->obtainDownloadRightSync(
+      PAYLOAD_INDEX_0, true, 2);
+    ErrorCode::printErrorCodeMsg(ret);
+
+    ROS_INFO("Try to download file list  .......");
+    char pathBuffer[100] = {0};
+    MediaFile targetFile = cur_file_list.media[i];
+    sprintf(pathBuffer, "/home/khadas/DJImedia/%s", targetFile.fileName.c_str()); // TBD: change the path
+    std::string localPath(pathBuffer);
+
+    ROS_INFO("targetFile.fileIndex = %d, localPath = %s", targetFile.fileIndex, localPath.c_str());
+    ret = vehicle->cameraManager->startReqFileData(
+      PAYLOAD_INDEX_0,
+      targetFile.fileIndex,
+      localPath,
+      fileDataReqCB,
+      (void*)(localPath.c_str()));
+    ErrorCode::printErrorCodeMsg(ret);
+    while (fileDataDownloadFinished == false) {
+      OsdkOsal_TaskSleepMs(1000);
+    }
+    ROS_INFO("Prepare to do next downloading ...");
+    OsdkOsal_TaskSleepMs(1000);
+  }
+}
 
 // TBD: Know the functionalities of the Events
 void waypointV2MissionEventSubCallback(const dji_osdk_ros::WaypointV2MissionEventPush::ConstPtr& waypointV2MissionEventPush)

@@ -39,6 +39,9 @@
 #include <std_msgs/Float64.h>
 #include <std_msgs/Bool.h>
 
+// raw OSDK includes
+#include <dji_linux_helpers.hpp> //used for download media
+
 dji_osdk_ros::GetDroneType drone_type;
 dji_osdk_ros::InitWaypointV2Setting initWaypointV2Setting_;
 dji_osdk_ros::UploadWaypointV2Mission uploadWaypointV2Mission_;
