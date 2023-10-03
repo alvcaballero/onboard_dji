@@ -64,14 +64,14 @@ std::vector<dji_osdk_ros::WaypointV2> createWaypoints(ros::NodeHandle &nh,std::v
   for (int i = 0; i < gpsList.size(); i++) {
     
     setWaypointV2Defaults(waypointV2);
-    //TEST to try different flightpaths
+    /*TEST to try different flightpaths
     if(i<=3){
       waypointV2.waypointType = dji_osdk_ros::DJIWaypointV2FlightPathModeGoToPointAlongACurve;
     }
     
     if(i>(gpsList.size()-2)){
       waypointV2.waypointType = dji_osdk_ros::DJIWaypointV2FlightPathModeGoToPointAlongACurveAndStop;
-    }
+    }*/
     
 
     waypointV2.config.useLocalCruiseVel = 1;
@@ -892,43 +892,7 @@ bool runWaypointV2Mission(ros::NodeHandle &nh, int &actionIDCounter)
   std::vector<dji_osdk_ros::WaypointV2> resetMission;
   resetMission = resetWaypoints(nh, gpsList_global);
 
-  /*! start mission 
-  result = startWaypointV2Mission(nh);
-  if(!result)
-  {
-    return false;
-  }*/
-  /*sleep(20);
-
-  /*! set global cruise speed /
-  result = setGlobalCruiseSpeed(nh, 1.5);
-  if(!result)
-  {
-    return false;
-  }
-  sleep(timeout);
-
-  /*! get global cruise speed /
-  float32_t globalCruiseSpeed = 0;
-  globalCruiseSpeed = getGlobalCruiseSpeed(nh);
-  sleep(timeout);
-
-  /*! pause the mission/
-  result = pauseWaypointV2Mission(nh);
-  if(!result)
-  {
-    return false;
-  }
-  sleep(5);
-
-  /*! resume the mission/
-  result = resumeWaypointV2Mission(nh);
-  if(!result)
-  {
-    return false;
-  }
-  sleep(20); */
-
+  
 return true;
 }
 
