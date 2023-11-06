@@ -453,6 +453,96 @@ class WaypointV2Node{
 
 
 };
+
+
+/*Attempt to download media
+
+  Adaptation of the code from the OSDK: download_sample.cpp
+*/
+FilePackage cur_file_list;
+void fileListReqCB(E_OsdkStat ret_code, const FilePackage file_list, void* udata) {
+  //ROS_INFO("\033[1;32;40m##[%s] : ret = %d \033[0m", udata, ret_code);
+  if (ret_code == OSDK_STAT_OK) {
+    cur_file_list = file_list;
+    ROS_INFO("file_list.type = %d", file_list.type);
+    ROS_INFO("file_list.media.size() = %d", file_list.media.size());
+    for (auto &file : file_list.media) {
+      if ((file.fileSize > 0) && (file.valid))
+      printMediaFileMsg(file);
+    }
+  }
+}
+
+bool fileDataDownloadFinished = false;
+void fileDataReqCB(E_OsdkStat ret_code, void *udata) {
+  if (ret_code == OSDK_STAT_OK) {
+    ROS_INFO("\033[1;32;40m##Download file [%s] successfully. \033[0m", udata);
+  } else {
+    ROS_ERROR("\033[1;31;40m##Download file data failed. \033[0m");
+  }
+  fileDataDownloadFinished = true;
+}
+
+
+/*
+
+// In order to download the filelist, it must be necessary to include this in functions
+bool downloadCameraFilelistCB(onboard_dji::FileList&  request, onboard_dji::FileList& response){
+  ErrorCode::ErrorCodeType ret;
+  ROS_INFO("Play back mode setting......");
+  vehicle->cameraManager->setModeSync(PAYLOAD_INDEX_0,
+                                      CameraModule::WorkMode::PLAYBACK,
+                                      2);
+  ROS_INFO("Get liveview right......");
+    ret = vehicle->cameraManager->obtainDownloadRightSync(PAYLOAD_INDEX_0,
+                                                      true, 2);
+  ErrorCode::printErrorCodeMsg(ret);
+  ROS_INFO("Try to download file list  .......");
+  ret = vehicle->cameraManager->startReqFileList(
+    PAYLOAD_INDEX_0,
+    fileListReqCB,
+    (void*)("Download main camera file list"));
+  ErrorCode::printErrorCodeMsg(ret);
+}
+// In order to download the raw files from the main camera
+bool downloadCameraFilesCallback(onboard_dji::DownloadMedia&  request, onboard_dji::DownloadMedia& response){
+  ErrorCode::ErrorCodeType ret;
+  ROS_INFO("Download file number : %d", cur_file_list.media.size());
+  uint32_t downloadCnt = cur_file_list.media.size();
+  if (downloadCnt > request.downloadCnt) downloadCnt = request.downloadCnt; //TBD: change this parameter, include that in the request of the service
+  ROS_INFO("Now try to download %d media files from main camera.", downloadCnt);
+  for (uint32_t i = 0; i < downloadCnt; i++) {
+    fileDataDownloadFinished = false;
+    ROS_INFO("playback mode......");
+    vehicle->cameraManager->setModeSync(PAYLOAD_INDEX_0,
+                                        CameraModule::WorkMode::PLAYBACK,
+                                        2);
+    ROS_INFO("Get liveview right......");
+    ret = vehicle->cameraManager->obtainDownloadRightSync(
+      PAYLOAD_INDEX_0, true, 2);
+    ErrorCode::printErrorCodeMsg(ret);
+
+    ROS_INFO("Try to download file list  .......");
+    char pathBuffer[100] = {0};
+    MediaFile targetFile = cur_file_list.media[i];
+    sprintf(pathBuffer, "/home/khadas/DJImedia/%s", targetFile.fileName.c_str()); // TBD: change the path
+    std::string localPath(pathBuffer);
+
+    ROS_INFO("targetFile.fileIndex = %d, localPath = %s", targetFile.fileIndex, localPath.c_str());
+    ret = vehicle->cameraManager->startReqFileData(
+      PAYLOAD_INDEX_0,
+      targetFile.fileIndex,
+      localPath,
+      fileDataReqCB,
+      (void*)(localPath.c_str()));
+    ErrorCode::printErrorCodeMsg(ret);
+    while (fileDataDownloadFinished == false) {
+      OsdkOsal_TaskSleepMs(1000);
+    }
+    ROS_INFO("Prepare to do next downloading ...");
+    OsdkOsal_TaskSleepMs(1000);
+  }
+}*/
 // Gimbal control management
 bool generateGimbalActions(ros::NodeHandle &nh, uint16_t actionNum)
 {
