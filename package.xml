@@ -2,7 +2,7 @@
 <package format="2">
   <name>onboard_dji</name>
   <version>1.0.0</version>
-  <description>A ROS package using DJI Onboard SDK in AERIAL-CORE, OMICRON and RESISTO projects</description>
+  <description>A ROS package using DJI Onboard SDK in INSPECTOR Project</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag -->
   <!-- Example:  -->
@@ -43,15 +43,13 @@
   <!-- Use doc_depend for packages you need only for building documentation: -->
   <!--   <doc_depend>doxygen</doc_depend> -->
   <buildtool_depend>catkin</buildtool_depend>
-  <build_depend>message_generation</build_depend>
-  <exec_depend>message_runtime</exec_depend>
   <depend>dji_osdk_ros</depend>
   <depend>aerialcore_common</depend>
   <depend>roscpp</depend>
   <depend>rospy</depend>
   <depend>std_msgs</depend>
   <depend>std_srvs</depend>
- <!-- <depend>message_generation</depend>
-  <depend>message_runtime</depend>-->
+  <depend>message_generation</depend>
+  <depend>message_runtime</depend>
 
 </package>
