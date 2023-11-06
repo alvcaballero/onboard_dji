@@ -27,7 +27,7 @@
  *
  */
 
-#include "dji_linux_environment.hpp"
+#include "waypointV2/dji_linux_environment.hpp"
 
 DJI_Environment::DJI_Environment(const std::string& config_file_path)
 {

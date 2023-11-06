@@ -27,7 +27,7 @@
  *
  */
 
-#include "dji_linux_helpers.hpp"
+#include "waypointV2/dji_linux_helpers.hpp"
 #include "osdkhal_linux.h"
 #include "osdkosal_linux.h"
 
