@@ -28,6 +28,7 @@
 
 #include <waypointV2/dji_waypointV2_node.h>
 #include <aerialcore_common/ConfigMission.h>
+#include <dji_linux_helpers.hpp>
 
 #include <stdio.h>
 #include <stdlib.h>
