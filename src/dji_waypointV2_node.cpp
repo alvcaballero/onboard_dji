@@ -48,7 +48,7 @@ int finish_action;
 int yaw_mode_global;
 int actionNumber;
 
-Vehicle *vehicle = linuxEnvironment.getVehicle();
+Vehicle *vehicle;
 
 // Creation of the waypoints depending on what the user wants
 std::vector<dji_osdk_ros::WaypointV2> createWaypoints(ros::NodeHandle &nh,std::vector<sensor_msgs::NavSatFix> gpsList)
@@ -996,6 +996,7 @@ int main(int argc, char** argv)
 {
   ros::init(argc, argv, "waypointV2_node");
   LinuxSetup linuxEnvironment(argc, argv);
+  Vehicle *vehicle = linuxEnvironment.getVehicle();
 
   WaypointV2Node node;
  
