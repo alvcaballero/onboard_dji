@@ -75,9 +75,9 @@ add_executable(dji_mission_node src/dji_mission_node.cpp)
 target_link_libraries(dji_mission_node dji_osdk_ros)
 add_dependencies(dji_mission_node ${catkin_EXPORTED_TARGETS})
 
-# add_executable(dji_waypointV2_node src/dji_waypointV2_node.cpp)
-# target_link_libraries(dji_waypointV2_node dji_osdk_ros)
-# add_dependencies(dji_waypointV2_node ${catkin_EXPORTED_TARGETS})
+add_executable(dji_waypointV2_node src/dji_waypointV2_node.cpp)
+target_link_libraries(dji_waypointV2_node dji_osdk_ros)
+add_dependencies(dji_waypointV2_node ${catkin_EXPORTED_TARGETS})
 
 # add_executable(dji_linux_environment src/dji_linux_environment.cpp)
 # target_link_libraries(dji_linux_environment dji_osdk_ros)
