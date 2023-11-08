@@ -33,7 +33,7 @@
 
 #include <iostream>
 #include <fstream>
-#include <waypointV2/dji_linux_environment.hpp>
+#include "waypointV2/dji_linux_environment.hpp"
 #include <dji_vehicle.hpp>
 #include <dji_platform.hpp>
 #include <dji_setup_helpers.hpp>
