@@ -263,3 +263,8 @@ LinuxSetup::initVehicle()
   this->vehicle     = nullptr;
   return false;
 }
+
+int main()
+{
+  
+}
