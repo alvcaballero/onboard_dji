@@ -57,9 +57,10 @@ include_directories(
 )
 
 ## Declare a C++ library
-# add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/onboard-sdk-ros.cpp
-# )
+add_library(${PROJECT_NAME}
+  src/${PROJECT_NAME}/src/dji_linux_environment.cpp
+  src/${PROJECT_NAME}/src/dji_linux_helpers.cpp
+)
 
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
