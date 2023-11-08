@@ -264,7 +264,3 @@ LinuxSetup::initVehicle()
   return false;
 }
 
-int main()
-{
-  
-}

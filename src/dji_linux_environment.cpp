@@ -216,7 +216,3 @@ DJI_Environment::parse(std::string config_file_path)
   return result;
 }
 
-int main()
-{
-  
-}
