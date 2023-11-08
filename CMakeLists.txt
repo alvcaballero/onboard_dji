@@ -14,7 +14,18 @@ find_package(catkin REQUIRED COMPONENTS
     std_msgs
     message_generation
   )
-
+# Generate services in the 'srv' folder
+add_service_files(
+  FILES
+  DownloadMedia.srv
+  FileList.srv
+)
+## Generate added messages and services with any dependencies listed here
+generate_messages(
+  DEPENDENCIES
+  sensor_msgs
+  std_msgs
+)
 ###################################
 ## catkin specific configuration ##
 ###################################

@@ -530,7 +530,7 @@ bool downloadCameraFilesCallback(onboard_dji::DownloadMedia&  request, onboard_d
     ROS_INFO("Try to download file list  .......");
     char pathBuffer[100] = {0};
     MediaFile targetFile = cur_file_list.media[i];
-    sprintf(pathBuffer, "/home/khadas/DJImedia/%s", targetFile.fileName.c_str()); // TBD: change the path
+    sprintf(pathBuffer, "/home/nvidia/DJImedia/%s", targetFile.fileName.c_str()); // TBD: change the path
     std::string localPath(pathBuffer);
 
     ROS_INFO("targetFile.fileIndex = %d, localPath = %s", targetFile.fileIndex, localPath.c_str());
@@ -998,7 +998,7 @@ int main(int argc, char** argv)
 {
   ros::init(argc, argv, "waypointV2_node");
   LinuxSetup linuxEnvironment(argc, argv);
-  Vehicle *vehicle = linuxEnvironment.getVehicle();
+  *vehicle = linuxEnvironment.getVehicle();
 
   WaypointV2Node node;
  
