@@ -490,7 +490,7 @@ void fileDataReqCB(E_OsdkStat ret_code, void *udata) {
 
 
 
-
+/*
 // In order to download the filelist, it must be necessary to include this in functions
 bool downloadCameraFilelistCB(onboard_dji::FileList&  request, onboard_dji::FileList& response){
   ErrorCode::ErrorCodeType ret;
@@ -547,7 +547,7 @@ bool downloadCameraFilesCallback(onboard_dji::DownloadMedia&  request, onboard_d
     ROS_INFO("Prepare to do next downloading ...");
     OsdkOsal_TaskSleepMs(1000);
   }
-}
+}*/
 // Gimbal control management
 bool generateGimbalActions(ros::NodeHandle &nh, uint16_t actionNum)
 {
