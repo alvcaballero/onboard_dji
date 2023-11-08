@@ -58,8 +58,8 @@ include_directories(
 
 ## Declare a C++ library
 add_library(${PROJECT_NAME}
-  src/${PROJECT_NAME}/src/dji_linux_environment.cpp
-  src/${PROJECT_NAME}/src/dji_linux_helpers.cpp
+  src/dji_linux_environment.cpp
+  src/dji_linux_helpers.cpp
 )
 
 ## Add cmake target dependencies of the library
