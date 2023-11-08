@@ -998,7 +998,7 @@ int main(int argc, char** argv)
 {
   ros::init(argc, argv, "waypointV2_node");
   LinuxSetup linuxEnvironment(argc, argv);
-  *vehicle = linuxEnvironment.getVehicle();
+  vehicle = linuxEnvironment.getVehicle();
 
   WaypointV2Node node;
  
