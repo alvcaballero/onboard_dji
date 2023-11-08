@@ -73,7 +73,7 @@ target_link_libraries(dji_linux_environment dji_osdk_ros)
 add_dependencies(dji_linux_environment ${catkin_EXPORTED_TARGETS})
 
 add_executable(dji_linux_helpers src/dji_linux_helpers.cpp)
-target_link_libraries(dji_linux_helpers dji_osdk_ros)
+#target_link_libraries(dji_linux_helpers dji_osdk_ros)
 add_dependencies(dji_linux_helpers ${catkin_EXPORTED_TARGETS})
 
 add_executable(vs_manager src/vs_manager.cpp)
