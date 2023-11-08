@@ -32,6 +32,7 @@
 #include <dji_osdk_ros/dji_vehicle_node.h>
 #include <dji_osdk_ros/common_type.h>
 #include <dji_osdk_ros/FlightTaskControl.h>
+
 // ROS includes
 #include <ros/ros.h>
 #include <sensor_msgs/NavSatFix.h>
