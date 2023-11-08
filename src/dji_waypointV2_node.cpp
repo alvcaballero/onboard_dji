@@ -31,7 +31,7 @@
 //#include "waypointV2/dji_linux_helpers.hpp"
 //#include "waypointV2/dji_linux_environment.hpp"
 #include <dji_linux_helpers.hpp>
-//#include <onboard_dji/FileList.h>
+#include <onboard_dji/FileList.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -490,7 +490,7 @@ void fileDataReqCB(E_OsdkStat ret_code, void *udata) {
 
 
 
-/*
+
 // In order to download the filelist, it must be necessary to include this in functions
 bool downloadCameraFilelistCB(onboard_dji::FileList&  request, onboard_dji::FileList& response){
   ErrorCode::ErrorCodeType ret;
@@ -508,7 +508,7 @@ bool downloadCameraFilelistCB(onboard_dji::FileList&  request, onboard_dji::File
     fileListReqCB,
     (void*)("Download main camera file list"));
   ErrorCode::printErrorCodeMsg(ret);
-}
+}/*
 // In order to download the raw files from the main camera
 bool downloadCameraFilesCallback(onboard_dji::DownloadMedia&  request, onboard_dji::DownloadMedia& response){
   ErrorCode::ErrorCodeType ret;
