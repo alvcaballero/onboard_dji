@@ -63,7 +63,9 @@ void StartRosbag()
 {
   std::string id = std::to_string(uav_id);
   std::string bashscript ("rosbag record -O ~/bags/uav_"+ id +"_");
-
+  char timeString[40];
+  time_t t = time(0);
+  struct tm tm = *localtime(&t);
   
   ROS_WARN("Start of ROS BAG");
   strftime(timeString, sizeof(timeString), "%Y_%m_%d_%H_%M", &tm);
