@@ -34,6 +34,13 @@
 #include <string>
 #include <time.h>
 
+// For media management we will need some extra libraries
+#include <sys/stat.h> 
+#include <iostream> 
+// For folder names including time references
+#include <chrono>
+#include <ctime>
+
 // Our changes goes from here:
 //Global Variables:
 std::vector<sensor_msgs::NavSatFix> gpsList_global;
@@ -45,6 +52,54 @@ int idle_velocity;
 int finish_action;
 int yaw_mode_global;
 int actionNumber;
+
+std::time_t start_time;
+std::time_t end_time;
+bool mission_status = false;   // becomes true when the mission started
+bool was_on_air = false;
+
+// Bags management
+void StartRosbag()
+{
+  std::string id = std::to_string(uav_id);
+  std::string bashscript ("rosbag record -O ~/bags/uav_"+ id +"_");
+
+  
+  ROS_WARN("Start of ROS BAG");
+  strftime(timeString, sizeof(timeString), "%Y_%m_%d_%H_%M", &tm);
+  bashscript = bashscript +  timeString+ ".bag  -e \"/uav_"+ id +"/dji_osdk_ros/(.*)\" __name:=node_bag_uav"+id+" &";
+  system( bashscript.c_str() );
+}
+void StopRosbag()
+{
+  std::string id = std::to_string(uav_id);
+  std::string bashscript  = "rosnode kill node_bag_uav"+id;
+  system( bashscript.c_str() );
+  ROS_WARN("END of ROS BAG");
+}
+bool sendFiles(std_srvs::SetBool::Request  &req, std_srvs::SetBool::Response &res){
+  ROS_WARN("Init to pass bag files ");
+  std::string bashscript  = "sshpass -p 112358 rsync -ae ~/bags/ arpa@10.42.0.2:~/bags";
+  system( bashscript.c_str() );
+  res.success = true;
+  res.message = "Success";
+  return true;
+}
+
+class tme
+{
+public:
+  tme(std::string& a)          // extracts the time date for further customization
+    :day{a.substr(0,3),a.substr(8,2)},month{a.substr(4,3)},year{a.substr(20,4)}
+  {
+    tie = a.substr(11, 8);
+  }
+  
+  std::string day[2]{}; //has day details 
+ std::string month{}; // month details
+ std::string year{}; //year details
+  std::string tie{}; //time details
+};
 
 // Creation of the waypoints depending on what the user wants
 std::vector<dji_osdk_ros::WaypointV2> createWaypoints(ros::NodeHandle &nh,std::vector<sensor_msgs::NavSatFix> gpsList)
@@ -332,6 +387,37 @@ void gpsPositionSubCallback(const sensor_msgs::NavSatFix::ConstPtr& gpsPosition)
   gps_position_ = *gpsPosition;
 }
 
+void flyStatusCallback(const std_msgs::UInt8::ConstPtr &msg)
+{
+  int flystatus = msg->data;//0 stoped //1 on_ground // 2 in air
+  
+  if( flystatus ==0 &&  mission_status == 1 && was_on_air==true){ 
+    StopRosbag();
+    was_on_air = false;
+    // Getting the time for the folder name
+    auto r=std::chrono::system_clock::now();
+    auto rp=std::chrono::system_clock::to_time_t(r);
+    std::string h(ctime(&rp)); //converting to c++ string
+    tme curtime(h);   // creating a tme object
+
+    // We create the folder name and then the folder
+    
+    std::string foldername = "/home/"+ std::getenv("USER") + "uav_media" + "_" + curtime.day[0] + "_" + curtime.day[1] + "_" + curtime.month + "_" + curtime.year + "_" + curtime.tie;
+    int check = mkdir(foldername,0777);
+
+    if (!check)
+        ROS_INFO("Media Directory created successfully");
+    else {
+        ROS_ERROR("Unable to create Media directory");
+        //exit(1);
+    }
+
+
+  }
+  if (flystatus == 2){
+    was_on_air = true;
+  }
+}
 
 // A class to improve the quality of the code:
 class WaypointV2Node{
@@ -342,6 +428,8 @@ class WaypointV2Node{
      // Our changes goes from here:
     service_config_mission = nh.advertiseService("dji_control/configure_mission", &WaypointV2Node::configMission,this);
     gpsPositionSub = nh.subscribe<sensor_msgs::NavSatFix>("dji_osdk_ros/gps_position", 10, &gpsPositionSubCallback);
+    fly_status_subscriber = nh.subscribe<std_msgs::UInt8>("dji_osdk_ros/flight_status", 1, &flyStatusCallback);
+
     obtain_ctrl_authority_client = nh.serviceClient<dji_osdk_ros::ObtainControlAuthority>(
       "obtain_release_control_authority");
 
@@ -362,6 +450,7 @@ class WaypointV2Node{
     ros::NodeHandle nh;
     ros::ServiceServer service_config_mission;
     ros::Subscriber gpsPositionSub;
+    ros::Subscriber fly_status_subscriber;
    
     ros::ServiceClient obtain_ctrl_authority_client;
     dji_osdk_ros::ObtainControlAuthority obtainCtrlAuthority;
@@ -721,6 +810,9 @@ bool startWaypointV2Mission(ros::NodeHandle &nh)
     if(startWaypointV2Mission_.response.result)
     {
       ROS_INFO("Start waypoint v2 mission successfully!\n");
+      StartRosbag();
+      mission_status = true;
+      start_time = std::time(0);
     }
     else
     {
