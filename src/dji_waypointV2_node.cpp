@@ -64,7 +64,7 @@ int uav_id=14;
 // Bags management
 void StartRosbag()
 {
-  ROS_WARN("Starting ROS bag of uav: %d",uav_id);
+  ROS_WARN("Starting ROS bag of uav:");
   //rosbag record -O ~/bags/uav_14_2021_01_20_15_00.bag  -e "/uav_14/dji_osdk_ros/(.*)" __name:=node_bag_uav1 &
   std::string id = std::to_string(uav_id);
   std::string bashscript ("rosbag record -O ~/bags/uav_"+ id +"_");
