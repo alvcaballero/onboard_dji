@@ -86,7 +86,7 @@ bool initWaypointV2Setting(ros::NodeHandle &nh, int &actionIDCounter);
 bool uploadWaypointV2Mission(ros::NodeHandle &nh);
 bool uploadWaypointV2Action(ros::NodeHandle &nh);
 bool downloadWaypointV2Mission(ros::NodeHandle &nh, std::vector<dji_osdk_ros::WaypointV2> &mission);
-bool startWaypointV2Mission(std_srvs::SetBool::Request  &req,std_srvs::SetBool::Response &res);
+//bool startWaypointV2Mission(std_srvs::SetBool::Request  &req,std_srvs::SetBool::Response &res);
 bool stopWaypointV2Mission(ros::NodeHandle &nh);
 bool pauseWaypointV2Mission(ros::NodeHandle &nh);
 bool resumeWaypointV2Mission(ros::NodeHandle &nh);
