@@ -41,6 +41,8 @@
 #include <chrono>
 #include <ctime>
 
+#include <std_srvs/SetBool.h>
+
 // Our changes goes from here:
 //Global Variables:
 std::vector<sensor_msgs::NavSatFix> gpsList_global;
@@ -57,6 +59,7 @@ std::time_t start_time;
 std::time_t end_time;
 bool mission_status = false;   // becomes true when the mission started
 bool was_on_air = false;
+int uav_id;
 
 // Bags management
 void StartRosbag()
@@ -403,9 +406,19 @@ void flyStatusCallback(const std_msgs::UInt8::ConstPtr &msg)
     tme curtime(h);   // creating a tme object
 
     // We create the folder name and then the folder
+    //we need to include the username to the folder name, FIX
+    char const* usr = getenv( "USER" );
+    if ( tmp == NULL ) {
+        ROS_ERROR("EEPA Error: $USER not set\n")
+    } else {
+        std::string user( usr );
+        //  ...
+    }
+
+    std::string foldername = "/home/"+ user + "uav_media" + "_" + curtime.day[0] + "_" + curtime.day[1] + "_" + curtime.month + "_" + curtime.year + "_" + curtime.tie;
     
-    std::string foldername = "/home/"+ std::getenv("USER") + "uav_media" + "_" + curtime.day[0] + "_" + curtime.day[1] + "_" + curtime.month + "_" + curtime.year + "_" + curtime.tie;
-    int check = mkdir(foldername,0777);
+    const char *cstr = foldername.c_str();
+    int check = mkdir(cstr,0777);
 
     if (!check)
         ROS_INFO("Media Directory created successfully");
@@ -995,6 +1008,7 @@ return true;
 int main(int argc, char** argv)
 {
   ros::init(argc, argv, "waypointV2_node");
+  nh.getParam("waypointV2_node/uav_id", uav_id);
   WaypointV2Node node;
  
   
