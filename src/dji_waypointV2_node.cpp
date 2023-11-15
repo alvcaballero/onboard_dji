@@ -662,7 +662,7 @@ void waypointV2MissionEventSubCallback(const dji_osdk_ros::WaypointV2MissionEven
     tme curtime(h);   // creating a tme object
     
     
-    std::string bashscript = "mkdir -p " + "~/uav_media" + "_" + curtime.day[0] + "_" + curtime.day[1] + "_" + curtime.month + "_" + curtime.year + "_" + curtime.tie;
+    std::string bashscript ("mkdir -p ~/uav_media/mission_" + curtime.day[0] + "_" + curtime.day[1] + "_" + curtime.month + "_" + curtime.year + "_" + curtime.tie);
     
     system( bashscript.c_str() );
           
