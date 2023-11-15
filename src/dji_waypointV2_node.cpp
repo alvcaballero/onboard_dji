@@ -844,6 +844,7 @@ bool startWaypointV2Mission(std_srvs::SetBool::Request  &req,std_srvs::SetBool::
 {
   bool response =false;
   std::string message ("Mission ");
+  ros::NodeHandle nh;
 
     waypointV2_start_mission_client = nh.serviceClient<dji_osdk_ros::StartWaypointV2Mission>("dji_osdk_ros/waypointV2_startMission");
     waypointV2_start_mission_client.call(startWaypointV2Mission_);
