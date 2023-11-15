@@ -64,6 +64,8 @@ int uav_id;
 // Bags management
 void StartRosbag()
 {
+  ROS_WARN("Starting ROS bag of uav: %d",uav_id);
+  //rosbag record -O ~/bags/uav_14_2021_01_20_15_00.bag  -e "/uav_14/dji_osdk_ros/(.*)" __name:=node_bag_uav1 &
   std::string id = std::to_string(uav_id);
   std::string bashscript ("rosbag record -O ~/bags/uav_"+ id +"_");
   char timeString[40];
@@ -72,7 +74,7 @@ void StartRosbag()
   
   ROS_WARN("Start of ROS BAG");
   strftime(timeString, sizeof(timeString), "%Y_%m_%d_%H_%M", &tm);
-  bashscript = bashscript +  timeString+ ".bag  -e \"/uav_"+ id +"/dji_osdk_ros/(.*)\" __name:=node_bag_uav"+id+" &";
+  bashscript = bashscript +  timeString+ ".bag  -e \"/uav_"+ id +"/dji_osdk_ros/(.*)\" __name:=uav"+id+"/node_bag &";
   system( bashscript.c_str() );
 }
 void StopRosbag()
@@ -652,7 +654,7 @@ void waypointV2MissionEventSubCallback(const dji_osdk_ros::WaypointV2MissionEven
   {
     ROS_INFO("finishReason:0x%x\n", waypoint_V2_mission_event_push_.finishReason);
     StopRosbag();
-    was_on_air = false;
+    
     // Getting the time for the folder name
     auto r=std::chrono::system_clock::now();
     auto rp=std::chrono::system_clock::to_time_t(r);
@@ -666,6 +668,7 @@ void waypointV2MissionEventSubCallback(const dji_osdk_ros::WaypointV2MissionEven
         ROS_ERROR("EEPA Error: $USER not set\n");
     } else {
         user = std::string( usr );
+        ROS_INFO("Trying to create a folder for user: %s",user);
         std::string foldername = "/home/"+ user + "uav_media" + "_" + curtime.day[0] + "_" + curtime.day[1] + "_" + curtime.month + "_" + curtime.year + "_" + curtime.tie;
         
         const char *cstr = foldername.c_str();
