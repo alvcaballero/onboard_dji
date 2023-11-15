@@ -653,18 +653,21 @@ void waypointV2MissionEventSubCallback(const dji_osdk_ros::WaypointV2MissionEven
   if(waypoint_V2_mission_event_push_.event== 0x03)
   {
     ROS_INFO("finishReason:0x%x\n", waypoint_V2_mission_event_push_.finishReason);
-    StopRosbag();
+    if (mission_status){
+      StopRosbag();
     
-    // Getting the time for the folder name
-    auto r=std::chrono::system_clock::now();
-    auto rp=std::chrono::system_clock::to_time_t(r);
-    std::string h(ctime(&rp)); //converting to c++ string
-    tme curtime(h);   // creating a tme object
-    
-    
-    std::string bashscript ("mkdir -p ~/uav_media/mission_" + curtime.day[0] + "_" + curtime.day[1] + "_" + curtime.month + "_" + curtime.year + "_" + curtime.tie);
-    
-    system( bashscript.c_str() );
+      // Getting the time for the folder name
+      auto r=std::chrono::system_clock::now();
+      auto rp=std::chrono::system_clock::to_time_t(r);
+      std::string h(ctime(&rp)); //converting to c++ string
+      tme curtime(h);   // creating a tme object
+      
+      
+      std::string bashscript ("mkdir -p ~/uav_media/mission_" + curtime.day[0] + "_" + curtime.day[1] + "_" + curtime.month + "_" + curtime.year + "_" + curtime.tie);
+      
+      system( bashscript.c_str() );
+      mission_status=false;
+    }
           
       
 
@@ -844,8 +847,9 @@ bool startWaypointV2Mission(ros::NodeHandle &nh)
 
     if(startWaypointV2Mission_.response.result)
     {
-      ROS_INFO("Start waypoint v2 mission successfully!\n");
       StartRosbag();
+      ROS_INFO("Start waypoint v2 mission successfully!\n");
+      
       mission_status = true;
       start_time = std::time(0);
     }
