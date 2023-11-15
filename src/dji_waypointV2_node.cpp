@@ -396,7 +396,7 @@ void flyStatusCallback(const std_msgs::UInt8::ConstPtr &msg)
 {
   int flystatus = msg->data;//0 stoped //1 on_ground // 2 in air
   
-  if( flystatus ==0 &&  mission_status == 1 && was_on_air==true){ 
+  /*if( flystatus ==0 &&  mission_status == 1 && was_on_air==true){ 
     StopRosbag();
     was_on_air = false;
     // Getting the time for the folder name
@@ -411,7 +411,7 @@ void flyStatusCallback(const std_msgs::UInt8::ConstPtr &msg)
     if ( usr == NULL ) {
         ROS_ERROR("EEPA Error: $USER not set\n");
     } else {
-        std::string( usr );
+        user = std::string( usr );
         //  ...
     }
 
@@ -431,7 +431,7 @@ void flyStatusCallback(const std_msgs::UInt8::ConstPtr &msg)
   }
   if (flystatus == 2){
     was_on_air = true;
-  }
+  }*/
 }
 
 // A class to improve the quality of the code:
@@ -651,6 +651,35 @@ void waypointV2MissionEventSubCallback(const dji_osdk_ros::WaypointV2MissionEven
   if(waypoint_V2_mission_event_push_.event== 0x03)
   {
     ROS_INFO("finishReason:0x%x\n", waypoint_V2_mission_event_push_.finishReason);
+    StopRosbag();
+    was_on_air = false;
+    // Getting the time for the folder name
+    auto r=std::chrono::system_clock::now();
+    auto rp=std::chrono::system_clock::to_time_t(r);
+    std::string h(ctime(&rp)); //converting to c++ string
+    tme curtime(h);   // creating a tme object
+    std::string user;
+    // We create the folder name and then the folder
+    //we need to include the username to the folder name, FIX
+    char const* usr = getenv( "USER" );
+    if ( usr == NULL ) {
+        ROS_ERROR("EEPA Error: $USER not set\n");
+    } else {
+        user = std::string( usr );
+        std::string foldername = "/home/"+ user + "uav_media" + "_" + curtime.day[0] + "_" + curtime.day[1] + "_" + curtime.month + "_" + curtime.year + "_" + curtime.tie;
+        
+        const char *cstr = foldername.c_str();
+        int check = mkdir(cstr,0777);
+
+        if (!check)
+            ROS_INFO("Media Directory created successfully");
+        else {
+            ROS_ERROR("Unable to create Media directory");
+            //exit(1);
+      }    
+      }
+
+    
   }
 
   if(waypoint_V2_mission_event_push_.event == 0x10)
