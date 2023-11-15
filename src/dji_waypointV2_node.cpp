@@ -408,7 +408,7 @@ void flyStatusCallback(const std_msgs::UInt8::ConstPtr &msg)
     // We create the folder name and then the folder
     //we need to include the username to the folder name, FIX
     char const* usr = getenv( "USER" );
-    if ( tmp == NULL ) {
+    if ( usr == NULL ) {
         ROS_ERROR("EEPA Error: $USER not set\n")
     } else {
         std::string user( usr );
@@ -440,6 +440,8 @@ class WaypointV2Node{
     WaypointV2Node() {
 	
     actionIDCounter=0; 
+      nh.getParam("waypointV2_node/uav_id", uav_id);
+
      // Our changes goes from here:
     service_config_mission = nh.advertiseService("dji_control/configure_mission", &WaypointV2Node::configMission,this);
     gpsPositionSub = nh.subscribe<sensor_msgs::NavSatFix>("dji_osdk_ros/gps_position", 10, &gpsPositionSubCallback);
@@ -1008,7 +1010,6 @@ return true;
 int main(int argc, char** argv)
 {
   ros::init(argc, argv, "waypointV2_node");
-  nh.getParam("waypointV2_node/uav_id", uav_id);
   WaypointV2Node node;
  
   
