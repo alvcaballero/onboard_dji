@@ -59,7 +59,7 @@ std::time_t start_time;
 std::time_t end_time;
 bool mission_status = false;   // becomes true when the mission started
 bool was_on_air = false;
-int uav_id;
+int uav_id=14;
 
 // Bags management
 void StartRosbag()
@@ -660,27 +660,14 @@ void waypointV2MissionEventSubCallback(const dji_osdk_ros::WaypointV2MissionEven
     auto rp=std::chrono::system_clock::to_time_t(r);
     std::string h(ctime(&rp)); //converting to c++ string
     tme curtime(h);   // creating a tme object
-    std::string user;
-    // We create the folder name and then the folder
-    //we need to include the username to the folder name, FIX
-    char const* usr = getenv( "USER" );
-    if ( usr == NULL ) {
-        ROS_ERROR("EEPA Error: $USER not set\n");
-    } else {
-        user = std::string( usr );
-        ROS_INFO("Trying to create a folder for user: %s",user);
-        std::string foldername = "/home/"+ user + "uav_media" + "_" + curtime.day[0] + "_" + curtime.day[1] + "_" + curtime.month + "_" + curtime.year + "_" + curtime.tie;
-        
-        const char *cstr = foldername.c_str();
-        int check = mkdir(cstr,0777);
-
-        if (!check)
-            ROS_INFO("Media Directory created successfully");
-        else {
-            ROS_ERROR("Unable to create Media directory");
-            //exit(1);
-      }    
-      }
+    
+    user = std::string( usr );
+    ROS_INFO("Trying to create a folder for user: %s",user);
+    std::string bashscript = "mkdir -p " + "~/uav_media" + "_" + curtime.day[0] + "_" + curtime.day[1] + "_" + curtime.month + "_" + curtime.year + "_" + curtime.tie;
+    
+    system( bashscript.c_str() );
+          
+      
 
     
   }
