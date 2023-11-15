@@ -404,14 +404,14 @@ void flyStatusCallback(const std_msgs::UInt8::ConstPtr &msg)
     auto rp=std::chrono::system_clock::to_time_t(r);
     std::string h(ctime(&rp)); //converting to c++ string
     tme curtime(h);   // creating a tme object
-
+    std::string user;
     // We create the folder name and then the folder
     //we need to include the username to the folder name, FIX
     char const* usr = getenv( "USER" );
     if ( usr == NULL ) {
         ROS_ERROR("EEPA Error: $USER not set\n");
     } else {
-        std::string user( usr );
+        std::string( usr );
         //  ...
     }
 
