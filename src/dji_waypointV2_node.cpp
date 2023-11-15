@@ -74,13 +74,13 @@ void StartRosbag()
   
   ROS_WARN("Start of ROS BAG");
   strftime(timeString, sizeof(timeString), "%Y_%m_%d_%H_%M", &tm);
-  bashscript = bashscript +  timeString+ ".bag  -e \"/uav_"+ id +"/dji_osdk_ros/(.*)\" __name:=uav"+id+"/node_bag &";
+  bashscript = bashscript +  timeString+ ".bag  -e \"/uav_"+ id +"/dji_osdk_ros/(.*)\" __name:=uav"+id+"_node_bag &";
   system( bashscript.c_str() );
 }
 void StopRosbag()
 {
   std::string id = std::to_string(uav_id);
-  std::string bashscript  = "rosnode kill node_bag_uav"+id;
+  std::string bashscript  = "rosnode kill uav"+id+"_node_bag";
   system( bashscript.c_str() );
   ROS_WARN("END of ROS BAG");
 }
