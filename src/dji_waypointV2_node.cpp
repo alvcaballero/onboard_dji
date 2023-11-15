@@ -458,7 +458,7 @@ class WaypointV2Node{
 
    
     ROS_WARN("WaypointV2Node started");
-    ros::ServiceServer service_run_mission = nh.advertiseService("dji_control/start_mission", startWaypointV2Mission);
+    ros::ServiceServer service_run_mission = nh.advertiseService("dji_control/start_mission", &startWaypointV2Mission);
     //ros::ServiceServer service_send_bags = nh.advertiseService("dji_control/send_bags", sendFiles);
 
 
