@@ -458,7 +458,7 @@ class WaypointV2Node{
 
    
     ROS_WARN("WaypointV2Node started");
-    //ros::ServiceServer service_run_mission = nh.advertiseService("dji_control/start_mission", run_mission);
+    ros::ServiceServer service_run_mission = nh.advertiseService("dji_control/start_mission", startWaypointV2Mission);
     //ros::ServiceServer service_send_bags = nh.advertiseService("dji_control/send_bags", sendFiles);
 
 
@@ -840,8 +840,11 @@ bool downloadWaypointV2Mission(ros::NodeHandle &nh, std::vector<dji_osdk_ros::Wa
     return downloadWaypointV2Mission_.response.result; 
 }
 
-bool startWaypointV2Mission(ros::NodeHandle &nh)
+bool startWaypointV2Mission(std_srvs::SetBool::Request  &req,std_srvs::SetBool::Response &res)
 {
+  bool response =false;
+  std::string message ("Mission ");
+
     waypointV2_start_mission_client = nh.serviceClient<dji_osdk_ros::StartWaypointV2Mission>("dji_osdk_ros/waypointV2_startMission");
     waypointV2_start_mission_client.call(startWaypointV2Mission_);
 
@@ -852,13 +855,18 @@ bool startWaypointV2Mission(ros::NodeHandle &nh)
       
       mission_status = true;
       start_time = std::time(0);
+      response =true;
     }
     else
     {
       ROS_ERROR("Start waypoint v2 mission failed!\n");
+      message += " fail ";
     }
 
-    return startWaypointV2Mission_.response.result;
+    //return startWaypointV2Mission_.response.result;
+    res.success = response;
+    res.message = message;
+    return true;
 }
 
 bool stopWaypointV2Mission(ros::NodeHandle &nh)
