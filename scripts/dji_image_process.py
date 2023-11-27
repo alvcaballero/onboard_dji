@@ -48,7 +48,9 @@ Handle function for the service
 '''
 def handle_process_thm_img(req):
     print("Processing the imgs between ", req.initDate, " and ", req.FinishDate)
-    root_path = "/home/nvidia/uav_media"
+    home_path = os.path.expanduser("~")
+    rospy.loginfo("The home path is {}".format(home_path))
+    root_path = +"/uav_media"
     # At first we list the directories in the root_path
     print(os.listdir(root_path))
 
@@ -58,8 +60,15 @@ def handle_process_thm_img(req):
             # mission
             print(dir)
             dir_date = dir.split("_")[1]
-            dir_date_std = datetime.strptime(dir_date, '%Y-%m-%d_%H:%M')
-            print(dir_date_std)
+            try:
+                dir_date_std = datetime.strptime(dir_date, '%Y-%m-%d_%H-%M')
+                #Debugging
+                rospy.loginfo("The date of the folder {} is {}".format(dir, dir_date_std))
+            except ValueError:
+                rospy.logerr("The folder {} is not in the correct format".format(dir))
+                continue
+            
+            
 
             # Converting the string to datetime
             init_date = datetime.strptime(req.initDate, '%Y-%m-%d %H:%M')
