@@ -55,41 +55,40 @@ def handle_process_thm_img(req):
     #print(os.listdir(root_path))
     folder_OK = False
 
-    for root, dirs, files in os.walk(root_path):
-        for dir in dirs:
-            # directories must have the template format: mission_YYYY-MM-DD_HH:MM and we need to obtain the date and time to compare with the requested
-            # mission
+    for dir in os.listdir(root_path):
+        # directories must have the template format: mission_YYYY-MM-DD_HH:MM and we need to obtain the date and time to compare with the requested
+        # mission
+        
+        dir_date = dir.split("_")[1]+"_"+dir.split("_")[2]
+        try:
+            dir_date_std = datetime.strptime(dir_date, '%Y-%m-%d_%H:%M')
+            #Debugging
             
-            dir_date = dir.split("_")[1]+"_"+dir.split("_")[2]
-            try:
-                dir_date_std = datetime.strptime(dir_date, '%Y-%m-%d_%H:%M')
-                #Debugging
-                
-            except ValueError:
-                rospy.logwarn("The folder {} is not in the correct format".format(dir))
-                continue
-            
-            rospy.loginfo("The date of the folder {} is {}".format(dir, dir_date_std))
-            
+        except ValueError:
+            rospy.logwarn("The folder {} is not in the correct format".format(dir))
+            continue
+        
+        rospy.loginfo("The date of the folder {} is {}".format(dir, dir_date_std))
+        
 
-            # Converting the string to datetime
-            init_date = datetime.strptime(req.initDate, '%Y-%m-%d %H:%M')
-            finish_date = datetime.strptime(req.FinishDate, '%Y-%m-%d %H:%M')
-            # do the comparison
-            if dir_date_std >= init_date and dir_date_std <= finish_date:
-                rospy.loginfo("The mission folder {} is between the requested dates".format(dir))
-                folder_OK = True
-                
-            else:
-                rospy.logwarn("The mission folder {} is NOT between the requested dates".format(dir))
-                folder_OK = False
-                continue
+        # Converting the string to datetime
+        init_date = datetime.strptime(req.initDate, '%Y-%m-%d %H:%M')
+        finish_date = datetime.strptime(req.FinishDate, '%Y-%m-%d %H:%M')
+        # do the comparison
+        if dir_date_std >= init_date and dir_date_std <= finish_date:
+            rospy.loginfo("The mission folder {} is between the requested dates".format(dir))
+            folder_OK = True
+            
+        else:
+            rospy.logwarn("The mission folder {} is NOT between the requested dates".format(dir))
+            folder_OK = False
+            continue
         # now we need to check if the mission has thermal images
-        for name in files:
-            print(name)
-            if name.endswith(("THRM.jpg")) and folder_OK:
+        for file in os.listdir(os.path.join(root_path,dir)):
+            print(file)
+            if file.endswith(("THRM.jpg")) and folder_OK:
                 # debug
-                rospy.loginfo("The file to process is: {}".format(os.path.join(root,dir,name)))
+                rospy.loginfo("The file to process is: {}".format(os.path.join(root_path,dir,file)))
                 
             
     return ProcessImgResponse(True)
