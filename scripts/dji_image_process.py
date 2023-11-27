@@ -84,12 +84,12 @@ def handle_process_thm_img(req):
                 rospy.logwarn("The mission folder {} is NOT between the requested dates".format(dir))
                 folder_OK = False
                 continue
-            # now we need to check if the mission has thermal images
-            for name in files:
-                print(name)
-                if name.endswith(("THRM.jpg")) and folder_OK:
-                    # debug
-                    rospy.loginfo("The file to process is: {}".format(os.path.join(root,dir,name)))
+        # now we need to check if the mission has thermal images
+        for name in files:
+            print(name)
+            if name.endswith(("THRM.jpg")) and folder_OK:
+                # debug
+                rospy.loginfo("The file to process is: {}".format(os.path.join(root,dir,name)))
                 
             
     return ProcessImgResponse(True)
