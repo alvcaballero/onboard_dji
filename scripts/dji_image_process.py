@@ -63,7 +63,7 @@ def handle_process_thm_img(req):
             ## Debugging
             rospy.loginfo("The date of the folder {} is {}".format(dir, dir_date))
             try:
-                dir_date_std = datetime.strptime(dir_date, '%Y-%m-%d_%H-%M')
+                dir_date_std = datetime.strptime(dir_date, '%Y-%m-%d_%H:%M')
                 #Debugging
                 
             except ValueError:
