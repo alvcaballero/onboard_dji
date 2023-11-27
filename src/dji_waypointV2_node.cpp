@@ -693,10 +693,10 @@ void waypointV2MissionEventSubCallback(const dji_osdk_ros::WaypointV2MissionEven
       struct tm date_tm; 
       
       
-      //std::string bashscript ("mkdir -p ~/uav_media/mission_" + curtime.day[0] + "_" + curtime.day[1] + "_" + curtime.month + "_" + curtime.year + "_" + curtime.tie);
+      std::string bashscript ("mkdir -p ~/uav_media/mission_" + curtime.day[0] + "_" + curtime.day[1] + "_" + curtime.month + "_" + curtime.year + "_" + curtime.tie);
 
       
-      std::string bashscript ("mkdir -p ~/uav_media/mission_" + to_string(date_tm.tm_year+1900)+ "_" + to_string(date_tm.tm_mon + 1) + "_" + to_string(date_tm.tm_mday)  + "_" + to_string(date_tm.tm_hour)  + "_" + to_string(date_tm.tm_min) );
+      //std::string bashscript ("mkdir -p ~/uav_media/mission_" + to_string(date_tm.tm_year+1900)+ "_" + to_string(date_tm.tm_mon + 1) + "_" + to_string(date_tm.tm_mday)  + "_" + to_string(date_tm.tm_hour)  + "_" + to_string(date_tm.tm_min) );
       
       system( bashscript.c_str() );
       mission_status=false;
