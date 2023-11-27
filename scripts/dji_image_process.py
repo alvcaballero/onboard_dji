@@ -48,11 +48,15 @@ Handle function for the service
 '''
 def handle_process_thm_img(req):
     print("Processing the imgs between ", req.initDate, " and ", req.FinishDate)
-    root_path = "~/uav_media"
+    root_path = "~/uav_media/"
+    # At first we list the directories in the root_path
+    print(os.listdir(root_path))
+
     for root, dirs, files in os.walk(root_path):
         for dir in dirs:
             # directories must have the template format: mission_YYYY-MM-DD_HH:MM and we need to obtain the date and time to compare with the requested
             # mission
+            print(dir)
             dir_date = dir.split("_")[1]
             dir_date_std = datetime.strptime(dir_date, '%Y-%m-%d_%H:%M')
             print(dir_date_std)
