@@ -84,3 +84,8 @@ add_executable(landing_manager src/landing_manager.cpp)
 target_link_libraries(landing_manager dji_osdk_ros)
 add_dependencies(landing_manager ${catkin_EXPORTED_TARGETS})
 
+## Python nodes
+catkin_install_python(PROGRAMS scripts/dji_image_process.py
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
