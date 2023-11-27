@@ -65,7 +65,7 @@ def handle_process_thm_img(req):
                 #Debugging
                 
             except ValueError:
-                rospy.logerr("The folder {} is not in the correct format".format(dir))
+                rospy.logwarn("The folder {} is not in the correct format".format(dir))
                 continue
             rospy.loginfo("The date of the folder {} is {}".format(dir, dir_date_std))
             
@@ -80,7 +80,7 @@ def handle_process_thm_img(req):
                 for name in files:
                     if name.endswith(("THRM.jpg")):
                         # debug
-                        print(os.path.join(root,dir,name))
+                        rospy.loginfo("The file to process is: {}".format(os.path.join(root,dir,name)))
             else:
                 rospy.logwarn("The mission folder {} is NOT between the requested dates".format(dir))
                 return ProcessImgResponse(False)
