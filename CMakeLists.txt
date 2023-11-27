@@ -21,18 +21,18 @@ message_generation
 sensor_msgs
 )
 
-# Generate services in the 'srv' folder
-add_service_files(
-FILES
-ProcessImg.srv
-)  
+# # Generate services in the 'srv' folder
+# add_service_files(
+# FILES
+# ProcessImg.srv
+# )  
 
-## Generate added messages and services with any dependencies listed here
-generate_messages(
-DEPENDENCIES
-sensor_msgs
-std_msgs
-)
+# ## Generate added messages and services with any dependencies listed here
+# generate_messages(
+# DEPENDENCIES
+# sensor_msgs
+# std_msgs
+# )
 
 ###################################
 ## catkin specific configuration ##
