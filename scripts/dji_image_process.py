@@ -52,7 +52,7 @@ def handle_process_thm_img(req):
     rospy.loginfo("The home path is {}".format(home_path))
     root_path = home_path +"/uav_media"
     # At first we list the directories in the root_path
-    print(os.listdir(root_path))
+    #print(os.listdir(root_path))
 
     for root, dirs, files in os.walk(root_path):
         for dir in dirs:
@@ -63,11 +63,11 @@ def handle_process_thm_img(req):
             try:
                 dir_date_std = datetime.strptime(dir_date, '%Y-%m-%d_%H-%M')
                 #Debugging
-                rospy.loginfo("The date of the folder {} is {}".format(dir, dir_date_std))
+                
             except ValueError:
                 rospy.logerr("The folder {} is not in the correct format".format(dir))
                 continue
-            
+            rospy.loginfo("The date of the folder {} is {}".format(dir, dir_date_std))
             
 
             # Converting the string to datetime
