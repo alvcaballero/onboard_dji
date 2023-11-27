@@ -11,7 +11,7 @@ import sys, rospy, rospkg, os
 
 # to work with dates
 from datetime import datetime
-# from onboard_dji.srv import *
+from onboard_dji.srv import ProcessImg, ProcessImgResponse
 from sensor_msgs.msg import NavSatFix
 
 # Decoding the thermal image
@@ -45,95 +45,105 @@ def find_max_temp(thermal_np):
 ########################################################################################################################################
 '''
 Handle function for the service
-
-def handle_add_two_ints(req):
-    print("Returning [%s + %s = %s]"%(req.a, req.b, (req.a + req.b)))
-    return AddTwoIntsResponse(req.a + req.b)
-
-
-
-root_path = "~/uav_media"
-for root, dirs, files in os.walk(root_path):
-    for dir in dirs:
-        # directories must have the template format: mission_YYYY-MM-DD_HH:MM and we need to obtain the date and time to compare with the requested
-        # mission
-        dir_date = dir.split("_")[1]
-        dir_date_std = datetime.strptime(dir_date, '%Y-%m-%d_%H:%M')
-        print(dir_date_std)
-
-        # do the comparison
-        
-        for name in files:
-            if name.endswith(("THRM.jpg")):
-                # debug
-                print(os.path.join(root,dir,name))
-
-path_to_image = "/home/ubuntugrvc/thermal_cameras/examples/H20T/DJI_202307211037_002/DJI_20230721104850_0004_T.JPG"
-image = ThermalImage(image_path=path_to_image, camera_manufacturer="dji")
-thermal_np = image.thermal_np           # The temperature matrix as a np array
-raw_sensor_np = image.raw_sensor_np     # The raw thermal sensor excitation values as a np array
-meta = image.meta                       # Any other metadata that exiftool picked up
-colorbar = image.generate_colorbar(cmap = cv2.COLORMAP_HOT)   # Returns: np.ndarray: A colourbar of the required height with temperature values labelled
-
-print(thermal_np)
-print("the shape of the thermal image is:", thermal_np.shape)
-#show the colorbar image which is in the form of np array
-
-cv2.imshow("colorbar", colorbar)
-
-
-# Thermal Image annotation
-from thermal_base import ThermalImageAnnotation
-
-img_ann = ThermalImageAnnotation()
-
-# Manipulation of the image
-from thermal_base import utils
-
-#print(dir(utils))                                   # View manipulation tools available
-#thermal_np = utils.change_emissivity_for_roi(...)   # Sample: Change the emissivity of an RoI
-
-temp_image = utils.get_temp_image(thermal_np, colormap=cv2.COLORMAP_HOT)     
-print("Thermal image as numpy image:", type(temp_image))
-print(temp_image)
-
-
-
-## As we have the thermal image and a matrix of the same size with the temperature values, we can now do some image processing
-# 1. We can apply a threshold to the image to get the areas that are above a certain temperature
-# 2. We can apply a gaussian filter to the image to smooth it out
-# 3. We can apply a median filter to the image to smooth it out
-# 4. We can apply a bilateral filter to the image to smooth it out
-# 5. We can apply a morphological filter to the image to smooth it out
-# 6. We can apply a canny filter to the image to smooth it out
-# 7. We can apply a laplacian filter to the image to smooth it out
-# 8. We can apply a sobel filter to the image to smooth it out
-# 9. We can apply a scharr filter to the image to smooth it out
-# 10. We can apply a prewitt filter to the image to smooth it out
-# 11. We can apply a roberts filter to the image to smooth it out
-# 12. We can apply a hessian filter to the image to smooth it out
-# 13. We can apply a frangi filter to the image to smooth it out
-# 14. We can apply a meijering filter to the image to smooth it out
-
-# or simply show the temperature in a single point over the image given the coordinates of the point
-
-
-show_temp(326,198,temp_image) # temperature of my head
-show_temp(344,244,temp_image) # temperature of the floor
-show_temp(141,78,temp_image) # temperature of the RTK
-
-find_max_temp(thermal_np)
-
-
-# Show the image
-cv2.imshow("temp_image", temp_image)
-cv2.waitKey(0)
 '''
+def handle_process_thm_img(req):
+    print("Processing the imgs between ", req.initDate, " and ", req.FinishDate)
+    root_path = "~/uav_media"
+    for root, dirs, files in os.walk(root_path):
+        for dir in dirs:
+            # directories must have the template format: mission_YYYY-MM-DD_HH:MM and we need to obtain the date and time to compare with the requested
+            # mission
+            dir_date = dir.split("_")[1]
+            dir_date_std = datetime.strptime(dir_date, '%Y-%m-%d_%H:%M')
+            print(dir_date_std)
+
+            # Converting the string to datetime
+            init_date = datetime.strptime(req.initDate, '%Y-%m-%d %H:%M')
+            finish_date = datetime.strptime(req.FinishDate, '%Y-%m-%d %H:%M')
+            # do the comparison
+            if dir_date >= init_date and dir_date <= finish_date:
+                rospy.loginfo("The mission folder {} is between the requested dates".format(dir))
+                # now we need to check if the mission has thermal images
+                for name in files:
+                    if name.endswith(("THRM.jpg")):
+                        # debug
+                        print(os.path.join(root,dir,name))
+            else:
+                rospy.logwarn("The mission folder {} is NOT between the requested dates".format(dir))
+                return ProcessImgResponse(False)
+            
+    return ProcessImgResponse(True)
+'''       
+    path_to_image = "/home/ubuntugrvc/thermal_cameras/examples/H20T/DJI_202307211037_002/DJI_20230721104850_0004_T.JPG"
+    image = ThermalImage(image_path=path_to_image, camera_manufacturer="dji")
+    thermal_np = image.thermal_np           # The temperature matrix as a np array
+    raw_sensor_np = image.raw_sensor_np     # The raw thermal sensor excitation values as a np array
+    meta = image.meta                       # Any other metadata that exiftool picked up
+    colorbar = image.generate_colorbar(cmap = cv2.COLORMAP_HOT)   # Returns: np.ndarray: A colourbar of the required height with temperature values labelled
+
+    print(thermal_np)
+    print("the shape of the thermal image is:", thermal_np.shape)
+    #show the colorbar image which is in the form of np array
+
+    cv2.imshow("colorbar", colorbar)
+
+
+    # Thermal Image annotation
+    from thermal_base import ThermalImageAnnotation
+
+    img_ann = ThermalImageAnnotation()
+
+    # Manipulation of the image
+    from thermal_base import utils
+
+    #print(dir(utils))                                   # View manipulation tools available
+    #thermal_np = utils.change_emissivity_for_roi(...)   # Sample: Change the emissivity of an RoI
+
+    temp_image = utils.get_temp_image(thermal_np, colormap=cv2.COLORMAP_HOT)     
+    print("Thermal image as numpy image:", type(temp_image))
+    print(temp_image)
+
+
+
+    ## As we have the thermal image and a matrix of the same size with the temperature values, we can now do some image processing
+    # 1. We can apply a threshold to the image to get the areas that are above a certain temperature
+    # 2. We can apply a gaussian filter to the image to smooth it out
+    # 3. We can apply a median filter to the image to smooth it out
+    # 4. We can apply a bilateral filter to the image to smooth it out
+    # 5. We can apply a morphological filter to the image to smooth it out
+    # 6. We can apply a canny filter to the image to smooth it out
+    # 7. We can apply a laplacian filter to the image to smooth it out
+    # 8. We can apply a sobel filter to the image to smooth it out
+    # 9. We can apply a scharr filter to the image to smooth it out
+    # 10. We can apply a prewitt filter to the image to smooth it out
+    # 11. We can apply a roberts filter to the image to smooth it out
+    # 12. We can apply a hessian filter to the image to smooth it out
+    # 13. We can apply a frangi filter to the image to smooth it out
+    # 14. We can apply a meijering filter to the image to smooth it out
+
+    # or simply show the temperature in a single point over the image given the coordinates of the point
+
+
+    show_temp(326,198,temp_image) # temperature of my head
+    show_temp(344,244,temp_image) # temperature of the floor
+    show_temp(141,78,temp_image) # temperature of the RTK
+
+    find_max_temp(thermal_np)
+
+
+    # Show the image
+    cv2.imshow("temp_image", temp_image)
+    cv2.waitKey(0)
+'''
+
+
+
+
 ########################################################################################################################################
 def process_thm_img_server():
     rospy.init_node('process_thm_img_node')
     # TBD: create the service
-    #s = rospy.Service('add_two_ints', AddTwoInts, handle_add_two_ints)
+    s = rospy.Service('dji_extra/process_thermal_image', ProcessImg, handle_process_thm_img)
     print("Ready to process the thermal images that you need")
     rospy.spin()
 
