@@ -16,6 +16,8 @@ from sensor_msgs.msg import NavSatFix
 
 # Decoding the thermal image
 from thermal_base import ThermalImage
+# Manipulation of the image
+from thermal_base import utils
 
 ## general porpuse functions definition
 def show_temp(x,y,temp_image):
@@ -28,14 +30,14 @@ def show_temp(x,y,temp_image):
 
     
 
-def find_max_temp(thermal_np):
+def find_max_temp(thermal_np,temp_image):
     # Encontrar el valor máximo en el array
     max_temp = np.max(thermal_np)
 
     # Encontrar los índices del valor máximo
     max_idx = np.argwhere(thermal_np == max_temp)
 
-    print("Máximum temperature:", max_temp) # Convert to ROS_INFO or ROS_WARN
+    print("Maximum temperature:", max_temp) # Convert to ROS_INFO or ROS_WARN
     print("Indexes:", max_idx[0]) # Convert to ROS_INFO or ROS_WARN
     print(type(max_idx[0])) # Convert to ROS_INFO or ROS_WARN
     #show_temp(max_idx[0][1],max_idx[0][0],temp_image)
@@ -87,8 +89,49 @@ def handle_process_thm_img(req):
         for file in os.listdir(os.path.join(root_path,dir)):
             print(file)
             if file.endswith(("THRM.jpg")) and folder_OK:
+                ## we create a folder to save the images processed
+                os.makedirs(os.path.join(root_path,dir,"proc"), exist_ok=True)
+
                 # debug
                 rospy.loginfo("The file to process is: {}".format(os.path.join(root_path,dir,file)))
+                path_to_image = os.path.join(root_path,dir,file)
+
+                image = ThermalImage(image_path=path_to_image, camera_manufacturer="dji")
+                thermal_np = image.thermal_np           # The temperature matrix as a np array
+                raw_sensor_np = image.raw_sensor_np     # The raw thermal sensor excitation values as a np array
+                meta = image.meta                       # Any other metadata that exiftool picked up
+                colorbar = image.generate_colorbar(cmap = cv2.COLORMAP_HOT)   # Returns: np.ndarray: A colourbar of the required height with temperature values labelled
+
+                print(thermal_np)
+                print("the shape of the thermal image is:", thermal_np.shape)
+
+                
+                
+
+                #print(dir(utils))                                   # View manipulation tools available
+                #thermal_np = utils.change_emissivity_for_roi(...)   # Sample: Change the emissivity of an RoI
+
+                temp_image = utils.get_temp_image(thermal_np, colormap=cv2.COLORMAP_HOT)     
+                print("Thermal image as numpy image:", type(temp_image))
+                print(temp_image)
+
+
+
+                # or simply show the temperature in a single point over the image given the coordinates of the point
+
+
+                # show_temp(326,198,temp_image) # temperature of my head
+                # show_temp(344,244,temp_image) # temperature of the floor
+                # show_temp(141,78,temp_image) # temperature of the RTK
+
+                find_max_temp(thermal_np,temp_image)
+
+
+                # Show the image
+                filename = os.path.join(root_path,dir,"proc",file)
+                cv2.imwrite(filename, temp_image)
+                
+                
                 
             
     return ProcessImgResponse(True)
