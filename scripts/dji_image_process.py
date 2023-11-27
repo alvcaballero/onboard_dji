@@ -83,7 +83,8 @@ def handle_process_thm_img(req):
                         rospy.loginfo("The file to process is: {}".format(os.path.join(root,dir,name)))
             else:
                 rospy.logwarn("The mission folder {} is NOT between the requested dates".format(dir))
-                return ProcessImgResponse(False)
+                continue
+                
             
     return ProcessImgResponse(True)
 '''       
