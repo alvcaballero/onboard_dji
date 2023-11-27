@@ -58,8 +58,10 @@ def handle_process_thm_img(req):
         for dir in dirs:
             # directories must have the template format: mission_YYYY-MM-DD_HH:MM and we need to obtain the date and time to compare with the requested
             # mission
-            print(dir)
+            
             dir_date = dir.split("_")[1]
+            ## Debugging
+            rospy.loginfo("The date of the folder {} is {}".format(dir, dir_date))
             try:
                 dir_date_std = datetime.strptime(dir_date, '%Y-%m-%d_%H-%M')
                 #Debugging
