@@ -50,7 +50,7 @@ def handle_process_thm_img(req):
     print("Processing the imgs between ", req.initDate, " and ", req.FinishDate)
     home_path = os.path.expanduser("~")
     rospy.loginfo("The home path is {}".format(home_path))
-    root_path = +"/uav_media"
+    root_path = home_path +"/uav_media"
     # At first we list the directories in the root_path
     print(os.listdir(root_path))
 
