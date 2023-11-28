@@ -421,6 +421,7 @@ bool generateWaypointV2AllActions_(ros::NodeHandle &nh, uint16_t actionNum, int 
     generateWaypointV2Action_.request.actions.push_back(*action);
     delete action;
     id+=1; 
+    action = new dji_osdk_ros::WaypointV2Action;
 
     // Start flying again the aircraft at waypoint 2
     action->actionId  = id;
