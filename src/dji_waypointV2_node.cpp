@@ -384,6 +384,45 @@ bool generateWaypointV2AllActions_(ros::NodeHandle &nh, uint16_t actionNum, int 
     {
       if (take_a_photo[k] == true)
       {
+        // if we want to take a picture in that exact waypoint we need to wait until the gimbal is in the correct position, we estimate more or less 2 seconds
+        // Stop the aircraft at waypoint 2
+        action->actionId  = id;
+        action->waypointV2ActionTriggerType  = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionTriggerTypeActionAssociated;
+        action->waypointV2AssociateTrigger.actionAssociatedType = dji_osdk_ros::WaypointV2AssociateTrigger::DJIWaypointV2TriggerAssociatedTimingTypeSimultaneously;
+        action->waypointV2AssociateTrigger.waitingTime = 3;
+        action->waypointV2AssociateTrigger.actionIdAssociated = k+1;
+
+        action->waypointV2ACtionActuatorType = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionActuatorTypeAircraftControl;
+        // Config of the aircraft control (in this case stop or start flying)
+        action->waypointV2AircraftControlActuator.actuatorIndex = 0;
+        action->waypointV2AircraftControlActuator.DJIWaypointV2ActionActuatorAircraftControlOperationType = dji_osdk_ros::WaypointV2AircraftControlActuator::DJIWaypointV2ActionActuatorAircraftControlOperationTypeFlyingControl;
+        action->waypointV2AircraftControlActuator.waypointV2AircraftControlActuatorFlying.isStartFlying = 0;
+        
+        generateWaypointV2Action_.request.actions.push_back(*action);
+        delete action;
+        id+=1; 
+        action = new dji_osdk_ros::WaypointV2Action;
+
+        // Start flying again the aircraft at waypoint 2
+        action->actionId  = id;
+        action->waypointV2ActionTriggerType  = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionTriggerTypeActionAssociated;
+        action->waypointV2AssociateTrigger.actionAssociatedType = dji_osdk_ros::WaypointV2AssociateTrigger::DJIWaypointV2TriggerAssociatedTimingTypeAfterFinised;
+        action->waypointV2AssociateTrigger.waitingTime = 0;
+        action->waypointV2AssociateTrigger.actionIdAssociated = id-1;
+
+        action->waypointV2ACtionActuatorType = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionActuatorTypeAircraftControl;
+        // Config of the aircraft control (in this case stop or start flying)
+        action->waypointV2AircraftControlActuator.actuatorIndex = 0;
+        action->waypointV2AircraftControlActuator.DJIWaypointV2ActionActuatorAircraftControlOperationType = dji_osdk_ros::WaypointV2AircraftControlActuator::DJIWaypointV2ActionActuatorAircraftControlOperationTypeFlyingControl;
+        action->waypointV2AircraftControlActuator.waypointV2AircraftControlActuatorFlying.isStartFlying = 1;
+
+        generateWaypointV2Action_.request.actions.push_back(*action);
+        delete action;
+        id+=1; 
+
+        action = new dji_osdk_ros::WaypointV2Action;
+
+
         action->actionId  = id;
         action->waypointV2ActionTriggerType  = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionTriggerTypeActionAssociated;
         action->waypointV2AssociateTrigger.actionAssociatedType = dji_osdk_ros::WaypointV2AssociateTrigger::DJIWaypointV2TriggerAssociatedTimingTypeAfterFinised;
@@ -405,42 +444,6 @@ bool generateWaypointV2AllActions_(ros::NodeHandle &nh, uint16_t actionNum, int 
          
     }
 
-    // Stop the aircraft at waypoint 2
-    action->actionId  = id;
-    action->waypointV2ActionTriggerType  = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionTriggerTypeActionAssociated;
-    action->waypointV2AssociateTrigger.actionAssociatedType = dji_osdk_ros::WaypointV2AssociateTrigger::DJIWaypointV2TriggerAssociatedTimingTypeAfterFinised;
-    action->waypointV2AssociateTrigger.waitingTime = 2;
-    action->waypointV2AssociateTrigger.actionIdAssociated = 2;
-
-    action->waypointV2ACtionActuatorType = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionActuatorTypeAircraftControl;
-    // Config of the aircraft control (in this case stop or start flying)
-    action->waypointV2AircraftControlActuator.actuatorIndex = 0;
-    action->waypointV2AircraftControlActuator.DJIWaypointV2ActionActuatorAircraftControlOperationType = dji_osdk_ros::WaypointV2AircraftControlActuator::DJIWaypointV2ActionActuatorAircraftControlOperationTypeFlyingControl;
-    action->waypointV2AircraftControlActuator.waypointV2AircraftControlActuatorFlying.isStartFlying = 0;
-    
-    generateWaypointV2Action_.request.actions.push_back(*action);
-    delete action;
-    id+=1; 
-    action = new dji_osdk_ros::WaypointV2Action;
-
-    // Start flying again the aircraft at waypoint 2
-    action->actionId  = id;
-    action->waypointV2ActionTriggerType  = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionTriggerTypeActionAssociated;
-    action->waypointV2AssociateTrigger.actionAssociatedType = dji_osdk_ros::WaypointV2AssociateTrigger::DJIWaypointV2TriggerAssociatedTimingTypeAfterFinised;
-    action->waypointV2AssociateTrigger.waitingTime = 0;
-    action->waypointV2AssociateTrigger.actionIdAssociated = id-1;
-
-    action->waypointV2ACtionActuatorType = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionActuatorTypeAircraftControl;
-    // Config of the aircraft control (in this case stop or start flying)
-    action->waypointV2AircraftControlActuator.actuatorIndex = 0;
-    action->waypointV2AircraftControlActuator.DJIWaypointV2ActionActuatorAircraftControlOperationType = dji_osdk_ros::WaypointV2AircraftControlActuator::DJIWaypointV2ActionActuatorAircraftControlOperationTypeFlyingControl;
-    action->waypointV2AircraftControlActuator.waypointV2AircraftControlActuatorFlying.isStartFlying = 1;
-
-    generateWaypointV2Action_.request.actions.push_back(*action);
-    delete action;
-    id+=1; 
-
-    action = new dji_osdk_ros::WaypointV2Action;
 
     //Stop recording video
     actionVector_camera.actionId  = id;
