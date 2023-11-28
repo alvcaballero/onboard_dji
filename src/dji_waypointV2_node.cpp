@@ -376,18 +376,25 @@ bool generateWaypointV2AllActions_(ros::NodeHandle &nh, uint16_t actionNum, int 
 
     }
     // taking photos depending on the action value
-    for(uint16_t i = 0; i < gpsList_global.size(); i++)
+    for(uint16_t k = 0; k < gpsList_global.size(); k++)
     {
-      action->actionId  = i;
-      action->waypointV2ActionTriggerType  = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionTriggerTypeSampleReachPoint;
-      action->waypointV2SampleReachPointTrigger.waypointIndex = i;
-      action->waypointV2SampleReachPointTrigger.terminateNum = 0;
-      action->waypointV2ACtionActuatorType = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionActuatorTypeCamera;
-      action->waypointV2CameraActuator.actuatorIndex = 0;
-      action->waypointV2CameraActuator.DJIWaypointV2ActionActuatorCameraOperationType = dji_osdk_ros::WaypointV2CameraActuator::DJIWaypointV2ActionActuatorCameraOperationTypeTakePhoto;
-      generateWaypointV2Action_.request.actions.push_back(*action);
-      delete action;
-      action = new dji_osdk_ros::WaypointV2Action;
+      if (take_a_photo[k] == true)
+      {
+        action->waypointV2ActionTriggerType  = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionTriggerTypeActionAssociated;
+        action->waypointV2AssociateTrigger.actionAssociatedType = dji_osdk_ros::WaypointV2AssociateTrigger::DJIWaypointV2TriggerAssociatedTimingTypeAfterFinised;
+        action->waypointV2AssociateTrigger.waitingTime = 0;
+        action->waypointV2AssociateTrigger.actionIdAssociated = k+gpsList_global.size(); //check
+
+        action->waypointV2ACtionActuatorType = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionActuatorTypeCamera;
+        action->waypointV2CameraActuator.actuatorIndex = 0;
+        action->waypointV2CameraActuator.DJIWaypointV2ActionActuatorCameraOperationType = dji_osdk_ros::WaypointV2CameraActuator::DJIWaypointV2ActionActuatorCameraOperationTypeTakePhoto;
+        generateWaypointV2Action_.request.actions.push_back(*action);
+        delete action;
+        action = new dji_osdk_ros::WaypointV2Action;
+      }else{
+        continue;
+      }
+         
     }
 
 
