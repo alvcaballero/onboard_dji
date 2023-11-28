@@ -337,10 +337,14 @@ bool generateWaypointV2AllActions_(ros::NodeHandle &nh, uint16_t actionNum, int 
       // Gimbal control, we need to use different IDs for the actions obviously
       action->actionId  = id;//+ actionNum + 1;
 
-      action->waypointV2ActionTriggerType  = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionTriggerTypeActionAssociated;
-      action->waypointV2AssociateTrigger.actionAssociatedType = dji_osdk_ros::WaypointV2AssociateTrigger::DJIWaypointV2TriggerAssociatedTimingTypeAfterFinised;
-      action->waypointV2AssociateTrigger.waitingTime = 0;
-      action->waypointV2AssociateTrigger.actionIdAssociated = i+1;
+      // action->waypointV2ActionTriggerType  = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionTriggerTypeActionAssociated;
+      // action->waypointV2AssociateTrigger.actionAssociatedType = dji_osdk_ros::WaypointV2AssociateTrigger::DJIWaypointV2TriggerAssociatedTimingTypeAfterFinised;
+      // action->waypointV2AssociateTrigger.waitingTime = 0;
+      // action->waypointV2AssociateTrigger.actionIdAssociated = i+1;
+      
+      action->waypointV2ActionTriggerType  = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionTriggerTypeSampleReachPoint; // Good for now
+      action->waypointV2SampleReachPointTrigger.waypointIndex = i;
+      action->waypointV2SampleReachPointTrigger.terminateNum = 0;
 
       action->waypointV2ACtionActuatorType = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionActuatorTypeGimbal;
       // We are gonna rotate the gimbal somehow so we need to set this operation type
@@ -380,16 +384,19 @@ bool generateWaypointV2AllActions_(ros::NodeHandle &nh, uint16_t actionNum, int 
     {
       if (take_a_photo[k] == true)
       {
+        action->actionId  = id;
         action->waypointV2ActionTriggerType  = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionTriggerTypeActionAssociated;
         action->waypointV2AssociateTrigger.actionAssociatedType = dji_osdk_ros::WaypointV2AssociateTrigger::DJIWaypointV2TriggerAssociatedTimingTypeAfterFinised;
         action->waypointV2AssociateTrigger.waitingTime = 0;
-        action->waypointV2AssociateTrigger.actionIdAssociated = k+gpsList_global.size(); //check
+        action->waypointV2AssociateTrigger.actionIdAssociated = k+1;
 
         action->waypointV2ACtionActuatorType = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionActuatorTypeCamera;
         action->waypointV2CameraActuator.actuatorIndex = 0;
         action->waypointV2CameraActuator.DJIWaypointV2ActionActuatorCameraOperationType = dji_osdk_ros::WaypointV2CameraActuator::DJIWaypointV2ActionActuatorCameraOperationTypeTakePhoto;
         generateWaypointV2Action_.request.actions.push_back(*action);
         delete action;
+        id+=1; 
+
         action = new dji_osdk_ros::WaypointV2Action;
       }else{
         continue;
