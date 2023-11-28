@@ -393,7 +393,7 @@ bool generateWaypointV2AllActions_(ros::NodeHandle &nh, uint16_t actionNum, int 
         action->waypointV2ACtionActuatorType = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionActuatorTypeCamera;
         action->waypointV2CameraActuator.actuatorIndex = 0;
         action->waypointV2CameraActuator.DJIWaypointV2ActionActuatorCameraOperationType = dji_osdk_ros::WaypointV2CameraActuator::DJIWaypointV2ActionActuatorCameraOperationTypeTakePhoto;
-        waypointV2AircraftControlActuatorFlying = ;
+        
         generateWaypointV2Action_.request.actions.push_back(*action);
         delete action;
         id+=1; 
@@ -433,7 +433,7 @@ bool generateWaypointV2AllActions_(ros::NodeHandle &nh, uint16_t actionNum, int 
     // Config of the aircraft control (in this case stop or start flying)
     action->waypointV2AircraftControlActuator.actuatorIndex = 0;
     action->waypointV2AircraftControlActuator.DJIWaypointV2ActionActuatorAircraftControlOperationType = dji_osdk_ros::WaypointV2AircraftControlActuator::DJIWaypointV2ActionActuatorAircraftControlOperationTypeFlyingControl;
-    action->waypointV2AircraftControlActuator.waypointV2AircraftControlActuatorFlying.isStartFlying = 0;
+    action->waypointV2AircraftControlActuator.waypointV2AircraftControlActuatorFlying.isStartFlying = 1;
 
     generateWaypointV2Action_.request.actions.push_back(*action);
     delete action;
