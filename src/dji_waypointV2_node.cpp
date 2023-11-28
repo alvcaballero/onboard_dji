@@ -49,6 +49,10 @@ std::vector<sensor_msgs::NavSatFix> gpsList_global;
 std_msgs::Float64MultiArray yaw_list_global;
 std_msgs::Float64MultiArray gimbal_pitch_list_global;
 std_msgs::Float64MultiArray speed_global;
+std::vector<bool> take_a_photo;
+std::vector<bool> start_recording;
+std::vector<bool> stop_recording;
+
 int velocity_range;
 int idle_velocity;
 int finish_action;
@@ -371,10 +375,26 @@ bool generateWaypointV2AllActions_(ros::NodeHandle &nh, uint16_t actionNum, int 
       
 
     }
+    // taking photos depending on the action value
+    for(uint16_t i = 0; i < gpsList_global.size(); i++)
+    {
+      action->actionId  = i;
+      action->waypointV2ActionTriggerType  = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionTriggerTypeSampleReachPoint;
+      action->waypointV2SampleReachPointTrigger.waypointIndex = i;
+      action->waypointV2SampleReachPointTrigger.terminateNum = 0;
+      action->waypointV2ACtionActuatorType = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionActuatorTypeCamera;
+      action->waypointV2CameraActuator.actuatorIndex = 0;
+      action->waypointV2CameraActuator.DJIWaypointV2ActionActuatorCameraOperationType = dji_osdk_ros::WaypointV2CameraActuator::DJIWaypointV2ActionActuatorCameraOperationTypeTakePhoto;
+      generateWaypointV2Action_.request.actions.push_back(*action);
+      delete action;
+      action = new dji_osdk_ros::WaypointV2Action;
+    }
+
+
     //Stop recording video
     actionVector_camera.actionId  = id;
     actionVector_camera.waypointV2ActionTriggerType  = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionTriggerTypeSampleReachPoint;
-    actionVector_camera.waypointV2SampleReachPointTrigger.waypointIndex = 1;
+    actionVector_camera.waypointV2SampleReachPointTrigger.waypointIndex = gpsList_global.size()-1;
     actionVector_camera.waypointV2SampleReachPointTrigger.terminateNum = 0;
     actionVector_camera.waypointV2ACtionActuatorType = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionActuatorTypeCamera;
     actionVector_camera.waypointV2CameraActuator.actuatorIndex = 0;
@@ -509,11 +529,17 @@ class WaypointV2Node{
       WP_ACTION_GIMBAL_PITCH         = 5,  
       * 
       */
+      // we must initialize the boolean vectors to false
+      take_a_photo.resize(gpsList_global.size(),false);
+      start_recording.resize(gpsList_global.size(),false);
+      stop_recording.resize(gpsList_global.size(),false);
+      
       // We need to create a vector of actions
       if (acommandList.data.size() != acommandParameter.data.size()){
         ROS_ERROR("The number of actions and parameters is not the same");
         return false;
       }
+
       // We need to be sure that exists actions
       if (acommandList.data.size() >= 0){
         for (int i = 0; i < gpsList_global.size(); i++){
@@ -524,13 +550,13 @@ class WaypointV2Node{
             switch (int(acommandList.data[i*10+j]))
             {
             case 1:// take a photo
-              // TBD
+              take_a_photo[i] = true;
               break;
             case 2:// start recording
-              // TBD
+              start_recording[i] = true;
               break;
             case 3:// stop recording
-              // TBD
+              stop_recording[i] = true; 
               break;
             case 4:// craft control yaw
               yaw_list_global.data[i] = acommandParameter.data[i*10+j];
@@ -693,10 +719,10 @@ void waypointV2MissionEventSubCallback(const dji_osdk_ros::WaypointV2MissionEven
       struct tm date_tm; 
       
       
-      std::string bashscript ("mkdir -p ~/uav_media/mission_" + curtime.day[0] + "_" + curtime.day[1] + "_" + curtime.month + "_" + curtime.year + "_" + curtime.tie);
+      //std::string bashscript ("mkdir -p ~/uav_media/mission_" + curtime.day[0] + "_" + curtime.day[1] + "_" + curtime.month + "_" + curtime.year + "_" + curtime.tie);
 
       
-      //std::string bashscript ("mkdir -p ~/uav_media/mission_" + to_string(date_tm.tm_year+1900)+ "_" + to_string(date_tm.tm_mon + 1) + "_" + to_string(date_tm.tm_mday)  + "_" + to_string(date_tm.tm_hour)  + "_" + to_string(date_tm.tm_min) );
+      std::string bashscript ("mkdir -p ~/uav_media/mission_" + to_string(date_tm.tm_year+1900)+ "_" + to_string(date_tm.tm_mon + 1) + "_" + to_string(date_tm.tm_mday)  + "_" + to_string(date_tm.tm_hour)  + "_" + to_string(date_tm.tm_min) );
       
       system( bashscript.c_str() );
       mission_status=false;
