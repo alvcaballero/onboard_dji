@@ -781,8 +781,8 @@ void waypointV2MissionEventSubCallback(const dji_osdk_ros::WaypointV2MissionEven
       //std::string bashscript ("mkdir -p ~/uav_media/mission_" + curtime.day[0] + "_" + curtime.day[1] + "_" + curtime.month + "_" + curtime.year + "_" + curtime.tie);
 
       
-      std::string bashscript ("mkdir -p ~/uav_media/mission_" + timeString );
-      
+      std::string bashscript ("mkdir -p ~/uav_media/mission_");
+      bashscript = bashscript +  timeString;
       system( bashscript.c_str() );
       mission_status=false;
     }
