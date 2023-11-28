@@ -771,12 +771,17 @@ void waypointV2MissionEventSubCallback(const dji_osdk_ros::WaypointV2MissionEven
       std::string h(ctime(&rp)); //converting to c++ string
       tme curtime(h);   // creating a tme object
       struct tm date_tm; 
+      char timeString[40];
+      time_t t = time(0);
+      struct tm tm = *localtime(&t);
+      
+      strftime(timeString, sizeof(timeString), "%Y_%m_%d_%H_%M", &tm);
       
       
       //std::string bashscript ("mkdir -p ~/uav_media/mission_" + curtime.day[0] + "_" + curtime.day[1] + "_" + curtime.month + "_" + curtime.year + "_" + curtime.tie);
 
       
-      std::string bashscript ("mkdir -p ~/uav_media/mission_" + to_string(date_tm.tm_year+1900)+ "_" + to_string(date_tm.tm_mon + 1) + "_" + to_string(date_tm.tm_mday)  + "_" + to_string(date_tm.tm_hour)  + "_" + to_string(date_tm.tm_min) );
+      std::string bashscript ("mkdir -p ~/uav_media/mission_" + timeString );
       
       system( bashscript.c_str() );
       mission_status=false;
