@@ -90,7 +90,7 @@ bool downloadWaypointV2Mission(ros::NodeHandle &nh, std::vector<dji_osdk_ros::Wa
 bool stopWaypointV2Mission(ros::NodeHandle &nh);
 bool pauseWaypointV2Mission(ros::NodeHandle &nh);
 bool resumeWaypointV2Mission(ros::NodeHandle &nh);
-bool generateWaypointV2Actions(ros::NodeHandle &nh, uint16_t actionNum);
+bool WaypointV2actionsAutomated(ros::NodeHandle &nh, uint16_t actionNum);
 bool generateWaypointV2AllActions_(ros::NodeHandle &nh, uint16_t actionNum, int &lastActionID);
 bool setGlobalCruiseSpeed(ros::NodeHandle &nh, float32_t cruiseSpeed);
 float32_t getGlobalCruiseSpeed(ros::NodeHandle &nh);
