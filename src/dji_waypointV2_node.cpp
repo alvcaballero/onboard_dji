@@ -200,24 +200,6 @@ bool WaypointV2actionsAutomated(ros::NodeHandle &nh, uint16_t actionNum)
 
     for (uint16_t j = 0; j < gpsList_global.size(); j++)
     {
-      // Stop the aircraft at the waypoint 
-      action->actionId  = id;
-      action->waypointV2ActionTriggerType  = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionTriggerTypeSampleReachPoint; // Good for now
-      action->waypointV2SampleReachPointTrigger.waypointIndex = j;
-      action->waypointV2SampleReachPointTrigger.terminateNum = 0;
-
-      action->waypointV2ACtionActuatorType = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionActuatorTypeAircraftControl;
-      // Config of the aircraft control (in this case stop or start flying)
-      action->waypointV2AircraftControlActuator.actuatorIndex = 0;
-      action->waypointV2AircraftControlActuator.DJIWaypointV2ActionActuatorAircraftControlOperationType = dji_osdk_ros::WaypointV2AircraftControlActuator::DJIWaypointV2ActionActuatorAircraftControlOperationTypeFlyingControl;
-      action->waypointV2AircraftControlActuator.waypointV2AircraftControlActuatorFlying.isStartFlying = 0;
-      ROS_INFO("Stop flying action created with ID: %d associated to action: %d ", action->actionId, action->waypointV2AssociateTrigger.actionIdAssociated); // add more info when advances come
-
-      generateWaypointV2Action_.request.actions.push_back(*action);
-      delete action;
-      id+=1; 
-      action = new dji_osdk_ros::WaypointV2Action;
-
       // HEADING / YAW CONTROL
       action->actionId  = id;//*2 + 1;
       action->waypointV2ActionTriggerType  = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionTriggerTypeSampleReachPoint; // Good for now
@@ -237,18 +219,38 @@ bool WaypointV2actionsAutomated(ros::NodeHandle &nh, uint16_t actionNum)
       generateWaypointV2Action_.request.actions.push_back(*action);
       delete action;
       action = new dji_osdk_ros::WaypointV2Action;
+      
+      // Stop the aircraft at the waypoint 
+      action->waypointV2ActionTriggerType  = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionTriggerTypeActionAssociated;
+      action->waypointV2AssociateTrigger.actionAssociatedType = dji_osdk_ros::WaypointV2AssociateTrigger::DJIWaypointV2TriggerAssociatedTimingTypeAfterFinised;
+      action->waypointV2AssociateTrigger.waitingTime = 0;
+      action->waypointV2AssociateTrigger.actionIdAssociated = id-1;
+
+      action->waypointV2ACtionActuatorType = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionActuatorTypeAircraftControl;
+      // Config of the aircraft control (in this case stop or start flying)
+      action->waypointV2AircraftControlActuator.actuatorIndex = 0;
+      action->waypointV2AircraftControlActuator.DJIWaypointV2ActionActuatorAircraftControlOperationType = dji_osdk_ros::WaypointV2AircraftControlActuator::DJIWaypointV2ActionActuatorAircraftControlOperationTypeFlyingControl;
+      action->waypointV2AircraftControlActuator.waypointV2AircraftControlActuatorFlying.isStartFlying = 0;
+      ROS_INFO("Stop flying action created with ID: %d associated to action: %d ", action->actionId, action->waypointV2AssociateTrigger.actionIdAssociated); // add more info when advances come
+
+      generateWaypointV2Action_.request.actions.push_back(*action);
+      delete action;
+      id+=1; 
+      action = new dji_osdk_ros::WaypointV2Action;
+
+      
 
       // GIMBAL CONTROL
       action->actionId  = id;//+ actionNum + 1;
 
-      // action->waypointV2ActionTriggerType  = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionTriggerTypeActionAssociated;
-      // action->waypointV2AssociateTrigger.actionAssociatedType = dji_osdk_ros::WaypointV2AssociateTrigger::DJIWaypointV2TriggerAssociatedTimingTypeAfterFinised;
-      // action->waypointV2AssociateTrigger.waitingTime = 0;
-      // action->waypointV2AssociateTrigger.actionIdAssociated = i+1;
+      action->waypointV2ActionTriggerType  = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionTriggerTypeActionAssociated;
+      action->waypointV2AssociateTrigger.actionAssociatedType = dji_osdk_ros::WaypointV2AssociateTrigger::DJIWaypointV2TriggerAssociatedTimingTypeAfterFinised;
+      action->waypointV2AssociateTrigger.waitingTime = 0;
+      action->waypointV2AssociateTrigger.actionIdAssociated = id-1;
       
-      action->waypointV2ActionTriggerType  = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionTriggerTypeSampleReachPoint; // Good for now
-      action->waypointV2SampleReachPointTrigger.waypointIndex = j;
-      action->waypointV2SampleReachPointTrigger.terminateNum = 0;
+      // action->waypointV2ActionTriggerType  = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionTriggerTypeSampleReachPoint; // Good for now
+      // action->waypointV2SampleReachPointTrigger.waypointIndex = j;
+      // action->waypointV2SampleReachPointTrigger.terminateNum = 0;
 
       action->waypointV2ACtionActuatorType = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionActuatorTypeGimbal;
       // We are gonna rotate the gimbal somehow so we need to set this operation type
