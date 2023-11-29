@@ -322,7 +322,7 @@ bool WaypointV2actionsAutomated(ros::NodeHandle &nh, uint16_t actionNum)
       
 
     }
-  
+    waypointV2_generate_actions_client.call(generateWaypointV2Action_);
     // after the call we need to reset the action vector
     generateWaypointV2Action_.request.actions.clear();
 
