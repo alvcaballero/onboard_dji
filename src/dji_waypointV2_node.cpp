@@ -233,7 +233,7 @@ bool WaypointV2actionsAutomated(ros::NodeHandle &nh, uint16_t actionNum)
 
       ROS_INFO("Heading action created with ID: %d at wp: %d and angle %f ", action->actionId, action->waypointV2SampleReachPointTrigger.waypointIndex, yaw_list_global.data[j]);//action->waypointV2AircraftControlActuator.waypointV2AircraftControlActuatorRotateHeading.yaw); // add more info when advances come
       id+=1; 
-      lastActionID++; 
+       
       generateWaypointV2Action_.request.actions.push_back(*action);
       delete action;
       action = new dji_osdk_ros::WaypointV2Action;
@@ -274,7 +274,7 @@ bool WaypointV2actionsAutomated(ros::NodeHandle &nh, uint16_t actionNum)
       // Gimbal Control speed
       action->waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.duationTime = 20; // rotate time
       id+=1; 
-      lastActionID++; 
+       
       ROS_INFO("Gimbal action created with ID: %d associated to action: %d and with angle %d", action->actionId, action->waypointV2AssociateTrigger.actionIdAssociated, action->waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.y); // add more info when advances come
 
       generateWaypointV2Action_.request.actions.push_back(*action);
