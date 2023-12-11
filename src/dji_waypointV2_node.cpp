@@ -338,9 +338,9 @@ bool WaypointV2actionsAutomated(ros::NodeHandle &nh, uint16_t actionNum)
           action->waypointV2AssociateTrigger.waitingTime = 0;
           action->waypointV2AssociateTrigger.actionIdAssociated = id-1;
 
-          actionVector_camera.waypointV2ACtionActuatorType = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionActuatorTypeCamera;
-          actionVector_camera.waypointV2CameraActuator.actuatorIndex = 0;
-          actionVector_camera.waypointV2CameraActuator.DJIWaypointV2ActionActuatorCameraOperationType = dji_osdk_ros::WaypointV2CameraActuator::DJIWaypointV2ActionActuatorCameraOperationTypeStartRecordVideo;
+          action->waypointV2ACtionActuatorType = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionActuatorTypeCamera;
+          action->waypointV2CameraActuator.actuatorIndex = 0;
+          action->waypointV2CameraActuator.DJIWaypointV2ActionActuatorCameraOperationType = dji_osdk_ros::WaypointV2CameraActuator::DJIWaypointV2ActionActuatorCameraOperationTypeStartRecordVideo;
           generateWaypointV2Action_.request.actions.push_back(actionVector_camera);
           
           ROS_INFO("Start recording action created with ID: %d associated to action: %d ", action->actionId, action->waypointV2AssociateTrigger.actionIdAssociated); // add more info when advances come
@@ -381,9 +381,9 @@ bool WaypointV2actionsAutomated(ros::NodeHandle &nh, uint16_t actionNum)
         action->waypointV2AssociateTrigger.waitingTime = 0;
         action->waypointV2AssociateTrigger.actionIdAssociated = id-1;
 
-        actionVector_camera.waypointV2ACtionActuatorType = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionActuatorTypeCamera;
-        actionVector_camera.waypointV2CameraActuator.actuatorIndex = 0;
-        actionVector_camera.waypointV2CameraActuator.DJIWaypointV2ActionActuatorCameraOperationType = dji_osdk_ros::WaypointV2CameraActuator::DJIWaypointV2ActionActuatorCameraOperationTypeStopRecordVideo;
+        action->waypointV2ACtionActuatorType = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionActuatorTypeCamera;
+        action->waypointV2CameraActuator.actuatorIndex = 0;
+        action->waypointV2CameraActuator.DJIWaypointV2ActionActuatorCameraOperationType = dji_osdk_ros::WaypointV2CameraActuator::DJIWaypointV2ActionActuatorCameraOperationTypeStopRecordVideo;
         generateWaypointV2Action_.request.actions.push_back(actionVector_camera);
         
         ROS_INFO("Stop recording action created with ID: %d associated to action: %d ", action->actionId, action->waypointV2AssociateTrigger.actionIdAssociated); // add more info when advances come
