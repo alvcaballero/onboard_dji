@@ -28,6 +28,8 @@
 
 #include <waypointV2/dji_waypointV2_node.h>
 #include <aerialcore_common/ConfigMission.h>
+#include <aerialcore_common/finishMission.h>
+
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -575,6 +577,7 @@ void flyStatusCallback(const std_msgs::UInt8::ConstPtr &msg)
 // A class to improve the quality of the code:
 class WaypointV2Node{
   public:
+
     WaypointV2Node() {
 	
     actionIDCounter=0; 
@@ -584,9 +587,10 @@ class WaypointV2Node{
     service_config_mission = nh.advertiseService("dji_control/configure_mission", &WaypointV2Node::configMission,this);
     gpsPositionSub = nh.subscribe<sensor_msgs::NavSatFix>("dji_osdk_ros/gps_position", 10, &gpsPositionSubCallback);
     fly_status_subscriber = nh.subscribe<std_msgs::UInt8>("dji_osdk_ros/flight_status", 1, &flyStatusCallback);
-
     obtain_ctrl_authority_client = nh.serviceClient<dji_osdk_ros::ObtainControlAuthority>(
       "obtain_release_control_authority");
+    finishMissionGCS = nh.serviceClient<aerialcore_common::finishMission>("/GCS/FinishMission");
+
 
     //if you want to fly without rc ,you need to obtain ctrl authority.Or it will enter rc lost.
     obtainCtrlAuthority.request.enable_obtain = true;
@@ -606,7 +610,8 @@ class WaypointV2Node{
     ros::ServiceServer service_config_mission;
     ros::Subscriber gpsPositionSub;
     ros::Subscriber fly_status_subscriber;
-   
+
+    ros::ServiceClient finishMissionGCS;
     ros::ServiceClient obtain_ctrl_authority_client;
     ros::ServiceServer service_run_mission;
     dji_osdk_ros::ObtainControlAuthority obtainCtrlAuthority;
@@ -696,7 +701,7 @@ class WaypointV2Node{
       ROS_WARN("Finish action: %d",finish_action);
 
       // if everything goes right we run the whole thing
-      res.success = runWaypointV2Mission(this->nh,this->actionIDCounter);
+      res.success = WaypointV2Node::runWaypointV2Mission(this->actionIDCounter);
       return true;
     }
     bool startWaypointV2Mission(std_srvs::SetBool::Request  &req,std_srvs::SetBool::Response &res)
@@ -727,7 +732,133 @@ class WaypointV2Node{
         res.message = message;
         return true;
     }
+    bool runWaypointV2Mission( int &actionIDCounter)
+    {
+      int timeout = 1;
+      bool result = false;
+
+      // ROS Declarations
+      get_drone_type_client = nh.serviceClient<dji_osdk_ros::GetDroneType>("get_drone_type");
+      waypointV2_mission_state_push_client = nh.serviceClient<dji_osdk_ros::SubscribeWaypointV2Event>("dji_osdk_ros/waypointV2_subscribeMissionState");
+      waypointV2_mission_event_push_client = nh.serviceClient<dji_osdk_ros::SubscribeWaypointV2State>("dji_osdk_ros/waypointV2_subscribeMissionEvent");
+
+      waypointV2EventSub = nh.subscribe("dji_osdk_ros/waypointV2_mission_event", 10, &WaypointV2Node::waypointV2MissionEventSubCallback,this);
+      waypointV2StateSub = nh.subscribe("dji_osdk_ros/waypointV2_mission_state", 10, &waypointV2MissionStateSubCallback);
+
+      subscribeWaypointV2Event_.request.enable_sub = true;
+      subscribeWaypointV2State_.request.enable_sub = true;
     
+      get_drone_type_client.call(drone_type);
+      if (drone_type.response.drone_type != static_cast<uint8_t>(dji_osdk_ros::Dronetype::M300))
+      {
+          ROS_DEBUG("This node only works for the model DJI M300!\n");
+          return false;
+      }
+
+      waypointV2_mission_state_push_client.call(subscribeWaypointV2State_);
+      waypointV2_mission_event_push_client.call(subscribeWaypointV2Event_);
+
+        /*! init mission */
+        
+      result = initWaypointV2Setting(nh,actionIDCounter);
+      if(!result)
+      {
+        return false;
+      }
+      sleep(timeout);
+
+      /*! upload mission */
+      result = uploadWaypointV2Mission(nh);
+      if(!result)
+      {
+        return false;
+      }
+      sleep(timeout);
+
+    /*! download mission */
+      std::vector<dji_osdk_ros::WaypointV2> mission;
+      result = downloadWaypointV2Mission(nh, mission);
+      if(!result)
+      {
+        return false;
+      }
+      sleep(timeout);
+
+      /*! upload  actions */
+      result = uploadWaypointV2Action(nh);
+      if(!result)
+      {
+        return false;
+      }
+      sleep(timeout);
+      std::vector<dji_osdk_ros::WaypointV2> resetMission;
+      resetMission = resetWaypoints(nh, gpsList_global);
+
+      
+    return true;
+    }
+    // TBD: Know the functionalities of the Events
+    void waypointV2MissionEventSubCallback(const dji_osdk_ros::WaypointV2MissionEventPush::ConstPtr& waypointV2MissionEventPush)
+    {
+      waypoint_V2_mission_event_push_ = *waypointV2MissionEventPush;
+
+      ROS_INFO("waypoint_V2_mission_event_push_.event ID :0x%x\n", waypoint_V2_mission_event_push_.event);
+
+      if(waypoint_V2_mission_event_push_.event == 0x01)
+      {
+        ROS_INFO("interruptReason:0x%x\n", waypoint_V2_mission_event_push_.interruptReason);
+      }
+      if(waypoint_V2_mission_event_push_.event == 0x02)
+      {
+        ROS_INFO("recoverProcess:0x%x\n", waypoint_V2_mission_event_push_.recoverProcess);
+      }
+      if(waypoint_V2_mission_event_push_.event== 0x03)
+      {
+        ROS_INFO("finishReason:0x%x\n", waypoint_V2_mission_event_push_.finishReason);
+        if (mission_status){
+          StopRosbag();
+          
+          
+          aerialcore_common::finishMission msgSrv;
+          std::string id = std::to_string(uav_id);
+          msgSrv.request.uav_id = id;
+          msgSrv.request.data = true;
+          if(finishMissionGCS.call(msgSrv)){
+            ROS_INFO("GCS srv Finish mission OK");
+          }else{
+            ROS_INFO("GCS srv Finish mission Fail --- ERROR");
+          }
+
+          // Getting the time for the folder name
+          auto r=std::chrono::system_clock::now();
+          auto rp=std::chrono::system_clock::to_time_t(r);
+          std::string h(ctime(&rp)); //converting to c++ string
+          tme curtime(h);   // creating a tme object
+          struct tm date_tm; 
+          char timeString[40];
+          time_t t = time(0);
+          struct tm tm = *localtime(&t);
+          
+          strftime(timeString, sizeof(timeString), "%Y_%m_%d_%H_%M", &tm);
+          
+          std::string bashscript ("mkdir -p ~/uav_media/mission_");
+          bashscript = bashscript +  timeString;
+          system( bashscript.c_str() );
+          mission_status=false;
+        }
+      }
+
+      if(waypoint_V2_mission_event_push_.event == 0x10)
+      {
+        ROS_INFO("current waypointIndex:%d\n", waypoint_V2_mission_event_push_.waypointIndex);
+      }
+
+      if(waypoint_V2_mission_event_push_.event == 0x11)
+      {
+        ROS_INFO("currentMissionExecNum:%d\n", waypoint_V2_mission_event_push_.currentMissionExecNum);
+      }
+    }
+
 
 
 };
@@ -806,64 +937,7 @@ bool generateHeadingV2Actions(ros::NodeHandle &nh, uint16_t actionNum)
 
 
 
-// TBD: Know the functionalities of the Events
-void waypointV2MissionEventSubCallback(const dji_osdk_ros::WaypointV2MissionEventPush::ConstPtr& waypointV2MissionEventPush)
-{
-  waypoint_V2_mission_event_push_ = *waypointV2MissionEventPush;
 
-  ROS_INFO("waypoint_V2_mission_event_push_.event ID :0x%x\n", waypoint_V2_mission_event_push_.event);
-
-  if(waypoint_V2_mission_event_push_.event == 0x01)
-  {
-    ROS_INFO("interruptReason:0x%x\n", waypoint_V2_mission_event_push_.interruptReason);
-  }
-  if(waypoint_V2_mission_event_push_.event == 0x02)
-  {
-    ROS_INFO("recoverProcess:0x%x\n", waypoint_V2_mission_event_push_.recoverProcess);
-  }
-  if(waypoint_V2_mission_event_push_.event== 0x03)
-  {
-    ROS_INFO("finishReason:0x%x\n", waypoint_V2_mission_event_push_.finishReason);
-    if (mission_status){
-      StopRosbag();
-    
-      // Getting the time for the folder name
-      auto r=std::chrono::system_clock::now();
-      auto rp=std::chrono::system_clock::to_time_t(r);
-      std::string h(ctime(&rp)); //converting to c++ string
-      tme curtime(h);   // creating a tme object
-      struct tm date_tm; 
-      char timeString[40];
-      time_t t = time(0);
-      struct tm tm = *localtime(&t);
-      
-      strftime(timeString, sizeof(timeString), "%Y_%m_%d_%H_%M", &tm);
-      
-      
-      //std::string bashscript ("mkdir -p ~/uav_media/mission_" + curtime.day[0] + "_" + curtime.day[1] + "_" + curtime.month + "_" + curtime.year + "_" + curtime.tie);
-
-      
-      std::string bashscript ("mkdir -p ~/uav_media/mission_");
-      bashscript = bashscript +  timeString;
-      system( bashscript.c_str() );
-      mission_status=false;
-    }
-          
-      
-
-    
-  }
-
-  if(waypoint_V2_mission_event_push_.event == 0x10)
-  {
-    ROS_INFO("current waypointIndex:%d\n", waypoint_V2_mission_event_push_.waypointIndex);
-  }
-
-  if(waypoint_V2_mission_event_push_.event == 0x11)
-  {
-    ROS_INFO("currentMissionExecNum:%d\n", waypoint_V2_mission_event_push_.currentMissionExecNum);
-  }
-}
 
 // This function Show the mission state
 void waypointV2MissionStateSubCallback(const dji_osdk_ros::WaypointV2MissionStatePush::ConstPtr& waypointV2MissionStatePush)
@@ -1122,71 +1196,7 @@ float32_t getGlobalCruiseSpeed(ros::NodeHandle &nh)
     return getGlobalCruisespeed_.response.global_cruisespeed;
 }
 
-bool runWaypointV2Mission(ros::NodeHandle &nh, int &actionIDCounter)
-{
-  int timeout = 1;
-  bool result = false;
 
-  // ROS Declarations
-  get_drone_type_client = nh.serviceClient<dji_osdk_ros::GetDroneType>("get_drone_type");
-  waypointV2_mission_state_push_client = nh.serviceClient<dji_osdk_ros::SubscribeWaypointV2Event>("dji_osdk_ros/waypointV2_subscribeMissionState");
-  waypointV2_mission_event_push_client = nh.serviceClient<dji_osdk_ros::SubscribeWaypointV2State>("dji_osdk_ros/waypointV2_subscribeMissionEvent");
-
-  waypointV2EventSub = nh.subscribe("dji_osdk_ros/waypointV2_mission_event", 10, &waypointV2MissionEventSubCallback);
-  waypointV2StateSub = nh.subscribe("dji_osdk_ros/waypointV2_mission_state", 10, &waypointV2MissionStateSubCallback);
-
-  subscribeWaypointV2Event_.request.enable_sub = true;
-  subscribeWaypointV2State_.request.enable_sub = true;
- 
-  get_drone_type_client.call(drone_type);
-  if (drone_type.response.drone_type != static_cast<uint8_t>(dji_osdk_ros::Dronetype::M300))
-  {
-      ROS_DEBUG("This node only works for the model DJI M300!\n");
-      return false;
-  }
-
-  waypointV2_mission_state_push_client.call(subscribeWaypointV2State_);
-  waypointV2_mission_event_push_client.call(subscribeWaypointV2Event_);
-
-    /*! init mission */
-    
-  result = initWaypointV2Setting(nh,actionIDCounter);
-  if(!result)
-  {
-    return false;
-  }
-  sleep(timeout);
-
-  /*! upload mission */
-  result = uploadWaypointV2Mission(nh);
-  if(!result)
-  {
-    return false;
-  }
-  sleep(timeout);
-
- /*! download mission */
-  std::vector<dji_osdk_ros::WaypointV2> mission;
-  result = downloadWaypointV2Mission(nh, mission);
-  if(!result)
-  {
-    return false;
-  }
-  sleep(timeout);
-
-  /*! upload  actions */
-  result = uploadWaypointV2Action(nh);
-  if(!result)
-  {
-    return false;
-  }
-  sleep(timeout);
-  std::vector<dji_osdk_ros::WaypointV2> resetMission;
-  resetMission = resetWaypoints(nh, gpsList_global);
-
-  
-return true;
-}
 
 
 
