@@ -1009,62 +1009,6 @@ bool generateHeadingV2Actions(ros::NodeHandle &nh, uint16_t actionNum)
 
 
 
-<<<<<<< HEAD
-=======
-  ROS_INFO("waypoint_V2_mission_event_push_.event ID :0x%x\n", waypoint_V2_mission_event_push_.event);
-
-  if(waypoint_V2_mission_event_push_.event == 0x01)
-  {
-    ROS_INFO("interruptReason:0x%x\n", waypoint_V2_mission_event_push_.interruptReason);
-  }
-  if(waypoint_V2_mission_event_push_.event == 0x02)
-  {
-    ROS_INFO("recoverProcess:0x%x\n", waypoint_V2_mission_event_push_.recoverProcess);
-  }
-  if(waypoint_V2_mission_event_push_.event== 0x03)
-  {
-    ROS_INFO("finishReason:0x%x\n", waypoint_V2_mission_event_push_.finishReason);
-    if (mission_status){
-      StopRosbag();
-    
-      // Getting the time for the folder name
-      auto r=std::chrono::system_clock::now();
-      auto rp=std::chrono::system_clock::to_time_t(r);
-      std::string h(ctime(&rp)); //converting to c++ string
-      tme curtime(h);   // creating a tme object
-      struct tm date_tm; 
-      char timeString[40];
-      time_t t = time(0);
-      struct tm tm = *localtime(&t);
-      
-      strftime(timeString, sizeof(timeString), "%Y-%m-%d_%H:%M", &tm);
-      
-      
-      //std::string bashscript ("mkdir -p ~/uav_media/mission_" + curtime.day[0] + "_" + curtime.day[1] + "_" + curtime.month + "_" + curtime.year + "_" + curtime.tie);
-
-      
-      std::string bashscript ("mkdir -p ~/uav_media/mission_");
-      bashscript = bashscript +  timeString;
-      system( bashscript.c_str() );
-      mission_status=false;
-    }
-          
-      
-
-    
-  }
-
-  if(waypoint_V2_mission_event_push_.event == 0x10)
-  {
-    ROS_INFO("current waypointIndex:%d\n", waypoint_V2_mission_event_push_.waypointIndex);
-  }
-
-  if(waypoint_V2_mission_event_push_.event == 0x11)
-  {
-    ROS_INFO("currentMissionExecNum:%d\n", waypoint_V2_mission_event_push_.currentMissionExecNum);
-  }
-}
->>>>>>> 9bf14c70135029387398db0cd662810c32d3b4ce
 
 // This function Show the mission state
 void waypointV2MissionStateSubCallback(const dji_osdk_ros::WaypointV2MissionStatePush::ConstPtr& waypointV2MissionStatePush)
