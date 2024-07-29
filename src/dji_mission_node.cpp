@@ -55,7 +55,8 @@ public:
 
     // waypoint reached function
     ros::Subscriber waypoint_reached_sub = nh.subscribe<sensor_msgs::NavSatFix>(
-        "dji_osdk_ros/gps_position", 10, &WaypointMissionNode::wpReachedCB);
+        "dji_osdk_ros/gps_position", 10, &WaypointMissionNode::wpReachedCB,
+        this);
   }
   // ROS Services Initialization
   void initService() {
@@ -68,12 +69,14 @@ public:
         "flight_task_control");
 
     gps_pos_subscriber = nh.subscribe<sensor_msgs::NavSatFix>(
-        "dji_osdk_ros/gps_position", 10, &WaypointMissionNode::gpsPosCallback);
-    ros::Subscriber flight_mode_subscriber = nh.subscribe<std_msgs::UInt8>(
-        "dji_osdk_ros/display_mode", 1, &WaypointMissionNode::ModeCallback);
-    ros::Subscriber fly_status_subscriber =
-        nh.subscribe<std_msgs::UInt8>("dji_osdk_ros/flight_status", 1,
-                                      &WaypointMissionNode::flyStatusCallback);
+        "dji_osdk_ros/gps_position", 10, &WaypointMissionNode::gpsPosCallback,
+        this);
+    ros::Subscriber flight_mode_subscriber =
+        nh.subscribe<std_msgs::UInt8>("dji_osdk_ros/display_mode", 1,
+                                      &WaypointMissionNode::ModeCallback, this);
+    ros::Subscriber fly_status_subscriber = nh.subscribe<std_msgs::UInt8>(
+        "dji_osdk_ros/flight_status", 1,
+        &WaypointMissionNode::flyStatusCallback, this);
 
     ros::ServiceServer service_config_mission =
         nh.advertiseService("dji_control/configure_mission",
