@@ -87,6 +87,72 @@ public:
         "dji_control/send_bags", &WaypointMissionNode::sendFiles, this);
   }
 
+  void gpsPosCallback(const sensor_msgs::NavSatFix::ConstPtr &msg) {
+    gps_pos = *msg;
+  }
+  void flyStatusCallback(const std_msgs::UInt8::ConstPtr &msg) {
+    int flystatus = msg->data; // 0 stoped //1 on_ground // 2 in air
+
+    if (flystatus == 0 && mission_status == 1 && was_on_air == true &&
+        dont_more_missionwaypoints == true) {
+      StopRosbag();
+      was_on_air = false;
+    }
+    if (flystatus == 2) {
+      was_on_air = true;
+    }
+  }
+
+  void ModeCallback(const std_msgs::UInt8::ConstPtr &msg) {
+    // msg->data   joystick? = 14
+    // if(msg->data == 14 && is_flying && exist_mission){
+    ros::NodeHandle n;
+    dji_osdk_ros::MissionWpGetInfo mission_get_info;
+    auto get_mission_info_client =
+        n.serviceClient<dji_osdk_ros::MissionWpGetInfo>(
+            "dji_osdk_ros/mission_waypoint_getInfo");
+    get_mission_info_client.call(mission_get_info);
+    dji_osdk_ros::MissionWaypointTask waypointTask =
+        mission_get_info.response.waypoint_task;
+
+    if (waypointTask.idle_velocity != 0.0 && !mission_started) {
+      mission_started = true;
+      landing_type = waypointTask.action_on_finish;
+      ROS_WARN("LANDING TYPE DJI MISION NODE %d", landing_type);
+    }
+    if (waypointTask.mission_waypoint.empty() && !lading_activated &&
+        mission_started && landing_type == 2) {
+      ROS_WARN("Activated DJI LANDING");
+      lading_activated = true;
+      land();
+    }
+
+    if (waypointTask.mission_waypoint.empty()) {
+      dont_more_missionwaypoints = true;
+    } else {
+      dont_more_missionwaypoints = false;
+    }
+  }
+  // Function to detect in what waypoint the drone is
+  int wpReachedCB(const sensor_msgs::NavSatFix::ConstPtr &msg) {
+    int index = 0;
+    double min_dist = 1.0; // min distance in meters
+    sensor_msgs::NavSatFix current_pos;
+
+    current_pos = *msg;
+    for (int i = 0; i < wpList.size(); i++) {
+      double dist = haversine(wpList[i].latitude, wpList[i].longitude,
+                              current_pos.latitude, current_pos.longitude);
+      if (dist <= min_dist) {
+        min_dist = dist;
+        index = i;
+        ROS_INFO("Waypoint [%d] reached", index);
+      }
+    }
+
+    return index;
+  }
+
 protected:
   ros::ServiceClient waypoint_upload_client;
   ros::ServiceClient waypoint_action_client;
@@ -144,30 +210,6 @@ protected:
     double c = 2.0 * std::atan2(std::sqrt(a), std::sqrt(1.0 - a));
 
     return C_EARTH * c;
-  }
-
-  // Function to detect in what waypoint the drone is
-  int wpReachedCB(const sensor_msgs::NavSatFix::ConstPtr &msg) {
-    int index = 0;
-    double min_dist = 1.0; // min distance in meters
-    sensor_msgs::NavSatFix current_pos;
-
-    current_pos = *msg;
-    for (int i = 0; i < wpList.size(); i++) {
-      double dist = haversine(wpList[i].latitude, wpList[i].longitude,
-                              current_pos.latitude, current_pos.longitude);
-      if (dist <= min_dist) {
-        min_dist = dist;
-        index = i;
-        ROS_INFO("Waypoint [%d] reached", index);
-      }
-    }
-
-    return index;
-  }
-
-  void gpsPosCallback(const sensor_msgs::NavSatFix::ConstPtr &msg) {
-    gps_pos = *msg;
   }
 
   bool runWaypointMission(std::vector<sensor_msgs::NavSatFix> gpsList,
@@ -501,50 +543,6 @@ protected:
     res.success = response;
     res.message = message;
     return true;
-  }
-
-  void flyStatusCallback(const std_msgs::UInt8::ConstPtr &msg) {
-    int flystatus = msg->data; // 0 stoped //1 on_ground // 2 in air
-
-    if (flystatus == 0 && mission_status == 1 && was_on_air == true &&
-        dont_more_missionwaypoints == true) {
-      StopRosbag();
-      was_on_air = false;
-    }
-    if (flystatus == 2) {
-      was_on_air = true;
-    }
-  }
-
-  void ModeCallback(const std_msgs::UInt8::ConstPtr &msg) {
-    // msg->data   joystick? = 14
-    // if(msg->data == 14 && is_flying && exist_mission){
-    ros::NodeHandle n;
-    dji_osdk_ros::MissionWpGetInfo mission_get_info;
-    auto get_mission_info_client =
-        n.serviceClient<dji_osdk_ros::MissionWpGetInfo>(
-            "dji_osdk_ros/mission_waypoint_getInfo");
-    get_mission_info_client.call(mission_get_info);
-    dji_osdk_ros::MissionWaypointTask waypointTask =
-        mission_get_info.response.waypoint_task;
-
-    if (waypointTask.idle_velocity != 0.0 && !mission_started) {
-      mission_started = true;
-      landing_type = waypointTask.action_on_finish;
-      ROS_WARN("LANDING TYPE DJI MISION NODE %d", landing_type);
-    }
-    if (waypointTask.mission_waypoint.empty() && !lading_activated &&
-        mission_started && landing_type == 2) {
-      ROS_WARN("Activated DJI LANDING");
-      lading_activated = true;
-      land();
-    }
-
-    if (waypointTask.mission_waypoint.empty()) {
-      dont_more_missionwaypoints = true;
-    } else {
-      dont_more_missionwaypoints = false;
-    }
   }
 
 private: // TBD: Comment the code propperly
