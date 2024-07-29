@@ -33,70 +33,81 @@
 #include "unistd.h"
 #include <iostream>
 
+// Other std and additional includes
+#include <std_srvs/SetBool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string>
+#include <time.h>
 // DJI SDK includes
-#include <dji_osdk_ros/MissionWpAction.h>
 #include <dji_osdk_ros/MissionHpAction.h>
-#include <dji_osdk_ros/MissionWpUpload.h>
-#include <dji_osdk_ros/MissionHpUpload.h>
 #include <dji_osdk_ros/MissionHpUpdateRadius.h>
 #include <dji_osdk_ros/MissionHpUpdateYawRate.h>
+#include <dji_osdk_ros/MissionHpUpload.h>
+#include <dji_osdk_ros/MissionWpAction.h>
+#include <dji_osdk_ros/MissionWpUpload.h>
 
 #include <dji_osdk_ros/dji_vehicle_node.h>
 
+#include <dji_osdk_ros/FlightTaskControl.h>
+#include <dji_osdk_ros/MissionWpGetInfo.h>
+#include <dji_osdk_ros/common_type.h>
+// #include <dji_osdk_ros/dji_waypoint.hpp>
+#include <aerialcore_common/ConfigMission.h>
 // ROS includes
+#include <geographic_msgs/GeoPoint.h>
 #include <ros/ros.h>
 #include <sensor_msgs/NavSatFix.h>
-#include <std_msgs/Float64MultiArray.h>
-#include <std_msgs/Float64.h>
 #include <std_msgs/Bool.h>
-#include <geographic_msgs/GeoPoint.h>
+#include <std_msgs/Float64.h>
+#include <std_msgs/Float64MultiArray.h>
 
 #define C_EARTH (double)6378137.0
 #define C_PI (double)3.141592653589793
 #define DEG2RAD(DEG) ((DEG) * ((C_PI) / (180.0)))
 
-typedef struct ServiceAck
-{
-  bool         result;
-  int          cmd_set;
-  int          cmd_id;
+typedef struct ServiceAck {
+  bool result;
+  int cmd_set;
+  int cmd_id;
   unsigned int ack_data;
   ServiceAck(bool res, int set, int id, unsigned int ack)
-    : result(res)
-    , cmd_set(set)
-    , cmd_id(id)
-    , ack_data(ack)
-  {
-  }
-  ServiceAck()
-  {
-  }
+      : result(res), cmd_set(set), cmd_id(id), ack_data(ack) {}
+  ServiceAck() {}
 } ServiceAck;
 
-bool runWaypointMission(std::vector<sensor_msgs::NavSatFix> gpsList, std_msgs::Float64MultiArray yawList,std_msgs::Float64MultiArray gimbalPitchList,
-                        std_msgs::Float64MultiArray acommandList,std_msgs::Float64MultiArray acommandParameter, int responseTimeout);
-void setWaypointDefaults(DJI::OSDK::WayPointSettings* wp);
+bool runWaypointMission(std::vector<sensor_msgs::NavSatFix> gpsList,
+                        std_msgs::Float64MultiArray yawList,
+                        std_msgs::Float64MultiArray gimbalPitchList,
+                        std_msgs::Float64MultiArray acommandList,
+                        std_msgs::Float64MultiArray acommandParameter,
+                        int responseTimeout);
+void setWaypointDefaults(DJI::OSDK::WayPointSettings *wp);
 
-void setWaypointInitDefaults(dji_osdk_ros::MissionWaypointTask& waypointTask);
+void setWaypointInitDefaults(dji_osdk_ros::MissionWaypointTask &waypointTask);
 
-std::vector<WayPointSettings> createWaypoints(std::vector<sensor_msgs::NavSatFix> gpsList, std_msgs::Float64MultiArray yawList, std_msgs::Float64MultiArray gimbalPitchList,
-                std_msgs::Float64MultiArray acommandList, std_msgs::Float64MultiArray acommandParameter,
+std::vector<WayPointSettings>
+createWaypoints(std::vector<sensor_msgs::NavSatFix> gpsList,
+                std_msgs::Float64MultiArray yawList,
+                std_msgs::Float64MultiArray gimbalPitchList,
+                std_msgs::Float64MultiArray acommandList,
+                std_msgs::Float64MultiArray acommandParameter,
                 float32_t start_alt);
 
-void uploadWaypoints(std::vector<DJI::OSDK::WayPointSettings>& wp_list,
-                     int                                       responseTimeout,
-                     dji_osdk_ros::MissionWaypointTask&        waypointTask);
+void uploadWaypoints(std::vector<DJI::OSDK::WayPointSettings> &wp_list,
+                     int responseTimeout,
+                     dji_osdk_ros::MissionWaypointTask &waypointTask);
 
 bool runHotpointMission(int initialRadius, int responseTimeout);
 
-void setHotpointInitDefault(dji_osdk_ros::MissionHotpointTask& hotpointTask);
+void setHotpointInitDefault(dji_osdk_ros::MissionHotpointTask &hotpointTask);
 
-ServiceAck initWaypointMission(dji_osdk_ros::MissionWaypointTask& waypointTask);
+ServiceAck initWaypointMission(dji_osdk_ros::MissionWaypointTask &waypointTask);
 
-ServiceAck initHotpointMission(dji_osdk_ros::MissionHotpointTask& hotpointTask);
+ServiceAck initHotpointMission(dji_osdk_ros::MissionHotpointTask &hotpointTask);
 
 ServiceAck missionAction(DJI::OSDK::DJI_MISSION_TYPE type,
-                         DJI::OSDK::MISSION_ACTION   action);
+                         DJI::OSDK::MISSION_ACTION action);
 
 ServiceAck activate();
 
@@ -110,9 +121,9 @@ ServiceAck hotpointUpdateRadius(float radius);
 
 ServiceAck hotpointUpdateYawRate(float yawRate, int direction);
 
-void gpsPosCallback(const sensor_msgs::NavSatFix::ConstPtr& msg);
+void gpsPosCallback(const sensor_msgs::NavSatFix::ConstPtr &msg);
 
-int wpReachedCB(const sensor_msgs::NavSatFix::ConstPtr& msg);
+int wpReachedCB(const sensor_msgs::NavSatFix::ConstPtr &msg);
 double haversine(double lat1, double lon1, double lat2, double lon2);
 
 #endif // MISSION_NODE_H
