@@ -54,9 +54,10 @@ public:
         nh.advertise<std_msgs::Bool>("dji_sm/command_mission", 1);
 
     // waypoint reached function
-    ros::Subscriber waypoint_reached_sub = nh.subscribe<sensor_msgs::NavSatFix>(
-        "dji_osdk_ros/gps_position", 10, &WaypointMissionNode::wpReachedCB,
-        this);
+    // ros::Subscriber waypoint_reached_sub =
+    // nh.subscribe<sensor_msgs::NavSatFix>(
+    //    "dji_osdk_ros/gps_position", 10, &WaypointMissionNode::wpReachedCB,
+    //    this);
   }
   // ROS Services Initialization
   void initService() {
