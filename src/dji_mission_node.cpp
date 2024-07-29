@@ -63,6 +63,7 @@ public:
   }
   // ROS Services Initialization
   void initService() {
+    ROS_INFO_STREAM("Topic startup!");
 
     waypoint_upload_client = nh.serviceClient<dji_osdk_ros::MissionWpUpload>(
         "dji_osdk_ros/mission_waypoint_upload");
@@ -88,6 +89,7 @@ public:
         "dji_control/start_mission", &WaypointMissionNode::run_mission, this);
     ros::ServiceServer service_send_bags = nh.advertiseService(
         "dji_control/send_bags", &WaypointMissionNode::sendFiles, this);
+    ROS_INFO_STREAM("Services startup!");
   }
 
   void gpsPosCallback(const sensor_msgs::NavSatFix::ConstPtr &msg) {
