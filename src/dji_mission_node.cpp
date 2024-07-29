@@ -40,6 +40,8 @@ public:
 
     command_mission_msg.data = false;
     upload_mission_msg.data = false;
+    initTopic();
+    initService();
   };
   // Destructor
   ~WaypointMissionNode(){};
