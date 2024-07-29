@@ -75,12 +75,13 @@ public:
         nh.subscribe<std_msgs::UInt8>("dji_osdk_ros/flight_status", 1,
                                       &WaypointMissionNode::flyStatusCallback);
 
-    ros::ServiceServer service_config_mission = nh.advertiseService(
-        "dji_control/configure_mission", &WaypointMissionNode::config_mission);
+    ros::ServiceServer service_config_mission =
+        nh.advertiseService("dji_control/configure_mission",
+                            &WaypointMissionNode::config_mission, this);
     ros::ServiceServer service_run_mission = nh.advertiseService(
-        "dji_control/start_mission", &WaypointMissionNode::run_mission);
+        "dji_control/start_mission", &WaypointMissionNode::run_mission, this);
     ros::ServiceServer service_send_bags = nh.advertiseService(
-        "dji_control/send_bags", &WaypointMissionNode::sendFiles);
+        "dji_control/send_bags", &WaypointMissionNode::sendFiles, this);
   }
 
 protected:
