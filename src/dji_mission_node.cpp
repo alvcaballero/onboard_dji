@@ -55,7 +55,7 @@ public:
 
     // waypoint reached function
     ros::Subscriber waypoint_reached_sub = nh.subscribe<sensor_msgs::NavSatFix>(
-        "dji_osdk_ros/gps_position", 10, &wpReachedCB);
+        "dji_osdk_ros/gps_position", 10, &WaypointMissionNode::wpReachedCB);
   }
   // ROS Services Initialization
   void initService() {
@@ -68,18 +68,19 @@ public:
         "flight_task_control");
 
     gps_pos_subscriber = nh.subscribe<sensor_msgs::NavSatFix>(
-        "dji_osdk_ros/gps_position", 10, &gpsPosCallback);
+        "dji_osdk_ros/gps_position", 10, &WaypointMissionNode::gpsPosCallback);
     ros::Subscriber flight_mode_subscriber = nh.subscribe<std_msgs::UInt8>(
-        "dji_osdk_ros/display_mode", 1, &ModeCallback);
-    ros::Subscriber fly_status_subscriber = nh.subscribe<std_msgs::UInt8>(
-        "dji_osdk_ros/flight_status", 1, &flyStatusCallback);
+        "dji_osdk_ros/display_mode", 1, &WaypointMissionNode::ModeCallback);
+    ros::Subscriber fly_status_subscriber =
+        nh.subscribe<std_msgs::UInt8>("dji_osdk_ros/flight_status", 1,
+                                      &WaypointMissionNode::flyStatusCallback);
 
-    ros::ServiceServer service_config_mission =
-        nh.advertiseService("dji_control/configure_mission", config_mission);
-    ros::ServiceServer service_run_mission =
-        nh.advertiseService("dji_control/start_mission", run_mission);
-    ros::ServiceServer service_send_bags =
-        nh.advertiseService("dji_control/send_bags", sendFiles);
+    ros::ServiceServer service_config_mission = nh.advertiseService(
+        "dji_control/configure_mission", &WaypointMissionNode::config_mission);
+    ros::ServiceServer service_run_mission = nh.advertiseService(
+        "dji_control/start_mission", &WaypointMissionNode::run_mission);
+    ros::ServiceServer service_send_bags = nh.advertiseService(
+        "dji_control/send_bags", &WaypointMissionNode::sendFiles);
   }
 
 protected:
@@ -580,7 +581,7 @@ private: // TBD: Comment the code propperly
   std_msgs::Bool command_mission_msg;
   std_msgs::Bool upload_mission_msg;
   std::vector<sensor_msgs::NavSatFix> wpList;
-}
+};
 
 int main(int argc, char **argv) {
   ros::init(argc, argv, "mission_node");
