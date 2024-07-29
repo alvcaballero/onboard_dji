@@ -54,6 +54,15 @@ public:
         nh.advertise<std_msgs::Bool>("dji_sm/upload_mission", 1);
     command_mission_pub =
         nh.advertise<std_msgs::Bool>("dji_sm/command_mission", 1);
+    gps_pos_subscriber = nh.subscribe<sensor_msgs::NavSatFix>(
+        "dji_osdk_ros/gps_position", 10, &WaypointMissionNode::gpsPosCallback,
+        this);
+    flight_mode_subscriber =
+        nh.subscribe<std_msgs::UInt8>("dji_osdk_ros/display_mode", 1,
+                                      &WaypointMissionNode::ModeCallback, this);
+    fly_status_subscriber = nh.subscribe<std_msgs::UInt8>(
+        "dji_osdk_ros/flight_status", 1,
+        &WaypointMissionNode::flyStatusCallback, this);
 
     // waypoint reached function
     // ros::Subscriber waypoint_reached_sub =
@@ -72,22 +81,12 @@ public:
     flight_control_client = nh.serviceClient<dji_osdk_ros::FlightTaskControl>(
         "flight_task_control");
 
-    gps_pos_subscriber = nh.subscribe<sensor_msgs::NavSatFix>(
-        "dji_osdk_ros/gps_position", 10, &WaypointMissionNode::gpsPosCallback,
-        this);
-    ros::Subscriber flight_mode_subscriber =
-        nh.subscribe<std_msgs::UInt8>("dji_osdk_ros/display_mode", 1,
-                                      &WaypointMissionNode::ModeCallback, this);
-    ros::Subscriber fly_status_subscriber = nh.subscribe<std_msgs::UInt8>(
-        "dji_osdk_ros/flight_status", 1,
-        &WaypointMissionNode::flyStatusCallback, this);
-
-    ros::ServiceServer service_config_mission =
+    service_config_mission =
         nh.advertiseService("dji_control/configure_mission",
                             &WaypointMissionNode::config_mission, this);
-    ros::ServiceServer service_run_mission = nh.advertiseService(
+    service_run_mission = nh.advertiseService(
         "dji_control/start_mission", &WaypointMissionNode::run_mission, this);
-    ros::ServiceServer service_send_bags = nh.advertiseService(
+    service_send_bags = nh.advertiseService(
         "dji_control/send_bags", &WaypointMissionNode::sendFiles, this);
     ROS_INFO_STREAM("Services startup!");
   }
@@ -162,7 +161,12 @@ protected:
   ros::ServiceClient waypoint_upload_client;
   ros::ServiceClient waypoint_action_client;
   ros::ServiceClient flight_control_client;
+  ros::ServiceServer service_config_mission;
+  ros::ServiceServer service_run_mission;
+  ros::ServiceServer service_send_bags;
   ros::Subscriber gps_pos_subscriber;
+  ros::Subscriber flight_mode_subscriber;
+  ros::Subscriber fly_status_subscriber;
   // Variables to publish mission info
   // Publisher for state_machine info
   ros::Publisher command_mission_pub;
