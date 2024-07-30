@@ -387,10 +387,33 @@ protected:
 
       // full information for actions:
       // Onboard-SDK/osdk-core/api/inc/dji_mission_type.hpp
+      /*
+         * WP_ACTION_STAY              = 0,  !< no action.uint of action
+  parameter:ms; WP_ACTION_SIMPLE_SHOT          = 1,  < take picture
+  action.action parameters Action parameter have no effect.limit time:6s;
+
+  WP_ACTION_VIDEO_START = 2,  < start take video action.action parameters Action
+  parameter have no effect.limit time:6s;
+
+  WP_ACTION_VIDEO_STOP           = 3,  <
+  stop video action.action parameters Action parameter have no effect.limit
+  time:6s;
+
+  WP_ACTION_CRAFT_YAW            = 4,  < craft control yaw action.uint
+  of action parameter:degree. range:-180 ~ 180;
+
+  WP_ACTION_GIMBAL_PITCH         =
+  5,  < gimbal control pitch action.uint of action parameter:degree. range:-90 ~
+  0
+         *
+         * */
       for (int j = 0; j < wp.actionNumber; j++) {
         wp.commandList[j] = acommandList.data[i * wp.actionNumber + j];
         wp.commandParameter[j] =
             acommandParameter.data[i * wp.actionNumber + j];
+        ROS_INFO(
+            "ACTION %d in WP[%d] with Command Type: <%d> and parameter: {%d} ",
+            j, i, wp.commandList[j], wp.commandParameter[j]);
       }
       // // gimbal pitch action
       // wp.commandList[0] = 5; // WP_ACTION_STAY= 0,  WP_ACTION_SIMPLE_SHOT= 1,
