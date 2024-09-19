@@ -65,7 +65,7 @@ std::time_t start_time;
 std::time_t end_time;
 bool mission_status = false;   // becomes true when the mission started
 bool was_on_air = false;
-int uav_id=14;
+int uav_id="uav_14";
 
 // Bags management
 void StartRosbag()
@@ -73,20 +73,20 @@ void StartRosbag()
   ROS_WARN("Starting ROS bag of uav:");
   //rosbag record -O ~/bags/uav_14_2021_01_20_15_00.bag  -e "/uav_14/dji_osdk_ros/(.*)" __name:=node_bag_uav1 &
   std::string id = std::to_string(uav_id);
-  std::string bashscript ("rosbag record -O ~/bags/uav_"+ id +"_");
+  std::string bashscript ("rosbag record -O ~/bags/"+ id +"_");
   char timeString[40];
   time_t t = time(0);
   struct tm tm = *localtime(&t);
   
   ROS_WARN("Start of ROS BAG");
   strftime(timeString, sizeof(timeString), "%Y_%m_%d_%H_%M", &tm);
-  bashscript = bashscript +  timeString+ ".bag  -e \"/uav_"+ id +"/dji_osdk_ros/(.*)\" __name:=uav"+id+"_node_bag &";
+  bashscript = bashscript +  timeString+ ".bag  -e \"/"+ id +"/dji_osdk_ros/(.*)\" __name:="+id+"_node_bag &";
   system( bashscript.c_str() );
 }
 void StopRosbag()
 {
   std::string id = std::to_string(uav_id);
-  std::string bashscript  = "rosnode kill uav"+id+"_node_bag";
+  std::string bashscript  = "rosnode kill "+id+"_node_bag";
   system( bashscript.c_str() );
   ROS_WARN("END of ROS BAG");
 }

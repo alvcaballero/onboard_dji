@@ -1,7 +1,7 @@
 <launch>
-    <arg name="uav_id" default="2"/>
+    <arg name="uav_id" default="uav_14"/>
 
-    <group ns="uav_$(arg uav_id)">
+    <group ns="$(arg uav_id)">
         <include file="$(find dji_osdk_ros)/launch/dji_vehicle_node.launch"/>
 
         <node pkg="onboard_dji" type="dji_waypointV2_node" name="waypointV2_node" output="screen">
