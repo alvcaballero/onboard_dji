@@ -65,7 +65,7 @@ std::time_t start_time;
 std::time_t end_time;
 bool mission_status = false;   // becomes true when the mission started
 bool was_on_air = false;
-int uav_id="uav_14";
+std::string uav_id ("uav_14");
 
 // Bags management
 void StartRosbag()
