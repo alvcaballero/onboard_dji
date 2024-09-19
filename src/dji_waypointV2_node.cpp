@@ -72,7 +72,7 @@ void StartRosbag()
 {
   ROS_WARN("Starting ROS bag of uav:");
   //rosbag record -O ~/bags/uav_14_2021_01_20_15_00.bag  -e "/uav_14/dji_osdk_ros/(.*)" __name:=node_bag_uav1 &
-  std::string id = std::to_string(uav_id);
+  std::string id (uav_id);
   std::string bashscript ("rosbag record -O ~/bags/"+ id +"_");
   char timeString[40];
   time_t t = time(0);
@@ -85,7 +85,7 @@ void StartRosbag()
 }
 void StopRosbag()
 {
-  std::string id = std::to_string(uav_id);
+  std::string id (uav_id);
   std::string bashscript  = "rosnode kill "+id+"_node_bag";
   system( bashscript.c_str() );
   ROS_WARN("END of ROS BAG");
@@ -891,7 +891,7 @@ class WaypointV2Node{
           
           
           aerialcore_common::finishMission msgSrv;
-          std::string id = std::to_string(uav_id);
+          std::string id (uav_id);
           msgSrv.request.uav_id = id;
           msgSrv.request.data = true;
           if(finishMissionGCS.call(msgSrv)){
