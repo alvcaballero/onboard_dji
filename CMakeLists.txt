@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(onboard_dji) ## Compile as C++11, supported in ROS Kinetic and newer
+project(multiuav_onboard_dji) ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
 
 ## Find catkin macros and libraries
@@ -7,7 +7,7 @@ project(onboard_dji) ## Compile as C++11, supported in ROS Kinetic and newer
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
     dji_osdk_ros
-    aerialcore_common
+    multiuav_interfaces
     roscpp
     rospy
     sensor_msgs
@@ -29,7 +29,7 @@ catkin_package(
   INCLUDE_DIRS include
   # LIBRARIES
   CATKIN_DEPENDS
-    aerialcore_common
+    multiuav_interfaces
     std_msgs
     message_runtime
 )

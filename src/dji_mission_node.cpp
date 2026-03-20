@@ -30,8 +30,8 @@
 #include <dji_osdk_ros/FlightTaskControl.h>
 #include <dji_osdk_ros/MissionWpGetInfo.h>
 //#include <dji_osdk_ros/dji_waypoint.hpp>
-#include <aerialcore_onboard_dji/dji_mission_node.h>
-#include <aerialcore_common/ConfigMission.h>
+#include <multiuav_onboard_dji/dji_mission_node.h>
+#include <multiuav_interfaces/ConfigMission.h>
 #include <std_srvs/SetBool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -294,8 +294,8 @@ bool land()
   return flightTaskControl.response.result;
 }
 
-bool config_mission(aerialcore_common::ConfigMission::Request  &req,
-         aerialcore_common::ConfigMission::Response &res){
+bool config_mission(multiuav_interfaces::ConfigMission::Request  &req,
+         multiuav_interfaces::ConfigMission::Response &res){
   ROS_WARN("Received mission");
   std::vector<sensor_msgs::NavSatFix> gps_list = req.waypoint;
   std_msgs::Float64MultiArray yaw_list = req.yaw;  
