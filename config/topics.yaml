@@ -1,0 +1,19 @@
+topics_to_filter:
+  - source: "dji_osdk_ros/gps_position"
+    target: "gcs/gps_position"
+    hz: 2.0
+  - source: "dji_osdk_ros/height_above_takeoff"
+    target: "gcs/height_above_takeoff"
+    hz: 2.0
+  - source: "dji_osdk_ros/battery_state"
+    target: "gcs/battery_state"
+    hz: 0.5
+  - source: "dji_osdk_ros/velocity"
+    target: "gcs/velocity"
+    hz: 2.0
+  - source: "dji_osdk_ros/gimbal_angle"
+    target: "gcs/gimbal_angle"
+    hz: 2.0
+  - source: "video_stream_compress"
+    target: "gcs/video_stream_compress"
+    hz: 10.0

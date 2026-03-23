@@ -30,7 +30,7 @@
 #include <dji_osdk_ros/FlightTaskControl.h>
 #include <dji_osdk_ros/MissionWpGetInfo.h>
 //#include <dji_osdk_ros/dji_waypoint.hpp>
-#include <multiuav_onboard_dji/dji_mission_node.h>
+#include <onboard_dji/dji_mission_node.h>
 #include <multiuav_interfaces/ConfigMission.h>
 #include <std_srvs/SetBool.h>
 #include <stdio.h>

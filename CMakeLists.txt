@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(multiuav_onboard_dji) ## Compile as C++11, supported in ROS Kinetic and newer
+project(onboard_dji) ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
 
 ## Find catkin macros and libraries
@@ -59,6 +59,15 @@ include_directories(
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 # add_executable(${PROJECT_NAME}_node src/onboard-sdk-ros_node.cpp)
+
+catkin_install_python(PROGRAMS
+  scripts/gcs_gateway.py
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
+install(DIRECTORY config/
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/config
+)
 
 add_executable(dji_mission_node src/dji_mission_node.cpp)
 target_link_libraries(dji_mission_node dji_osdk_ros)
