@@ -32,6 +32,7 @@
 //#include <dji_osdk_ros/dji_waypoint.hpp>
 #include <aerialcore_onboard_dji/dji_mission_node.h>
 #include <aerialcore_common/ConfigMission.h>
+#include <aerialcore_common/finishGetFiles.h>
 #include <std_srvs/SetBool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -44,6 +45,7 @@ using namespace DJI::OSDK;
 ros::ServiceClient     waypoint_upload_client;
 ros::ServiceClient     waypoint_action_client;
 ros::ServiceClient     flight_control_client;
+ros::ServiceClient     download_finished_client;
 sensor_msgs::NavSatFix gps_pos;
 ros::Subscriber        gps_pos_subscriber;
 
@@ -497,6 +499,22 @@ bool run_mission(std_srvs::SetBool::Request  &req,std_srvs::SetBool::Response &r
   return true;
 }
 
+void downloadFinishedCallback(const std_msgs::Bool::ConstPtr& msg)
+{
+  if (!msg->data) return;
+  aerialcore_common::finishGetFiles srv;
+  srv.request.uav_id = "uav_" + std::to_string(uav_id);
+  srv.request.data = true;
+  if (download_finished_client.call(srv))
+  {
+    ROS_INFO("GCS notified: download finished for uav_%d", uav_id);
+  }
+  else
+  {
+    ROS_ERROR("Failed to call /GCS/FinishDownload");
+  }
+}
+
 void flyStatusCallback(const std_msgs::UInt8::ConstPtr &msg)
 {
   int flystatus = msg->data;//0 stoped //1 on_ground // 2 in air
@@ -553,9 +571,11 @@ int main(int argc, char** argv)
   // ROS stuff
   waypoint_upload_client = nh.serviceClient<dji_osdk_ros::MissionWpUpload>("dji_osdk_ros/mission_waypoint_upload");
   waypoint_action_client = nh.serviceClient<dji_osdk_ros::MissionWpAction>("dji_osdk_ros/mission_waypoint_action");
-  flight_control_client =nh.serviceClient<dji_osdk_ros::FlightTaskControl>("flight_task_control");
+  flight_control_client = nh.serviceClient<dji_osdk_ros::FlightTaskControl>("flight_task_control");
+  download_finished_client = nh.serviceClient<aerialcore_common::finishGetFiles>("/GCS/FinishDownload");
 
   gps_pos_subscriber = nh.subscribe<sensor_msgs::NavSatFix>("dji_osdk_ros/gps_position", 10, &gpsPosCallback);
+  ros::Subscriber download_finished_sub = nh.subscribe<std_msgs::Bool>("dji_osdk_ros/download_finished", 1, &downloadFinishedCallback);
   ros::Subscriber flight_mode_subscriber = nh.subscribe<std_msgs::UInt8>("dji_osdk_ros/display_mode", 1, &ModeCallback);
   ros::Subscriber fly_status_subscriber = nh.subscribe<std_msgs::UInt8>("dji_osdk_ros/flight_status", 1, &flyStatusCallback);
 

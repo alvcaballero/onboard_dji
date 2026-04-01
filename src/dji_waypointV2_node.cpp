@@ -29,6 +29,7 @@
 #include <waypointV2/dji_waypointV2_node.h>
 #include <aerialcore_common/ConfigMission.h>
 #include <aerialcore_common/finishMission.h>
+#include <aerialcore_common/finishGetFiles.h>
 
 
 #include <stdio.h>
@@ -661,6 +662,8 @@ class WaypointV2Node{
     obtain_ctrl_authority_client = nh.serviceClient<dji_osdk_ros::ObtainControlAuthority>(
       "obtain_release_control_authority");
     finishMissionGCS = nh.serviceClient<aerialcore_common::finishMission>("/GCS/FinishMission");
+    downloadFinishedGCS = nh.serviceClient<aerialcore_common::finishGetFiles>("/GCS/FinishDownload");
+    download_finished_sub = nh.subscribe<std_msgs::Bool>("dji_osdk_ros/download_finished", 1, &WaypointV2Node::downloadFinishedCallback, this);
 
 
     //if you want to fly without rc ,you need to obtain ctrl authority.Or it will enter rc lost.
@@ -683,11 +686,29 @@ class WaypointV2Node{
     ros::Subscriber fly_status_subscriber;
 
     ros::ServiceClient finishMissionGCS;
+    ros::ServiceClient downloadFinishedGCS;
     ros::ServiceClient obtain_ctrl_authority_client;
     ros::ServiceServer service_run_mission;
+    ros::Subscriber download_finished_sub;
     dji_osdk_ros::ObtainControlAuthority obtainCtrlAuthority;
     // WaypointV2  variables
     int actionIDCounter;
+
+    void downloadFinishedCallback(const std_msgs::Bool::ConstPtr& msg)
+    {
+      if (!msg->data) return;
+      aerialcore_common::finishGetFiles srv;
+      srv.request.uav_id = uav_id;
+      srv.request.data = true;
+      if (downloadFinishedGCS.call(srv))
+      {
+        ROS_INFO("GCS notified: download finished for %s", uav_id.c_str());
+      }
+      else
+      {
+        ROS_ERROR("Failed to call /GCS/FinishDownload");
+      }
+    }
 
     // Configuration of the mission obtained from the .YAML file
     bool configMission(aerialcore_common::ConfigMission::Request  &req,
