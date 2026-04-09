@@ -144,19 +144,20 @@ std::vector<dji_osdk_ros::WaypointV2> createWaypoints(ros::NodeHandle &nh,std::v
     }*/
     
 
-    waypointV2.config.useLocalCruiseVel = 1;
-    waypointV2.config.useLocalMaxVel = 1;
-    waypointV2.maxFlightSpeed= velocity_range;//TBD: velocity_range;
-    // Simple TEST for varying the velocity between waypoints
-    waypointV2.autoFlightSpeed = speed_global.data[i];
+    waypointV2.config.useLocalCruiseVel = 1; // 0: use this waypoint's autoFlightSpeed | 1: override with global autoFlightSpeed from InitSetting
+    waypointV2.config.useLocalMaxVel = 1;    // 0: use this waypoint's maxFlightSpeed   | 1: override with global maxFlightSpeed from InitSetting
+    waypointV2.maxFlightSpeed= velocity_range; // max speed cap for this waypoint (used only if useLocalMaxVel = 0)
+    // Use per-waypoint speed if provided, otherwise fall back to idle_velocity
+    float wp_speed = (i < (int)speed_global.data.size()) ? (float)speed_global.data[i] : idle_velocity;
+    waypointV2.autoFlightSpeed = (wp_speed > 0.0f) ? wp_speed : idle_velocity; // cruise speed for this waypoint (used only if useLocalCruiseVel = 0)
     waypointV2.latitude       = gpsList[i].latitude * C_PI / 180.0;
     waypointV2.longitude      = gpsList[i].longitude * C_PI / 180.0;
     waypointV2.relativeHeight = gpsList[i].altitude;
-    
-    
+
+
     // Heading management
     //waypointV2.heading = yaw_list_global.data[i];
-    if (yaw_list_global.data[i]< yaw_list_global.data[i+1] && i <= gpsList.size())
+    if (i < (int)gpsList.size() - 1 && yaw_list_global.data[i] < yaw_list_global.data[i+1])
       waypointV2.turnMode           = 0; // depends on the yaw
     else{
       waypointV2.turnMode           = 1;
@@ -1144,7 +1145,7 @@ std::vector<dji_osdk_ros::WaypointV2> generatePolygonWaypoints(ros::NodeHandle &
 
   startPoint.latitude  = gps_position_.latitude * C_PI / 180.0;
   startPoint.longitude = gps_position_.longitude * C_PI / 180.0;
-  startPoint.relativeHeight = 15;
+  startPoint.relativeHeight = 1;
   setWaypointV2Defaults(startPoint);
   waypointList.push_back(startPoint);
 
