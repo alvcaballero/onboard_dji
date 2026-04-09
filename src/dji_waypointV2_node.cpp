@@ -57,8 +57,8 @@ std::vector<bool> take_a_photo;
 std::vector<bool> start_recording;
 std::vector<bool> stop_recording;
 
-int velocity_range;
-int idle_velocity;
+float velocity_range;
+float idle_velocity;
 int finish_action;
 int yaw_mode_global;
 int actionNumber;
