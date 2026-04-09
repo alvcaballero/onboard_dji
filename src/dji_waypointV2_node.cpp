@@ -28,6 +28,8 @@
 
 #include <waypointV2/dji_waypointV2_node.h>
 #include <aerialcore_common/ConfigMission.h>
+#include <future>
+#include <chrono>
 #include <aerialcore_common/finishMission.h>
 #include <aerialcore_common/finishGetFiles.h>
 
@@ -726,13 +728,21 @@ class WaypointV2Node{
       aerialcore_common::finishGetFiles srv;
       srv.request.uav_id = uav_id;
       srv.request.data = true;
-      if (downloadFinishedGCS.call(srv))
-      {
-        ROS_INFO("GCS notified: download finished for %s", uav_id.c_str());
-      }
-      else
-      {
-        ROS_ERROR("Failed to call /GCS/FinishDownload");
+      auto futureDownload = std::async(std::launch::async, [&]() {
+        return downloadFinishedGCS.call(srv);
+      });
+      if (futureDownload.wait_for(std::chrono::seconds(5)) == std::future_status::ready) {
+        if (futureDownload.get()) {
+          if (srv.response.success) {
+            ROS_INFO("GCS FinishDownload OK: %s", srv.response.msg.c_str());
+          } else {
+            ROS_WARN("GCS FinishDownload: servidor reportó fallo: %s", srv.response.msg.c_str());
+          }
+        } else {
+          ROS_ERROR("GCS FinishDownload: fallo en la llamada RPC");
+        }
+      } else {
+        ROS_ERROR("GCS FinishDownload: timeout (5s) esperando respuesta del servidor");
       }
     }
 
@@ -981,13 +991,24 @@ class WaypointV2Node{
           msgSrv.request.uav_id = id;
           msgSrv.request.data = true;
           if (finishMissionGCS.waitForExistence(ros::Duration(3.0))) {
-            if(finishMissionGCS.call(msgSrv)){
-              ROS_INFO("GCS srv Finish mission OK");
-            }else{
-              ROS_INFO("GCS srv Finish mission Fail --- ERROR");
+            auto futureFinish = std::async(std::launch::async, [&]() {
+              return finishMissionGCS.call(msgSrv);
+            });
+            if (futureFinish.wait_for(std::chrono::seconds(5)) == std::future_status::ready) {
+              if (futureFinish.get()) {
+                if (msgSrv.response.success) {
+                  ROS_INFO("GCS FinishMission OK: %s", msgSrv.response.msg.c_str());
+                } else {
+                  ROS_WARN("GCS FinishMission: servidor reportó fallo: %s", msgSrv.response.msg.c_str());
+                }
+              } else {
+                ROS_ERROR("GCS FinishMission: fallo en la llamada RPC");
+              }
+            } else {
+              ROS_ERROR("GCS FinishMission: timeout (5s) esperando respuesta del servidor");
             }
           } else {
-            ROS_WARN("GCS srv Finish mission TIMEOUT - service not available");
+            ROS_WARN("GCS FinishMission: servicio no disponible tras esperar 3s");
           }
 
           // Getting the time for the folder name
