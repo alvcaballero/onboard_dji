@@ -144,12 +144,14 @@ std::vector<dji_osdk_ros::WaypointV2> createWaypoints(ros::NodeHandle &nh,std::v
     }*/
     
 
-    waypointV2.config.useLocalCruiseVel = 1; // 0: use this waypoint's autoFlightSpeed | 1: override with global autoFlightSpeed from InitSetting
-    waypointV2.config.useLocalMaxVel = 1;    // 0: use this waypoint's maxFlightSpeed   | 1: override with global maxFlightSpeed from InitSetting
+    waypointV2.config.useLocalCruiseVel = 0; // 0: use this waypoint's autoFlightSpeed | 1: override with global autoFlightSpeed from InitSetting
+    waypointV2.config.useLocalMaxVel = 0;    // 0: use this waypoint's maxFlightSpeed   | 1: override with global maxFlightSpeed from InitSetting
     waypointV2.maxFlightSpeed= velocity_range; // max speed cap for this waypoint (used only if useLocalMaxVel = 0)
     // Use per-waypoint speed if provided, otherwise fall back to idle_velocity
     float wp_speed = (i < (int)speed_global.data.size()) ? (float)speed_global.data[i] : idle_velocity;
-    waypointV2.autoFlightSpeed = (wp_speed > 0.0f) ? wp_speed : idle_velocity; // cruise speed for this waypoint (used only if useLocalCruiseVel = 0)
+    float assigned_speed = (wp_speed > 0.0f) ? wp_speed : idle_velocity;
+    ROS_INFO("Waypoint %d: Assigned speed %f (wp_speed: %f, idle_velocity: %f)", i, assigned_speed, wp_speed, idle_velocity);
+    waypointV2.autoFlightSpeed = assigned_speed; // cruise speed for this waypoint (used only if useLocalCruiseVel = 0)
     waypointV2.latitude       = gpsList[i].latitude * C_PI / 180.0;
     waypointV2.longitude      = gpsList[i].longitude * C_PI / 180.0;
     waypointV2.relativeHeight = gpsList[i].altitude;
@@ -787,7 +789,7 @@ class WaypointV2Node{
       yaw_list_global = req.yaw; // WORKS
       yaw_mode_global = req.yawMode; // TBD
       gimbal_pitch_list_global = req.gimbalPitch; // TEST:  to include gimbal pitch
-      velocity_range = req.maxVel;
+      velocity_range =  std::max((float)req.maxVel, 1.0f);
       idle_velocity = req.idleVel;
       finish_action = req.finishAction;
 
@@ -1145,7 +1147,7 @@ std::vector<dji_osdk_ros::WaypointV2> generatePolygonWaypoints(ros::NodeHandle &
 
   startPoint.latitude  = gps_position_.latitude * C_PI / 180.0;
   startPoint.longitude = gps_position_.longitude * C_PI / 180.0;
-  startPoint.relativeHeight = 1;
+  startPoint.relativeHeight = 15;
   setWaypointV2Defaults(startPoint);
   waypointList.push_back(startPoint);
 
