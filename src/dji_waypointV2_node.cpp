@@ -268,67 +268,59 @@ bool WaypointV2actionsAutomated(ros::NodeHandle &nh, uint16_t actionNum)
       
       
 
-      // GIMBAL CONTROL
-      int gimbal_action_id = id;
-      action->actionId  = id;//+ actionNum + 1;
+      // flight_anchor_id: last action in the flight chain (yaw or gimbal).
+      // StartFlying and camera actions always reference this, never each other.
+      int flight_anchor_id = id - 1; // starts pointing at yaw
 
-      action->waypointV2ActionTriggerType  = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionTriggerTypeActionAssociated;
-      action->waypointV2AssociateTrigger.actionAssociatedType = dji_osdk_ros::WaypointV2AssociateTrigger::DJIWaypointV2TriggerAssociatedTimingTypeAfterFinised;
-      action->waypointV2AssociateTrigger.waitingTime = 0;
-      action->waypointV2AssociateTrigger.actionIdAssociated = id-1;
-      
-      // action->waypointV2ActionTriggerType  = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionTriggerTypeSampleReachPoint; // Good for now
-      // action->waypointV2SampleReachPointTrigger.waypointIndex = j;
-      // action->waypointV2SampleReachPointTrigger.terminateNum = 0;
+      // GIMBAL CONTROL — only created when there is actual pitch movement
+      int gimbal_action_id = -1;
+      if (gimbal_pitch_list_global.data[j] != 0)
+      {
+        gimbal_action_id = id;
+        action->actionId  = id;
+        action->waypointV2ActionTriggerType  = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionTriggerTypeActionAssociated;
+        action->waypointV2AssociateTrigger.actionAssociatedType = dji_osdk_ros::WaypointV2AssociateTrigger::DJIWaypointV2TriggerAssociatedTimingTypeAfterFinised;
+        action->waypointV2AssociateTrigger.waitingTime = 0;
+        action->waypointV2AssociateTrigger.actionIdAssociated = id-1;
 
-      action->waypointV2ACtionActuatorType = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionActuatorTypeGimbal;
-      // We are gonna rotate the gimbal somehow so we need to set this operation type
-      action->waypointV2GimbalActuator.DJIWaypointV2ActionActuatorGimbalOperationType = dji_osdk_ros::WaypointV2GimbalActuator::DJIWaypointV2ActionActuatorGimbalOperationTypeRotateGimbal;
-      action->waypointV2GimbalActuator.actuatorIndex = 0;
-      // Gimbal Parameters
-      // Gimbal roll angle
-      action->waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.x = 0; 
-      // Gimbal pitch angle
-      action->waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.y = 10*gimbal_pitch_list_global.data[j]; // TBD: Change it acording to user needs -> gimbal_pitch_list_global.data[i];
-      // Gimbal yaw angle
-      action->waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.z = 0;//10*yaw_list_global.data[i]; 
+        action->waypointV2ACtionActuatorType = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionActuatorTypeGimbal;
+        action->waypointV2GimbalActuator.DJIWaypointV2ActionActuatorGimbalOperationType = dji_osdk_ros::WaypointV2GimbalActuator::DJIWaypointV2ActionActuatorGimbalOperationTypeRotateGimbal;
+        action->waypointV2GimbalActuator.actuatorIndex = 0;
+        action->waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.x = 0;
+        action->waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.y = 10*gimbal_pitch_list_global.data[j];
+        action->waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.z = 0;
+        action->waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.ctrl_mode = 0;
+        action->waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.rollCmdIgnore = 1;
+        action->waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.pitchCmdIgnore = 0;
+        action->waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.yawCmdIgnore = 1;
+        action->waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.absYawModeRef = 1;
+        action->waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.duationTime = 20;
 
-      // Gimbal Control mode
-      action->waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.ctrl_mode = 0; // 0: absolute angle, 1: relative angle
+        ROS_INFO("Gimbal action created with ID: %d at wp: %d with angle %d", action->actionId, j, action->waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.y);
 
-      action->waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.rollCmdIgnore = 1;
-      action->waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.pitchCmdIgnore = 0;
-      action->waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.yawCmdIgnore = 1;
-
-      action->waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.absYawModeRef = 1; //0: relative to the aircraft, 1: relative to North
-   
-      // Gimbal Control speed
-      action->waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.duationTime = 20; // rotate time
-      id+=1; 
-       
-      ROS_INFO("Gimbal action created with ID: %d associated to action: %d and with angle %d", action->actionId, action->waypointV2AssociateTrigger.actionIdAssociated, action->waypointV2GimbalActuator.waypointV2GimbalActuatorRotationParam.y); // add more info when advances come
-
-      generateWaypointV2Action_.request.actions.push_back(*action);
-      delete action;
-      action = new dji_osdk_ros::WaypointV2Action;
+        generateWaypointV2Action_.request.actions.push_back(*action);
+        delete action;
+        action = new dji_osdk_ros::WaypointV2Action;
+        flight_anchor_id = gimbal_action_id;
+        id+=1;
+      }
 
       if (take_a_photo[j] == true)
       {
         // Determine the anchor action that precedes the photo sequence
         // (gimbal if it moves, otherwise direct WP arrival)
-        int photo_anchor_id = gimbal_action_id;
-        bool has_gimbal = (gimbal_pitch_list_global.data[j] != 0);
+        int photo_anchor_id = flight_anchor_id;
 
         // Step 1: if recording, stop it before taking the photo
         if (recording)
         {
           action->actionId  = id;
-          if (has_gimbal)
+          if (flight_anchor_id >= 0)
           {
             action->waypointV2ActionTriggerType  = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionTriggerTypeActionAssociated;
             action->waypointV2AssociateTrigger.actionAssociatedType = dji_osdk_ros::WaypointV2AssociateTrigger::DJIWaypointV2TriggerAssociatedTimingTypeAfterFinised;
             action->waypointV2AssociateTrigger.waitingTime = 0;
-            action->waypointV2AssociateTrigger.actionIdAssociated = gimbal_action_id;
+            action->waypointV2AssociateTrigger.actionIdAssociated = flight_anchor_id;
           }
           else
           {
@@ -349,9 +341,9 @@ bool WaypointV2actionsAutomated(ros::NodeHandle &nh, uint16_t actionNum)
 
         // Step 2: take the photo
         action->actionId  = id;
-        if (has_gimbal || recording)
+        if (photo_anchor_id >= 0)
         {
-          // wait for the anchor (gimbal or stop-recording)
+          // wait for the anchor (yaw, gimbal, or stop-recording)
           action->waypointV2ActionTriggerType  = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionTriggerTypeActionAssociated;
           action->waypointV2AssociateTrigger.actionAssociatedType = dji_osdk_ros::WaypointV2AssociateTrigger::DJIWaypointV2TriggerAssociatedTimingTypeAfterFinised;
           action->waypointV2AssociateTrigger.waitingTime = 0;
@@ -360,11 +352,11 @@ bool WaypointV2actionsAutomated(ros::NodeHandle &nh, uint16_t actionNum)
         }
         else
         {
-          // no gimbal, not recording — fire directly on WP arrival
+          // no prior actions — fire directly on WP arrival
           action->waypointV2ActionTriggerType  = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionTriggerTypeSampleReachPoint;
           action->waypointV2SampleReachPointTrigger.waypointIndex = j;
           action->waypointV2SampleReachPointTrigger.terminateNum = 0;
-          ROS_INFO("Take a picture action ID: %d at wp: %d (no gimbal, no recording)", action->actionId, j);
+          ROS_INFO("Take a picture action ID: %d at wp: %d (no prior actions)", action->actionId, j);
         }
         action->waypointV2ACtionActuatorType = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionActuatorTypeCamera;
         action->waypointV2CameraActuator.actuatorIndex = 0;
@@ -411,12 +403,12 @@ bool WaypointV2actionsAutomated(ros::NodeHandle &nh, uint16_t actionNum)
         recording = false;
       }
 
-      // START FLYING again
+      // START FLYING again — always anchored to flight_anchor_id (yaw or gimbal), never to camera actions
       action->actionId  = id;
       action->waypointV2ActionTriggerType  = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionTriggerTypeActionAssociated;
       action->waypointV2AssociateTrigger.actionAssociatedType = dji_osdk_ros::WaypointV2AssociateTrigger::DJIWaypointV2TriggerAssociatedTimingTypeAfterFinised;
       action->waypointV2AssociateTrigger.waitingTime = 0;
-      action->waypointV2AssociateTrigger.actionIdAssociated = id-1;
+      action->waypointV2AssociateTrigger.actionIdAssociated = flight_anchor_id;
 
       action->waypointV2ACtionActuatorType = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionActuatorTypeAircraftControl;
       action->waypointV2AircraftControlActuator.actuatorIndex = 0;
