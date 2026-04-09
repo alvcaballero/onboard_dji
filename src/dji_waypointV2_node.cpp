@@ -799,7 +799,7 @@ class WaypointV2Node{
       yaw_list_global = req.yaw; // WORKS
       yaw_mode_global = req.yawMode; // TBD
       gimbal_pitch_list_global = req.gimbalPitch; // TEST:  to include gimbal pitch
-      velocity_range =  std::max((float)req.maxVel, 1.0f);
+      velocity_range =  std::max((float)req.maxVel, 2.0f);
       idle_velocity = req.idleVel;
       finish_action = req.finishAction;
 
