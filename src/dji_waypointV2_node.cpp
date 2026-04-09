@@ -39,7 +39,8 @@
 
 // For media management we will need some extra libraries
 #include <sys/stat.h> 
-#include <iostream> 
+#include <iostream>
+#include <fstream>
 // For folder names including time references
 #include <chrono>
 #include <ctime>
@@ -715,9 +716,50 @@ class WaypointV2Node{
             aerialcore_common::ConfigMission::Response &res){
       ROS_WARN("Received mission");
 
+      // --- DEBUG: dump raw request to file ---
+      {
+        char ts[32];
+        std::time_t now = std::time(nullptr);
+        std::strftime(ts, sizeof(ts), "%Y%m%d_%H%M%S", std::localtime(&now));
+        std::string dbg_path = std::string("/tmp/config_mission_") + ts + ".txt";
+        std::ofstream dbg(dbg_path);
+        dbg << "===== configMission called at " << ts << " =====\n";
+        dbg << "type: " << req.type << "\n";
+        dbg << "radius: " << req.radius << "\n";
+        dbg << "maxVel: " << req.maxVel << "\n";
+        dbg << "idleVel: " << req.idleVel << "\n";
+        dbg << "yawMode: " << (int)req.yawMode << "\n";
+        dbg << "traceMode: " << (int)req.traceMode << "\n";
+        dbg << "gimbalPitchMode: " << (int)req.gimbalPitchMode << "\n";
+        dbg << "finishAction: " << (int)req.finishAction << "\n";
+        dbg << "waypoints (" << req.waypoint.size() << "):\n";
+        for (size_t i = 0; i < req.waypoint.size(); i++) {
+          dbg << "  [" << i << "] lat=" << req.waypoint[i].latitude
+              << " lon=" << req.waypoint[i].longitude
+              << " alt=" << req.waypoint[i].altitude << "\n";
+        }
+        dbg << "yaw (" << req.yaw.data.size() << "): ";
+        for (auto v : req.yaw.data) dbg << v << " ";
+        dbg << "\n";
+        dbg << "gimbalPitch (" << req.gimbalPitch.data.size() << "): ";
+        for (auto v : req.gimbalPitch.data) dbg << v << " ";
+        dbg << "\n";
+        dbg << "speed (" << req.speed.data.size() << "): ";
+        for (auto v : req.speed.data) dbg << v << " ";
+        dbg << "\n";
+        dbg << "commandList (" << req.commandList.data.size() << "): ";
+        for (auto v : req.commandList.data) dbg << v << " ";
+        dbg << "\n";
+        dbg << "commandParameter (" << req.commandParameter.data.size() << "): ";
+        for (auto v : req.commandParameter.data) dbg << v << " ";
+        dbg << "\n";
+        dbg.flush();
+      }
+      // --- END DEBUG ---
+
       //ros::NodeHandle nodehandler;
 
-      
+
       gpsList_global = req.waypoint; // WORKS
       yaw_list_global = req.yaw; // WORKS
       yaw_mode_global = req.yawMode; // TBD
