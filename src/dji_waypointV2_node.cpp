@@ -222,26 +222,23 @@ bool WaypointV2actionsAutomated(ros::NodeHandle &nh, uint16_t actionNum)
       id+=1; 
       action = new dji_osdk_ros::WaypointV2Action;
 
-      // Start recording video
+      // Start recording video — independent trigger, does not block the flight chain
       if(start_recording[j]){
-        action->actionId  = id;//*2 + 1;
-        action->waypointV2ActionTriggerType  = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionTriggerTypeActionAssociated;
-        action->waypointV2AssociateTrigger.actionAssociatedType = dji_osdk_ros::WaypointV2AssociateTrigger::DJIWaypointV2TriggerAssociatedTimingTypeAfterFinised;
-        action->waypointV2AssociateTrigger.waitingTime = 0;
-        action->waypointV2AssociateTrigger.actionIdAssociated = id-1;
+        action->actionId  = id;
+        action->waypointV2ActionTriggerType  = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionTriggerTypeSampleReachPoint;
+        action->waypointV2SampleReachPointTrigger.waypointIndex = j;
+        action->waypointV2SampleReachPointTrigger.terminateNum = 0;
 
         action->waypointV2ACtionActuatorType = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionActuatorTypeCamera;
         action->waypointV2CameraActuator.actuatorIndex = 0;
         action->waypointV2CameraActuator.DJIWaypointV2ActionActuatorCameraOperationType = dji_osdk_ros::WaypointV2CameraActuator::DJIWaypointV2ActionActuatorCameraOperationTypeStartRecordVideo;
-        generateWaypointV2Action_.request.actions.push_back(*action);
-        
-        ROS_INFO("Start recording action created with ID: %d associated to action: %d ", action->actionId, action->waypointV2AssociateTrigger.actionIdAssociated); // add more info when advances come
 
-        id+=1; 
-        
+        ROS_INFO("Start recording action created with ID: %d at wp: %d", action->actionId, j);
+
         generateWaypointV2Action_.request.actions.push_back(*action);
         delete action;
         action = new dji_osdk_ros::WaypointV2Action;
+        id+=1;
         recording = true;
 
       }
@@ -335,24 +332,22 @@ bool WaypointV2actionsAutomated(ros::NodeHandle &nh, uint16_t actionNum)
 
         if (recording)
         {
-          /* if we are recording video we continue with that action after taking the picture */
-          action->actionId  = id;//*2 + 1;
-          action->waypointV2ActionTriggerType  = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionTriggerTypeActionAssociated;
-          action->waypointV2AssociateTrigger.actionAssociatedType = dji_osdk_ros::WaypointV2AssociateTrigger::DJIWaypointV2TriggerAssociatedTimingTypeAfterFinised;
-          action->waypointV2AssociateTrigger.waitingTime = 0;
-          action->waypointV2AssociateTrigger.actionIdAssociated = id-1;
+          /* resume recording after photo — independent trigger, does not block the flight chain */
+          action->actionId  = id;
+          action->waypointV2ActionTriggerType  = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionTriggerTypeSampleReachPoint;
+          action->waypointV2SampleReachPointTrigger.waypointIndex = j;
+          action->waypointV2SampleReachPointTrigger.terminateNum = 0;
 
           action->waypointV2ACtionActuatorType = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionActuatorTypeCamera;
           action->waypointV2CameraActuator.actuatorIndex = 0;
           action->waypointV2CameraActuator.DJIWaypointV2ActionActuatorCameraOperationType = dji_osdk_ros::WaypointV2CameraActuator::DJIWaypointV2ActionActuatorCameraOperationTypeStartRecordVideo;
-          
-          ROS_INFO("Start recording action created with ID: %d associated to action: %d ", action->actionId, action->waypointV2AssociateTrigger.actionIdAssociated); // add more info when advances come
 
-          id+=1; 
-          
+          ROS_INFO("Resume recording action created with ID: %d at wp: %d", action->actionId, j);
+
           generateWaypointV2Action_.request.actions.push_back(*action);
           delete action;
           action = new dji_osdk_ros::WaypointV2Action;
+          id+=1;
 
         }
       }
@@ -376,27 +371,24 @@ bool WaypointV2actionsAutomated(ros::NodeHandle &nh, uint16_t actionNum)
 
       action = new dji_osdk_ros::WaypointV2Action;
 
-      // Stop recording video
+      // Stop recording video — independent trigger, does not block the flight chain
       if(stop_recording[j] && recording){
-        action->actionId  = id;//*2 + 1;
-        action->waypointV2ActionTriggerType  = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionTriggerTypeActionAssociated;
-        action->waypointV2AssociateTrigger.actionAssociatedType = dji_osdk_ros::WaypointV2AssociateTrigger::DJIWaypointV2TriggerAssociatedTimingTypeAfterFinised;
-        action->waypointV2AssociateTrigger.waitingTime = 0;
-        action->waypointV2AssociateTrigger.actionIdAssociated = id-1;
+        action->actionId  = id;
+        action->waypointV2ActionTriggerType  = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionTriggerTypeSampleReachPoint;
+        action->waypointV2SampleReachPointTrigger.waypointIndex = j;
+        action->waypointV2SampleReachPointTrigger.terminateNum = 0;
 
         action->waypointV2ACtionActuatorType = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionActuatorTypeCamera;
         action->waypointV2CameraActuator.actuatorIndex = 0;
         action->waypointV2CameraActuator.DJIWaypointV2ActionActuatorCameraOperationType = dji_osdk_ros::WaypointV2CameraActuator::DJIWaypointV2ActionActuatorCameraOperationTypeStopRecordVideo;
-        generateWaypointV2Action_.request.actions.push_back(*action);
-        
-        ROS_INFO("Stop recording action created with ID: %d associated to action: %d ", action->actionId, action->waypointV2AssociateTrigger.actionIdAssociated); // add more info when advances come
 
-        id+=1; 
-        
+        ROS_INFO("Stop recording action created with ID: %d at wp: %d", action->actionId, j);
+
         generateWaypointV2Action_.request.actions.push_back(*action);
         delete action;
         action = new dji_osdk_ros::WaypointV2Action;
-        recording = true;
+        id+=1;
+        recording = false;
 
       }
       
@@ -990,6 +982,10 @@ class WaypointV2Node{
       if(waypoint_V2_mission_event_push_.event == 0x11)
       {
         ROS_INFO("currentMissionExecNum:%d\n", waypoint_V2_mission_event_push_.currentMissionExecNum);
+      }
+      if(waypoint_V2_mission_event_push_.event == 0x30)
+      {
+        ROS_INFO("execute action in wp ");
       }
     }
 
