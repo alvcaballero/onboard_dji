@@ -977,10 +977,14 @@ class WaypointV2Node{
           std::string id (uav_id);
           msgSrv.request.uav_id = id;
           msgSrv.request.data = true;
-          if(finishMissionGCS.call(msgSrv)){
-            ROS_INFO("GCS srv Finish mission OK");
-          }else{
-            ROS_INFO("GCS srv Finish mission Fail --- ERROR");
+          if (finishMissionGCS.waitForExistence(ros::Duration(3.0))) {
+            if(finishMissionGCS.call(msgSrv)){
+              ROS_INFO("GCS srv Finish mission OK");
+            }else{
+              ROS_INFO("GCS srv Finish mission Fail --- ERROR");
+            }
+          } else {
+            ROS_WARN("GCS srv Finish mission TIMEOUT - service not available");
           }
 
           // Getting the time for the folder name
