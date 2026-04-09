@@ -269,6 +269,7 @@ bool WaypointV2actionsAutomated(ros::NodeHandle &nh, uint16_t actionNum)
       
 
       // GIMBAL CONTROL
+      int gimbal_action_id = id;
       action->actionId  = id;//+ actionNum + 1;
 
       action->waypointV2ActionTriggerType  = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionTriggerTypeActionAssociated;
@@ -314,19 +315,31 @@ bool WaypointV2actionsAutomated(ros::NodeHandle &nh, uint16_t actionNum)
       if (take_a_photo[j] == true)
       {
         action->actionId  = id;
-        action->waypointV2ActionTriggerType  = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionTriggerTypeActionAssociated;
-        action->waypointV2AssociateTrigger.actionAssociatedType = dji_osdk_ros::WaypointV2AssociateTrigger::DJIWaypointV2TriggerAssociatedTimingTypeAfterFinised;
-        action->waypointV2AssociateTrigger.waitingTime = 2;
-        action->waypointV2AssociateTrigger.actionIdAssociated = id-1;
+        if (gimbal_pitch_list_global.data[j] != 0)
+        {
+          // gimbal moves at this WP — wait for it before shooting
+          action->waypointV2ActionTriggerType  = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionTriggerTypeActionAssociated;
+          action->waypointV2AssociateTrigger.actionAssociatedType = dji_osdk_ros::WaypointV2AssociateTrigger::DJIWaypointV2TriggerAssociatedTimingTypeAfterFinised;
+          action->waypointV2AssociateTrigger.waitingTime = 0;
+          action->waypointV2AssociateTrigger.actionIdAssociated = gimbal_action_id;
+          ROS_INFO("Take a picture action created with ID: %d after gimbal ID: %d at wp: %d", action->actionId, gimbal_action_id, j);
+        }
+        else
+        {
+          // no gimbal movement — fire directly on waypoint arrival
+          action->waypointV2ActionTriggerType  = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionTriggerTypeSampleReachPoint;
+          action->waypointV2SampleReachPointTrigger.waypointIndex = j;
+          action->waypointV2SampleReachPointTrigger.terminateNum = 0;
+          ROS_INFO("Take a picture action created with ID: %d at wp: %d (no gimbal)", action->actionId, j);
+        }
 
         action->waypointV2ACtionActuatorType = dji_osdk_ros::WaypointV2Action::DJIWaypointV2ActionActuatorTypeCamera;
         action->waypointV2CameraActuator.actuatorIndex = 0;
         action->waypointV2CameraActuator.DJIWaypointV2ActionActuatorCameraOperationType = dji_osdk_ros::WaypointV2CameraActuator::DJIWaypointV2ActionActuatorCameraOperationTypeTakePhoto;
-        ROS_INFO("Take a picture action created with ID: %d associated to action: %d", action->actionId, action->waypointV2AssociateTrigger.actionIdAssociated); // add more info when advances come
 
         generateWaypointV2Action_.request.actions.push_back(*action);
         delete action;
-        id+=1; 
+        id+=1;
 
         action = new dji_osdk_ros::WaypointV2Action;
 
