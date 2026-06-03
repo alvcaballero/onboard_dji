@@ -1,0 +1,26 @@
+<launch>
+    <arg name="uav_id" default="uav_14"/>
+
+    <group ns="$(arg uav_id)">
+        <include file="$(find dji_osdk_ros)/launch/dji_vehicle_node.launch"/>
+
+        <node pkg="onboard_dji" type="dji_waypointV2_node" name="waypointV2_node" output="screen">
+        
+            <param name="damping" type="double" value="0.0"/>
+            <param name="start_altitude" type="double" value="2.0"/>
+            <param name="uav_id" type="str" value="$(arg uav_id)"/>
+        </node>
+
+        <node pkg="simple_vs" type="video_resize" name="video_resize" output="log">
+            <param name="fps" type="int" value="10"/>
+            <param name="frame_height" type="int" value="448"/>
+            <param name="frame_width" type="int" value="608"/>
+            <param name="ns" value="$(arg uav_id)"/>
+            <param name="source" value="/dji_osdk_ros/main_camera_images"/>
+        </node>
+
+        <include file="$(find ros_rtsp)/launch/rtsp_streams.launch"/>
+    </group>
+
+
+</launch>
